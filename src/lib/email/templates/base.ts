@@ -4,7 +4,7 @@ export function getSiteUrl(): string {
     process.env.NEXT_PUBLIC_SITE_URL ||
     (process.env.APP_ORIGINS ? process.env.APP_ORIGINS.split(",")[0].trim() : "");
 
-  return configured ? configured.replace(/\/+$/, "") : "https://spnhealthmix.in";
+  return configured ? configured.replace(/\/+$/, "") : "https://spn-foods.vercel.app";
 }
 
 export function escapeHtml(str: string): string {

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description:
     "Traditional Indian health mixes, spice powders, podis, masalas and snacks. Packaged with care for modern households.",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://spnfoods.in"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://spn-foods.vercel.app"
   ),
   openGraph: {
     type: "website",
