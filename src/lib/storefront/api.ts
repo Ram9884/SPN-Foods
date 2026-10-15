@@ -41,6 +41,7 @@ export const fetchAllActiveCategories = cache(async (): Promise<CategoriesRespon
   try {
     const rows = await db
       .select({
+        id: categories.id,
         slug: categories.slug,
         name: categories.name,
         description: categories.description,
@@ -54,6 +55,7 @@ export const fetchAllActiveCategories = cache(async (): Promise<CategoriesRespon
 
     return {
       categories: rows.map((r) => ({
+        id: r.id,
         slug: r.slug,
         name: r.name,
         description: r.description,
@@ -75,6 +77,7 @@ export const fetchCategoryBySlug = cache(async (slug: string): Promise<CategoryC
   const { db, imageBaseUrl } = getDeps();
   const [row] = await db
     .select({
+      id: categories.id,
       slug: categories.slug,
       name: categories.name,
       description: categories.description,
@@ -87,6 +90,7 @@ export const fetchCategoryBySlug = cache(async (slug: string): Promise<CategoryC
 
   if (!row) return null;
   return {
+    id: row.id,
     slug: row.slug,
     name: row.name,
     description: row.description,

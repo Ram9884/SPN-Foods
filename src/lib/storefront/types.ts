@@ -5,7 +5,7 @@
  */
 
 export type CategoryCard = {
-  id: string;
+  id?: string;
   slug: string;
   name: string;
   description: string | null;
