@@ -85,6 +85,7 @@ export function CategoryStrip({ categories }: CategoryStripProps) {
       id: slug,
       slug,
       name: fallbackNames[slug] ?? slug,
+      description: "",
       productCount: 0,
       image: null,
     } as CategoryCard;
