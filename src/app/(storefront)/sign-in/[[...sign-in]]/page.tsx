@@ -20,6 +20,17 @@ interface SignInPageProps {
 export default async function SignInPage({ searchParams }: SignInPageProps) {
   const sp = await searchParams;
   let redirectUrl = sp.redirect_url ?? "/";
+  try {
+    if (redirectUrl.startsWith("http://") || redirectUrl.startsWith("https://")) {
+      const parsed = new URL(redirectUrl);
+      redirectUrl = parsed.pathname + parsed.search;
+    }
+  } catch {
+    redirectUrl = "/";
+  }
+  if (!redirectUrl.startsWith("/")) {
+    redirectUrl = "/" + redirectUrl;
+  }
   if (sp.add && !redirectUrl.includes("add=")) {
     redirectUrl += (redirectUrl.includes("?") ? "&" : "?") + `add=${encodeURIComponent(sp.add)}`;
   }

@@ -18,7 +18,18 @@ interface SignUpPageProps {
 
 export default async function SignUpPage({ searchParams }: SignUpPageProps) {
   const sp = await searchParams;
-  const redirectUrl = sp.redirect_url ?? "/";
+  let redirectUrl = sp.redirect_url ?? "/";
+  try {
+    if (redirectUrl.startsWith("http://") || redirectUrl.startsWith("https://")) {
+      const parsed = new URL(redirectUrl);
+      redirectUrl = parsed.pathname + parsed.search;
+    }
+  } catch {
+    redirectUrl = "/";
+  }
+  if (!redirectUrl.startsWith("/")) {
+    redirectUrl = "/" + redirectUrl;
+  }
 
   return (
     <div className="py-12 lg:py-20 flex flex-col items-center justify-center min-h-[60vh] px-4">

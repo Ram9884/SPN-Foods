@@ -54,7 +54,17 @@ export default function RootLayout({
 
   const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   if (clerkKey) {
-    return <ClerkProvider publishableKey={clerkKey}>{content}</ClerkProvider>;
+    return (
+      <ClerkProvider
+        publishableKey={clerkKey}
+        signInUrl="/sign-in"
+        signUpUrl="/sign-up"
+        signInFallbackRedirectUrl="/"
+        signUpFallbackRedirectUrl="/"
+      >
+        {content}
+      </ClerkProvider>
+    );
   }
 
   return content;
