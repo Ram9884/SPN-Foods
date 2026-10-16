@@ -21,8 +21,12 @@ export default function SSOCallbackHandler() {
 
     clerk
       .handleRedirectCallback({
+        signInUrl: "/sign-in",
+        signUpUrl: "/sign-up",
         signInFallbackRedirectUrl: "/",
         signUpFallbackRedirectUrl: "/",
+        firstFactorUrl: "/sign-in",
+        secondFactorUrl: "/sign-in",
       })
       .then(() => {
         if (isMounted) {
