@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { AuthenticateWithRedirectCallback, SignIn } from "@clerk/nextjs";
-import SSOCallbackHandler from "@/components/auth/sso-callback";
+import { SignIn } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
   title: "Sign In — SPN Foods",
@@ -12,22 +11,14 @@ export const metadata: Metadata = {
 const HAS_CLERK = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 interface SignInPageProps {
-  params?: Promise<{
-    "sign-in"?: string[];
-  }>;
   searchParams: Promise<{
     redirect_url?: string;
     add?: string;
   }>;
 }
 
-export default async function SignInPage({ params, searchParams }: SignInPageProps) {
-  const [p, sp] = await Promise.all([
-    params ? params : Promise.resolve(undefined),
-    searchParams,
-  ]);
-  const isSsoCallback = p?.["sign-in"]?.includes("sso-callback");
-
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const sp = await searchParams;
   let redirectUrl = sp.redirect_url ?? "/";
   try {
     if (redirectUrl.startsWith("http://") || redirectUrl.startsWith("https://")) {
@@ -42,10 +33,6 @@ export default async function SignInPage({ params, searchParams }: SignInPagePro
   }
   if (sp.add && !redirectUrl.includes("add=")) {
     redirectUrl += (redirectUrl.includes("?") ? "&" : "?") + `add=${encodeURIComponent(sp.add)}`;
-  }
-
-  if (isSsoCallback) {
-    return <SSOCallbackHandler />;
   }
 
   return (
@@ -82,6 +69,7 @@ export default async function SignInPage({ params, searchParams }: SignInPagePro
               routing="path"
               path="/sign-in"
               fallbackRedirectUrl={redirectUrl}
+              signUpFallbackRedirectUrl={redirectUrl}
               signUpUrl="/sign-up"
               appearance={{
                 elements: {

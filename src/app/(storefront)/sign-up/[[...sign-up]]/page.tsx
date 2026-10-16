@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { AuthenticateWithRedirectCallback, SignUp } from "@clerk/nextjs";
-import SSOCallbackHandler from "@/components/auth/sso-callback";
+import { SignUp } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
   title: "Create an Account — SPN Foods",
@@ -12,21 +11,13 @@ export const metadata: Metadata = {
 const HAS_CLERK = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 interface SignUpPageProps {
-  params?: Promise<{
-    "sign-up"?: string[];
-  }>;
   searchParams: Promise<{
     redirect_url?: string;
   }>;
 }
 
-export default async function SignUpPage({ params, searchParams }: SignUpPageProps) {
-  const [p, sp] = await Promise.all([
-    params ? params : Promise.resolve(undefined),
-    searchParams,
-  ]);
-  const isSsoCallback = p?.["sign-up"]?.includes("sso-callback");
-
+export default async function SignUpPage({ searchParams }: SignUpPageProps) {
+  const sp = await searchParams;
   let redirectUrl = sp.redirect_url ?? "/";
   try {
     if (redirectUrl.startsWith("http://") || redirectUrl.startsWith("https://")) {
@@ -38,10 +29,6 @@ export default async function SignUpPage({ params, searchParams }: SignUpPagePro
   }
   if (!redirectUrl.startsWith("/")) {
     redirectUrl = "/" + redirectUrl;
-  }
-
-  if (isSsoCallback) {
-    return <SSOCallbackHandler />;
   }
 
   return (
@@ -78,6 +65,7 @@ export default async function SignUpPage({ params, searchParams }: SignUpPagePro
               routing="path"
               path="/sign-up"
               fallbackRedirectUrl={redirectUrl}
+              signInFallbackRedirectUrl={redirectUrl}
               signInUrl="/sign-in"
               appearance={{
                 elements: {
