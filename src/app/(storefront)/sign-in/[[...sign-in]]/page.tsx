@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { AuthenticateWithRedirectCallback, SignIn } from "@clerk/nextjs";
+import SSOCallbackHandler from "@/components/auth/sso-callback";
 
 export const metadata: Metadata = {
   title: "Sign In — SPN Foods",
@@ -44,20 +45,7 @@ export default async function SignInPage({ params, searchParams }: SignInPagePro
   }
 
   if (isSsoCallback) {
-    return (
-      <div className="py-20 flex flex-col items-center justify-center min-h-[50vh] px-4">
-        <AuthenticateWithRedirectCallback
-          signInFallbackRedirectUrl={redirectUrl}
-          signUpFallbackRedirectUrl={redirectUrl}
-        />
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-3 border-[var(--color-brand-primary)] border-t-transparent rounded-full animate-spin" />
-          <p className="font-[family-name:var(--font-body)] text-sm text-[var(--color-text-muted)]">
-            Completing sign in...
-          </p>
-        </div>
-      </div>
-    );
+    return <SSOCallbackHandler />;
   }
 
   return (
