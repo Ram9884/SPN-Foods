@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { SignIn } from "@clerk/nextjs";
+import { AuthenticateWithRedirectCallback, SignIn } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
   title: "Sign In — SPN Foods",
@@ -11,14 +11,22 @@ export const metadata: Metadata = {
 const HAS_CLERK = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 interface SignInPageProps {
+  params?: Promise<{
+    "sign-in"?: string[];
+  }>;
   searchParams: Promise<{
     redirect_url?: string;
     add?: string;
   }>;
 }
 
-export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const sp = await searchParams;
+export default async function SignInPage({ params, searchParams }: SignInPageProps) {
+  const [p, sp] = await Promise.all([
+    params ? params : Promise.resolve(undefined),
+    searchParams,
+  ]);
+  const isSsoCallback = p?.["sign-in"]?.includes("sso-callback");
+
   let redirectUrl = sp.redirect_url ?? "/";
   try {
     if (redirectUrl.startsWith("http://") || redirectUrl.startsWith("https://")) {
@@ -33,6 +41,23 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   }
   if (sp.add && !redirectUrl.includes("add=")) {
     redirectUrl += (redirectUrl.includes("?") ? "&" : "?") + `add=${encodeURIComponent(sp.add)}`;
+  }
+
+  if (isSsoCallback) {
+    return (
+      <div className="py-20 flex flex-col items-center justify-center min-h-[50vh] px-4">
+        <AuthenticateWithRedirectCallback
+          signInFallbackRedirectUrl={redirectUrl}
+          signUpFallbackRedirectUrl={redirectUrl}
+        />
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-3 border-[var(--color-brand-primary)] border-t-transparent rounded-full animate-spin" />
+          <p className="font-[family-name:var(--font-body)] text-sm text-[var(--color-text-muted)]">
+            Completing sign in...
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
