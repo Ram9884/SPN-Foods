@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { User, Package, MapPin, Star, LogOut } from "lucide-react";
-import { useClerk } from "@clerk/nextjs";
+import { User, Package, MapPin, Star, LogOut, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -34,48 +33,25 @@ const NAV_ITEMS = [
   },
 ];
 
-const HAS_CLERK = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
-
-function ClerkSignOutAction({
-  className,
-  onFinish,
-}: {
-  className: string;
-  onFinish: () => void;
-}) {
-  const clerk = useClerk();
-
-  const handleSignOut = async () => {
-    try {
-      if (clerk && clerk.signOut) {
-        await clerk.signOut();
-      }
-    } catch (err) {
-      console.warn("Sign out encountered issue:", err);
-    } finally {
-      onFinish();
-    }
-  };
-
-  return (
-    <button type="button" onClick={handleSignOut} className={className}>
-      <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>Sign Out</span>
-    </button>
-  );
-}
-
 export function AccountNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
-  const handleFallbackSignOut = () => {
-    router.push("/");
-    router.refresh();
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Sign out error:", err);
+    } finally {
+      router.push("/");
+      router.refresh();
+    }
   };
 
   const signOutBtnClass =
-    "flex items-center gap-3 px-3.5 py-2.5 rounded-[6px] font-[family-name:var(--font-body)] text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-error)] hover:bg-[var(--color-surface-raised)]/70 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] text-left";
+    "flex items-center gap-3 px-3.5 py-2.5 rounded-[6px] font-[family-name:var(--font-body)] text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-error)] hover:bg-[var(--color-surface-raised)]/70 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] text-left disabled:opacity-60 cursor-pointer";
 
   return (
     <nav
@@ -116,21 +92,19 @@ export function AccountNav() {
 
       <div className="hidden lg:block border-t border-[var(--color-border)] my-1" />
 
-      {HAS_CLERK ? (
-        <ClerkSignOutAction
-          className={signOutBtnClass}
-          onFinish={handleFallbackSignOut}
-        />
-      ) : (
-        <button
-          type="button"
-          onClick={handleFallbackSignOut}
-          className={signOutBtnClass}
-        >
+      <button
+        type="button"
+        onClick={handleSignOut}
+        disabled={isSigningOut}
+        className={signOutBtnClass}
+      >
+        {isSigningOut ? (
+          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden="true" />
+        ) : (
           <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>Sign Out</span>
-        </button>
-      )}
+        )}
+        <span>{isSigningOut ? "Signing Out..." : "Sign Out"}</span>
+      </button>
     </nav>
   );
 }

@@ -10,7 +10,6 @@ type ProductListItem = {
   name: string;
   isActive: boolean;
   isFeatured: boolean;
-  designVersion: "old" | "new";
   sortOrder: number;
   category: {
     id: string;
@@ -156,7 +155,7 @@ export function ProductsList() {
             Products Catalogue
           </h1>
           <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            Manage product descriptions, packaging design versions, stock, and variants
+            Manage product descriptions, pricing, stock, and variants
           </p>
         </div>
         <Link
@@ -307,7 +306,6 @@ export function ProductsList() {
                 <tr className="bg-[var(--color-surface-warm)]/60 border-b border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] font-medium">
                   <th className="py-3 px-4">Product</th>
                   <th className="py-3 px-4">Category</th>
-                  <th className="py-3 px-4 text-center">Packaging</th>
                   <th className="py-3 px-4 text-center">Variants</th>
                   <th className="py-3 px-4">Price Range</th>
                   <th className="py-3 px-4 text-center">Stock</th>
@@ -357,19 +355,6 @@ export function ProductsList() {
                         {p.category.name}
                       </td>
 
-                      {/* Packaging Design Version */}
-                      <td className="py-3 px-4 text-center">
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
-                            p.designVersion === "new"
-                              ? "bg-purple-50 text-purple-700 border border-purple-200"
-                              : "bg-stone-100 text-stone-700 border border-stone-200"
-                          }`}
-                        >
-                          {p.designVersion === "new" ? "New Pack" : "Classic Pack"}
-                        </span>
-                      </td>
-
                       {/* Variants Count */}
                       <td className="py-3 px-4 text-center">
                         <span
@@ -379,7 +364,7 @@ export function ProductsList() {
                               : "bg-[var(--color-surface-warm)] text-[var(--color-text-secondary)] border-[var(--color-border-subtle)]"
                           }`}
                         >
-                          {p.variantCount} {p.variantCount === 1 ? "variant" : "variants"}
+                          {p.variantCount}
                         </span>
                       </td>
 

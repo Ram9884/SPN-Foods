@@ -1,16 +1,18 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
 import { dispatchAdminRequest } from "@/lib/api/admin-router";
 import { json } from "@/lib/api/http";
 import type { ApiDeps } from "@/lib/api/customer-api";
-import { ensureProfile } from "@/lib/customers/profile";
 import { getTxDb } from "@/lib/db";
 import { r2Storage } from "@/lib/storage/storage";
+import { extractSessionTokenFromRequest, validateSession } from "@/lib/auth/session";
+import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
 function getDeps(req: Request): ApiDeps {
   const databaseUrl = process.env.DATABASE_URL!;
-  const allowedOrigins = process.env.APP_ORIGINS ? process.env.APP_ORIGINS.split(",").map((s) => s.trim()) : undefined;
+  const allowedOrigins = process.env.APP_ORIGINS
+    ? process.env.APP_ORIGINS.split(",").map((s) => s.trim())
+    : undefined;
 
   // Cloudflare R2 bucket binding or S3/compatible client fallback
   const r2Bucket = (process.env as any).SPN_IMAGES;
@@ -29,40 +31,27 @@ function getDeps(req: Request): ApiDeps {
       // In dev or test environments, allow x-test-user header
       const testUser = _req.headers.get("x-test-user");
       if (testUser && process.env.NODE_ENV !== "production") {
-        return ensureProfile(db, testUser, async () => ({
+        const { ensureProfile } = await import("@/lib/customers/profile");
+        const p = await ensureProfile(db, testUser, async () => ({
           email: `${testUser}@example.com`,
           name: testUser,
         }));
-      }
-
-      // In local dev without live Clerk keys, use dev-admin profile
-      if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.NODE_ENV !== "production") {
-        const p = await ensureProfile(db, "dev-admin", async () => ({
-          email: "admin@spnfoods.local",
-          name: "SPN Store Admin",
-        }));
-        if (p) {
-          // Ensure role is admin
-          const { eq } = await import("drizzle-orm");
-          const { profiles } = await import("@/lib/db/schema");
-          await db.update(profiles).set({ role: "admin" }).where(eq(profiles.id, p.profileId));
-          p.role = "admin";
-        }
+        if (p) p.role = "admin";
         return p;
       }
 
-      try {
-        const { userId } = await auth();
-        if (!userId) return null;
-        return ensureProfile(db, userId, async () => {
-          const u = await currentUser();
-          const email = u?.emailAddresses[0]?.emailAddress ?? `${userId}@clerk.user`;
-          const name = [u?.firstName, u?.lastName].filter(Boolean).join(" ") || null;
-          return { email, name };
-        });
-      } catch {
+      const token = extractSessionTokenFromRequest(_req);
+      if (!token) return null;
+
+      const validated = await validateSession(db, token);
+      if (!validated || validated.profile.role !== "admin") {
         return null;
       }
+
+      return {
+        profileId: validated.profile.id,
+        role: validated.profile.role,
+      };
     },
     gateway: {
       createOrder: async () => {
@@ -77,8 +66,6 @@ function getDeps(req: Request): ApiDeps {
     log: (msg, extra) => console.error(msg, extra),
   };
 }
-
-import { revalidatePath } from "next/cache";
 
 async function handle(req: Request) {
   const deps = getDeps(req);

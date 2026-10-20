@@ -192,16 +192,16 @@ describe("products", () => {
     await admin();
     const r = await mkProduct({ name: "Nendram Raw Banana Powder (Nuts Mixed)" });
     expect(r.status).toBe(201);
-    expect(r.body).toMatchObject({ slug: "nendram-raw-banana-powder-nuts-mixed", designVersion: "old", isActive: true, isFeatured: false, variants: [], images: [], category: { slug: "c" } });
+    expect(r.body).toMatchObject({ slug: "nendram-raw-banana-powder-nuts-mixed", isActive: true, isFeatured: false, variants: [], images: [], category: { slug: "c" } });
   });
 
   it("stores all the descriptive fields; descriptions keep their line breaks", async () => {
     await admin();
     const r = await mkProduct({
-      name: "Karuppu Kavuni Kanji Mix", shortDescription: "Black rice  kanji", designVersion: "new", isFeatured: true, sortOrder: 3,
+      name: "Karuppu Kavuni Kanji Mix", shortDescription: "Black rice  kanji", isFeatured: true, sortOrder: 3,
       description: "  Line one\r\nLine two\n\n\n\nLine three  ", ingredients: "Karuppu kavuni, ragi", usage: "Mix 2 tbsp in warm water",
     });
-    expect(r.body).toMatchObject({ shortDescription: "Black rice kanji", designVersion: "new", isFeatured: true, sortOrder: 3, ingredients: "Karuppu kavuni, ragi", usage: "Mix 2 tbsp in warm water" });
+    expect(r.body).toMatchObject({ shortDescription: "Black rice kanji", isFeatured: true, sortOrder: 3, ingredients: "Karuppu kavuni, ragi", usage: "Mix 2 tbsp in warm water" });
     expect(r.body.description).toBe("Line one\nLine two\n\nLine three");
   });
 
@@ -210,7 +210,7 @@ describe("products", () => {
     const bad = await mkProduct({ name: "Ok Name", categoryId: SOME });
     expect(bad.status).toBe(422);
     expect(bad.body.error.fields.categoryId).toBeDefined();
-    for (const body of [{ name: "A" }, {}, { name: "Ok Name", categoryId: "nope" }, { name: "Ok Name", designVersion: "ancient" }, { name: "Ok Name", description: "x".repeat(5001) }, { name: "Ok Name", slug: "Bad Slug" }, { name: "Ok Name", id: SOME }, { name: "Ok Name", isActive: 1 }]) {
+    for (const body of [{ name: "A" }, {}, { name: "Ok Name", categoryId: "nope" }, { name: "Ok Name", description: "x".repeat(5001) }, { name: "Ok Name", slug: "Bad Slug" }, { name: "Ok Name", id: SOME }, { name: "Ok Name", isActive: 1 }]) {
       expect((await mkProduct(body)).status).toBe(422);
     }
     expect(await db.select().from(s.products)).toHaveLength(1);

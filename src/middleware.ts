@@ -1,23 +1,68 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { SESSION_COOKIE_NAME } from "@/lib/auth/session";
 
 /**
- * Clerk must run on every request that calls auth(). Pages that need a signed-in customer
- * redirect to sign-in here. API routes are deliberately NOT protected here: each handler
- * authenticates itself and answers JSON 401, which a fetch() caller can handle (a redirect
- * to an HTML sign-in page cannot). The two webhooks authenticate by signature instead.
+ * Lightweight edge-compatible middleware for SPN Foods authentication.
+ * Checks for the presence of the secure session cookie on protected pages.
+ * Full cryptographic and role validation is performed server-side on every protected route.
  */
-const needsSignIn = createRouteMatcher(["/account(.*)", "/checkout(.*)", "/orders(.*)", "/profile(.*)", "/admin(.*)"]);
+export function middleware(req: NextRequest) {
+  const { pathname, search } = req.nextUrl;
+  const hasSession = Boolean(req.cookies.get(SESSION_COOKIE_NAME)?.value);
 
-export default clerkMiddleware(async (auth, req) => {
-  if (needsSignIn(req)) await auth.protect();
-});
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-pathname", pathname);
+
+  // 1. Admin route protection
+  if (pathname.startsWith("/admin")) {
+    // Always allow access to the admin login page
+    if (pathname === "/admin/login") {
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+
+    if (!hasSession) {
+      const redirectUrl = new URL("/admin/login", req.url);
+      if (pathname !== "/admin") {
+        redirectUrl.searchParams.set("redirect_url", pathname + search);
+      }
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+
+  // 2. Customer protected routes
+  const isProtectedCustomerRoute =
+    pathname.startsWith("/account") ||
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/orders") ||
+    pathname.startsWith("/profile");
+
+  if (isProtectedCustomerRoute && !hasSession) {
+    const signInUrl = new URL("/sign-in", req.url);
+    signInUrl.searchParams.set("redirect_url", pathname + search);
+    return NextResponse.redirect(signInUrl);
+  }
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+}
 
 export const config = {
   matcher: [
-    // Skip Next internals and static files
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for Clerk's auto-proxy path
-    "/__clerk/:path*",
-    "/(api|trpc)(.*)",
+    // Match protected routes and storefront paths, excluding static assets and internals
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)",
   ],
 };

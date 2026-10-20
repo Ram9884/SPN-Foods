@@ -1,8 +1,9 @@
-import { and, asc, desc, eq, ilike, ne, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, ne, or, sql, type SQL } from "drizzle-orm";
 import { ApiError } from "../api/http";
 import { categories, productImages, productVariants, products } from "../db/schema";
 import type { AnyDb } from "../orders/common";
 import { imageUrl } from "../storage/storage";
+import type { ProductVariant } from "../storefront/types";
 import type { PublicProductQuery } from "./validation";
 
 /**
@@ -123,7 +124,7 @@ type CardRow = {
   sizeCount: number; inStock: boolean; imageKey: string | null; imageAlt: string | null;
 };
 
-function toCard(r: CardRow, o: Base) {
+function toCard(r: CardRow, o: Base, variants: ProductVariant[] = []) {
   return {
     id: r.id,
     slug: r.slug,
@@ -140,6 +141,7 @@ function toCard(r: CardRow, o: Base) {
     hasMultipleSizes: r.sizeCount > 1,
     inStock: r.inStock,
     image: r.imageKey ? { url: imageUrl(o.imageBaseUrl, r.imageKey)!, alt: r.imageAlt } : null,
+    variants,
   };
 }
 
@@ -238,8 +240,42 @@ export async function listPublicProducts(db: AnyDb, q: PublicProductQuery, o: Ba
     .innerJoin(categories, eq(categories.id, products.categoryId))
     .where(cond);
 
+  const productIds = rows.map((r) => r.id);
+  const allVariants = productIds.length > 0
+    ? await db
+        .select({
+          id: productVariants.id,
+          productId: productVariants.productId,
+          label: productVariants.label,
+          weightGrams: productVariants.weightGrams,
+          mrpPaise: productVariants.mrpPaise,
+          pricePaise: productVariants.pricePaise,
+          stock: productVariants.stock,
+        })
+        .from(productVariants)
+        .where(and(inArray(productVariants.productId, productIds), eq(productVariants.isActive, true)))
+        .orderBy(asc(productVariants.pricePaise), asc(productVariants.id))
+    : [];
+
+  const variantsByProduct = new Map<string, ProductVariant[]>();
+  for (const v of allVariants) {
+    const list = variantsByProduct.get(v.productId) ?? [];
+    list.push({
+      id: v.id,
+      label: v.label,
+      weightGrams: v.weightGrams,
+      mrpPaise: v.mrpPaise,
+      pricePaise: v.pricePaise,
+      discountPercent: pct(v.mrpPaise, v.pricePaise),
+      inStock: v.stock > 0,
+      lowStock: v.stock > 0 && v.stock <= LOW_STOCK_AT,
+      maxQuantity: Math.max(0, Math.min(v.stock, MAX_QUANTITY)),
+    });
+    variantsByProduct.set(v.productId, list);
+  }
+
   return {
-    products: rows.map((r) => toCard(r, o)),
+    products: rows.map((r) => toCard(r, o, variantsByProduct.get(r.id) ?? [])),
     total,
     limit: q.limit,
     offset: q.offset,
@@ -306,6 +342,40 @@ export async function getPublicProduct(db: AnyDb, slug: string, o: Base) {
     .orderBy(...orderFor("featured", undefined, vs.fromPricePaise))
     .limit(RELATED_COUNT);
 
+  const relatedIds = relatedRows.map((r) => r.id);
+  const relatedVariants = relatedIds.length > 0
+    ? await db
+        .select({
+          id: productVariants.id,
+          productId: productVariants.productId,
+          label: productVariants.label,
+          weightGrams: productVariants.weightGrams,
+          mrpPaise: productVariants.mrpPaise,
+          pricePaise: productVariants.pricePaise,
+          stock: productVariants.stock,
+        })
+        .from(productVariants)
+        .where(and(inArray(productVariants.productId, relatedIds), eq(productVariants.isActive, true)))
+        .orderBy(asc(productVariants.pricePaise), asc(productVariants.id))
+    : [];
+
+  const relatedVariantsByProduct = new Map<string, ProductVariant[]>();
+  for (const v of relatedVariants) {
+    const list = relatedVariantsByProduct.get(v.productId) ?? [];
+    list.push({
+      id: v.id,
+      label: v.label,
+      weightGrams: v.weightGrams,
+      mrpPaise: v.mrpPaise,
+      pricePaise: v.pricePaise,
+      discountPercent: pct(v.mrpPaise, v.pricePaise),
+      inStock: v.stock > 0,
+      lowStock: v.stock > 0 && v.stock <= LOW_STOCK_AT,
+      maxQuantity: Math.max(0, Math.min(v.stock, MAX_QUANTITY)),
+    });
+    relatedVariantsByProduct.set(v.productId, list);
+  }
+
   return {
     id: p.id,
     slug: p.slug,
@@ -329,6 +399,6 @@ export async function getPublicProduct(db: AnyDb, slug: string, o: Base) {
       maxQuantity: Math.max(0, Math.min(v.stock, MAX_QUANTITY)), // what can be ordered right now
     })),
     images: images.map((i) => ({ url: imageUrl(o.imageBaseUrl, i.r2Key)!, alt: i.alt, isPrimary: i.isPrimary })),
-    related: relatedRows.map((r) => toCard(r, o)),
+    related: relatedRows.map((r) => toCard(r, o, relatedVariantsByProduct.get(r.id) ?? [])),
   };
 }

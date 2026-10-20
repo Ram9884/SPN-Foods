@@ -12,7 +12,7 @@ interface ProductPurchasePanelProps {
 }
 
 export function ProductPurchasePanel({ product, initialVariantId }: ProductPurchasePanelProps) {
-  const { addItem, isMutating } = useCart();
+  const { addItem, isVariantMutating } = useCart();
 
   // If a specific variant was passed (e.g. from homepage selection), use it if found
   const requestedVariant = initialVariantId
@@ -31,6 +31,9 @@ export function ProductPurchasePanel({ product, initialVariantId }: ProductPurch
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
+
+  const isThisVariantMutating = selectedVariant?.id ? isVariantMutating(selectedVariant.id) : false;
+  const isBusy = adding || isThisVariantMutating;
 
   if (!selectedVariant) {
     return (
@@ -57,13 +60,16 @@ export function ProductPurchasePanel({ product, initialVariantId }: ProductPurch
   };
 
   const handleAddToCart = async () => {
-    if (!selectedVariant.inStock || isMutating || adding) return;
+    if (!selectedVariant.inStock || isBusy) return;
     setAdding(true);
-    const success = await addItem(selectedVariant.id, quantity);
-    setAdding(false);
-    if (success) {
-      setAdded(true);
-      setTimeout(() => setAdded(false), 2200);
+    try {
+      const success = await addItem(selectedVariant.id, quantity);
+      if (success) {
+        setAdded(true);
+        setTimeout(() => setAdded(false), 2200);
+      }
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -154,7 +160,7 @@ export function ProductPurchasePanel({ product, initialVariantId }: ProductPurch
               <button
                 type="button"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                disabled={quantity <= 1 || isMutating || adding}
+                disabled={quantity <= 1 || isBusy}
                 className="h-10 w-10 flex items-center justify-center text-[var(--color-text-body)] hover:bg-[var(--color-surface-sunken)] active:bg-[var(--color-border)] transition-colors font-[family-name:var(--font-body)] text-lg disabled:opacity-35 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-[var(--color-brand-primary)]"
                 aria-label="Decrease quantity"
               >
@@ -169,7 +175,7 @@ export function ProductPurchasePanel({ product, initialVariantId }: ProductPurch
               <button
                 type="button"
                 onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
-                disabled={quantity >= maxQty || isMutating || adding}
+                disabled={quantity >= maxQty || isBusy}
                 className="h-10 w-10 flex items-center justify-center text-[var(--color-text-body)] hover:bg-[var(--color-surface-sunken)] active:bg-[var(--color-border)] transition-colors font-[family-name:var(--font-body)] text-lg disabled:opacity-35 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-[var(--color-brand-primary)]"
                 aria-label="Increase quantity"
               >
@@ -181,7 +187,7 @@ export function ProductPurchasePanel({ product, initialVariantId }: ProductPurch
           <button
             type="button"
             onClick={handleAddToCart}
-            disabled={isMutating || adding}
+            disabled={isBusy}
             className={[
               "w-full h-12 flex items-center justify-center gap-2 font-[family-name:var(--font-body)] font-semibold text-base text-white rounded-[8px] active:scale-[0.98] transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] disabled:opacity-75 cursor-pointer shadow-xs",
               added
@@ -191,7 +197,7 @@ export function ProductPurchasePanel({ product, initialVariantId }: ProductPurch
             aria-label={`Add ${product.name} (${selectedVariant.label}) to cart`}
             aria-live="polite"
           >
-            {adding || isMutating ? (
+            {isBusy ? (
               <>
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
                 <span>Adding to Cart...</span>

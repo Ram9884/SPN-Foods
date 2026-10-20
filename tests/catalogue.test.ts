@@ -31,7 +31,7 @@ const mkProd = async (categoryId: string, name: string, variants: V[] | null = [
 };
 
 const names = (r: { body: any }) => r.body.products.map((p: any) => p.name);
-const FORBIDDEN = ["sku", "stock", "isActive", "designVersion", "r2Key", "imageKey", "createdAt", "updatedAt", "sortOrder", "categoryId", "productId", "adminNote", "cost"];
+const FORBIDDEN = ["sku", "stock", "isActive", "r2Key", "imageKey", "createdAt", "updatedAt", "sortOrder", "categoryId", "productId", "adminNote", "cost"];
 const allKeys = (v: unknown, out = new Set<string>()): Set<string> => {
   if (Array.isArray(v)) v.forEach((x) => allKeys(x, out));
   else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) (out.add(k), allKeys(x, out));

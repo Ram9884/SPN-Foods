@@ -35,6 +35,7 @@ export type ProductCard = {
   hasMultipleSizes: boolean;
   inStock: boolean;
   image: { url: string; alt: string | null } | null;
+  variants: ProductVariant[];
 };
 
 export type ProductsResponse = {

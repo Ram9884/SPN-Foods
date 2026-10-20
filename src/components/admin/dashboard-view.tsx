@@ -2,6 +2,22 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import {
+  RefreshCw,
+  Package,
+  AlertCircle,
+  IndianRupee,
+  ShoppingBag,
+  Truck,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Plus,
+  FolderKanban,
+  ClipboardCheck,
+  ArrowRight,
+} from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
 type DashboardData = {
@@ -15,18 +31,85 @@ type DashboardData = {
   lowStockVariants: number;
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  confirmed: { label: "Confirmed", color: "bg-blue-50 text-blue-700 border-blue-200" },
-  processing: { label: "Processing", color: "bg-amber-50 text-amber-700 border-amber-200" },
-  packed: { label: "Packed", color: "bg-purple-50 text-purple-700 border-purple-200" },
-  shipped: { label: "Shipped", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  delivered: { label: "Delivered", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  pending_payment: { label: "Pending Payment", color: "bg-stone-50 text-stone-700 border-stone-200" },
-  cancelled: { label: "Cancelled", color: "bg-rose-50 text-rose-700 border-rose-200" },
-  refunded: { label: "Refunded", color: "bg-orange-50 text-orange-700 border-orange-200" },
+type AdminProfile = {
+  id: string;
+  email: string;
+  name: string | null;
+  role: "admin";
 };
 
-export function DashboardView() {
+interface DashboardViewProps {
+  profile?: AdminProfile | null;
+}
+
+const STATUS_ITEMS = [
+  {
+    key: "confirmed",
+    label: "Confirmed",
+    icon: Package,
+    iconColor: "text-blue-600",
+    iconBg: "bg-blue-50 border-blue-100",
+    pillBg: "bg-blue-50 text-blue-700 border-blue-200",
+  },
+  {
+    key: "processing",
+    label: "Processing",
+    icon: Package,
+    iconColor: "text-amber-600",
+    iconBg: "bg-amber-50 border-amber-100",
+    pillBg: "bg-amber-50 text-amber-700 border-amber-200",
+  },
+  {
+    key: "packed",
+    label: "Packed",
+    icon: ShoppingBag,
+    iconColor: "text-purple-600",
+    iconBg: "bg-purple-50 border-purple-100",
+    pillBg: "bg-purple-50 text-purple-700 border-purple-200",
+  },
+  {
+    key: "shipped",
+    label: "Shipped",
+    icon: Truck,
+    iconColor: "text-sky-600",
+    iconBg: "bg-sky-50 border-sky-100",
+    pillBg: "bg-sky-50 text-sky-700 border-sky-200",
+  },
+  {
+    key: "delivered",
+    label: "Delivered",
+    icon: CheckCircle2,
+    iconColor: "text-emerald-600",
+    iconBg: "bg-emerald-50 border-emerald-100",
+    pillBg: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  },
+  {
+    key: "pending_payment",
+    label: "Pending Payment",
+    icon: Clock,
+    iconColor: "text-stone-600",
+    iconBg: "bg-stone-50 border-stone-200",
+    pillBg: "bg-stone-100 text-stone-700 border-stone-200",
+  },
+  {
+    key: "cancelled",
+    label: "Cancelled",
+    icon: XCircle,
+    iconColor: "text-rose-600",
+    iconBg: "bg-rose-50 border-rose-100",
+    pillBg: "bg-rose-50 text-rose-700 border-rose-200",
+  },
+  {
+    key: "refunded",
+    label: "Refunded",
+    icon: IndianRupee,
+    iconColor: "text-orange-600",
+    iconBg: "bg-orange-50 border-orange-100",
+    pillBg: "bg-orange-50 text-orange-700 border-orange-200",
+  },
+] as const;
+
+export function DashboardView({ profile }: DashboardViewProps) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,169 +136,280 @@ export function DashboardView() {
     fetchDashboard();
   }, []);
 
-  if (loading) {
+  if (loading && !data) {
     return (
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[var(--color-border-subtle)]">
-          <div className="h-8 w-48 bg-stone-200 animate-pulse rounded" />
-          <div className="h-6 w-32 bg-stone-200 animate-pulse rounded" />
-        </div>
+      <div className="space-y-6 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="h-36 bg-white border border-[#E8DFD4] rounded-2xl" />
+        {/* 4 Cards Skeleton */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg animate-pulse" />
+            <div key={i} className="h-32 bg-white border border-[#E8DFD4] rounded-2xl" />
           ))}
         </div>
-        <div className="h-64 bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg animate-pulse" />
+        {/* Orders Breakdown Skeleton */}
+        <div className="h-48 bg-white border border-[#E8DFD4] rounded-2xl" />
+        {/* Quick Actions Skeleton */}
+        <div className="h-36 bg-white border border-[#E8DFD4] rounded-2xl" />
       </div>
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
-      <div className="p-6 rounded-lg border border-rose-200 bg-rose-50 text-rose-800">
-        <h2 className="text-base font-semibold mb-1">Failed to Load Dashboard Data</h2>
-        <p className="text-sm mb-4">{error}</p>
+      <div className="p-8 rounded-2xl border border-rose-200 bg-white text-center shadow-xs">
+        <div className="w-12 h-12 mx-auto rounded-full bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mb-3">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+        <h2 className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[#1A1614] mb-2">
+          Failed to Load Dashboard Data
+        </h2>
+        <p className="text-sm text-[#635850] max-w-md mx-auto mb-5">{error}</p>
         <button
           type="button"
           onClick={fetchDashboard}
-          className="px-4 py-2 text-xs font-semibold rounded bg-rose-700 text-white hover:bg-rose-800 transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-[#BF5330] text-white hover:bg-[#8F3E20] transition-colors cursor-pointer shadow-xs"
         >
-          Try Again
+          <RefreshCw className="w-4 h-4" />
+          <span>Retry Loading</span>
         </button>
       </div>
     );
   }
 
-  if (!data) return null;
+  const d = data || {
+    ordersByStatus: {},
+    toFulfil: 0,
+    openRefunds: 0,
+    last30Days: { paidOrders: 0, revenuePaise: 0 },
+    lowStockVariants: 0,
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-[var(--color-border-subtle)]">
-        <div>
-          <h1 className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[var(--color-text-primary)]">
-            Operations Dashboard
-          </h1>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            Real-time fulfillment, inventory levels, and order pipeline
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={fetchDashboard}
-          className="inline-flex items-center gap-1.5 self-start sm:self-auto px-3 py-1.5 text-xs font-medium rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-surface-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-warm)] transition-colors shadow-2xs"
+    <div className="space-y-6 pb-2">
+      {/* ── Operations Dashboard Header Banner ──────────────────────────────── */}
+      <div className="relative rounded-2xl sm:rounded-[22px] border border-[#E8DFD4] bg-white p-6 sm:p-8 lg:p-9 shadow-xs overflow-hidden">
+        {/* Right Photographic Grain Art Visual Element */}
+        <div
+          className="absolute right-0 top-0 bottom-0 w-full sm:w-3/5 lg:w-1/2 pointer-events-none select-none overflow-hidden"
+          aria-hidden="true"
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span>Refresh</span>
-        </button>
+          <div className="relative w-full h-full">
+            <Image
+              src="/categories/health-mix.jpg"
+              alt="Traditional South Indian grains and wholesome ingredients"
+              fill
+              priority
+              className="object-cover object-right opacity-90"
+            />
+            {/* Elegant fade into white background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 sm:via-white/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-white/40 via-transparent to-white/30" />
+          </div>
+        </div>
+
+        {/* Left Editorial Narrative */}
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="max-w-xl">
+            <span className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#BF5330] mb-2 block font-[family-name:var(--font-body)]">
+              WELCOME BACK
+            </span>
+            <h1
+              className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl lg:text-[44px] text-[#1A1614] leading-[1.1] font-normal tracking-tight mb-2"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Operations Dashboard
+            </h1>
+            <p className="font-[family-name:var(--font-body)] text-xs sm:text-sm text-[#635850] leading-relaxed">
+              Real-time fulfilment, inventory levels, and order pipeline.
+            </p>
+          </div>
+
+          {/* Refresh Action Button */}
+          <div className="shrink-0 self-start sm:self-center">
+            <button
+              type="button"
+              onClick={fetchDashboard}
+              disabled={loading}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#E8DFD4] bg-white text-xs font-semibold text-[#1A1614] hover:bg-[#FAF5EF] hover:border-[#BF5330]/40 transition-all shadow-2xs cursor-pointer active:scale-95 disabled:opacity-60"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#BF5330]" : "text-[#635850]"}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Operational KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Orders to Fulfil */}
+      {/* ── Four Summary KPI Cards ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-5">
+        {/* Card 1: To Fulfil */}
         <Link
           href="/admin/orders"
-          className="p-5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface-elevated)] hover:border-[var(--color-brand-primary)]/40 hover:shadow-xs transition-all group"
+          className="rounded-2xl border border-[#E8DFD4] bg-white p-5 sm:p-6 shadow-xs hover:border-[#BF5330]/40 hover:shadow-sm transition-all group flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-xs font-medium text-[var(--color-text-secondary)]">
-            <span>To Fulfil</span>
-            <span className="w-2 h-2 rounded-full bg-blue-500" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                <Package className="w-4 h-4" />
+              </div>
+              <span className="text-xs sm:text-[13px] font-semibold text-[#1A1614]">
+                To Fulfil
+              </span>
+            </div>
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0" aria-hidden="true" />
           </div>
-          <div className="mt-2 text-3xl font-bold font-[family-name:var(--font-heading)] text-[var(--color-text-primary)]">
-            {data.toFulfil}
+
+          <div className="my-3">
+            <span className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-heading)] text-[#1A1614]">
+              {d.toFulfil}
+            </span>
           </div>
-          <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">
+
+          <p className="text-[11px] sm:text-xs text-[#635850]">
             Confirmed, processing, or packed
           </p>
         </Link>
 
-        {/* Low Stock Variants */}
+        {/* Card 2: Low Stock Items */}
         <Link
           href="/admin/products"
-          className="p-5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface-elevated)] hover:border-amber-400 hover:shadow-xs transition-all group"
+          className="rounded-2xl border border-[#E8DFD4] bg-white p-5 sm:p-6 shadow-xs hover:border-[#BF5330]/40 hover:shadow-sm transition-all group flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-xs font-medium text-[var(--color-text-secondary)]">
-            <span>Low Stock Items</span>
-            <span className={`w-2 h-2 rounded-full ${data.lowStockVariants > 0 ? "bg-amber-500" : "bg-stone-300"}`} />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <Package className="w-4 h-4" />
+              </div>
+              <span className="text-xs sm:text-[13px] font-semibold text-[#1A1614]">
+                Low Stock Items
+              </span>
+            </div>
+            <span
+              className={`w-2.5 h-2.5 rounded-full shrink-0 ${d.lowStockVariants > 0 ? "bg-amber-500" : "bg-stone-300"}`}
+              aria-hidden="true"
+            />
           </div>
-          <div className="mt-2 text-3xl font-bold font-[family-name:var(--font-heading)] text-amber-800">
-            {data.lowStockVariants}
+
+          <div className="my-3">
+            <span className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-heading)] text-amber-800">
+              {d.lowStockVariants}
+            </span>
           </div>
-          <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">
-            Active variants with stock ≤ 5
+
+          <p className="text-[11px] sm:text-xs text-[#635850]">
+            Active variants with stock &le; 5
           </p>
         </Link>
 
-        {/* Attention / Open Refunds */}
+        {/* Card 3: Needs Attention */}
         <Link
           href="/admin/orders?attention=true"
-          className="p-5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface-elevated)] hover:border-rose-400 hover:shadow-xs transition-all group"
+          className="rounded-2xl border border-[#E8DFD4] bg-white p-5 sm:p-6 shadow-xs hover:border-[#BF5330]/40 hover:shadow-sm transition-all group flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-xs font-medium text-[var(--color-text-secondary)]">
-            <span>Needs Attention</span>
-            <span className={`w-2 h-2 rounded-full ${data.openRefunds > 0 ? "bg-rose-500" : "bg-emerald-500"}`} />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-4 h-4" />
+              </div>
+              <span className="text-xs sm:text-[13px] font-semibold text-[#1A1614]">
+                Needs Attention
+              </span>
+            </div>
+            <span
+              className={`w-2.5 h-2.5 rounded-full shrink-0 ${d.openRefunds > 0 ? "bg-rose-500" : "bg-emerald-500"}`}
+              aria-hidden="true"
+            />
           </div>
-          <div className="mt-2 text-3xl font-bold font-[family-name:var(--font-heading)] text-rose-800">
-            {data.openRefunds}
+
+          <div className="my-3">
+            <span className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-heading)] text-rose-800">
+              {d.openRefunds}
+            </span>
           </div>
-          <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">
+
+          <p className="text-[11px] sm:text-xs text-[#635850]">
             Pending refund or fulfillment flags
           </p>
         </Link>
 
-        {/* Last 30 Days Paid Revenue */}
-        <div className="p-5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface-elevated)]">
-          <div className="flex items-center justify-between text-xs font-medium text-[var(--color-text-secondary)]">
-            <span>Last 30 Days (Paid)</span>
-            <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-              {data.last30Days.paidOrders} orders
+        {/* Card 4: Last 30 Days (Paid) */}
+        <div className="rounded-2xl border border-[#E8DFD4] bg-white p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-base">
+                ₹
+              </div>
+              <span className="text-xs sm:text-[13px] font-semibold text-[#1A1614]">
+                Last 30 Days (Paid)
+              </span>
+            </div>
+            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
+              {d.last30Days.paidOrders} orders
             </span>
           </div>
-          <div className="mt-2 text-3xl font-bold font-[family-name:var(--font-heading)] text-emerald-800">
-            {formatPrice(data.last30Days.revenuePaise)}
+
+          <div className="my-3">
+            <span className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-heading)] text-emerald-800">
+              {formatPrice(d.last30Days.revenuePaise)}
+            </span>
           </div>
-          <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">
+
+          <p className="text-[11px] sm:text-xs text-[#635850]">
             Fulfilled and active captured orders
           </p>
         </div>
       </div>
 
-      {/* Order Status Breakdown */}
-      <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-5">
-        <div className="flex items-center justify-between mb-4">
+      {/* ── Orders Status Breakdown Section ─────────────────────────────────── */}
+      <div className="rounded-2xl border border-[#E8DFD4] bg-white p-6 sm:p-7 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
           <div>
-            <h2 className="font-[family-name:var(--font-heading)] text-base font-bold text-[var(--color-text-primary)]">
+            <h2
+              className="font-[family-name:var(--font-heading)] text-xl sm:text-2xl font-normal text-[#1A1614]"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
               Orders Status Breakdown
             </h2>
-            <p className="text-xs text-[var(--color-text-muted)]">
-              Full distribution of orders in the database
+            <p className="text-xs sm:text-[13px] text-[#635850] mt-0.5">
+              Full distribution of orders in the database.
             </p>
           </div>
+
           <Link
             href="/admin/orders"
-            className="text-xs font-semibold text-[var(--color-brand-primary)] hover:text-[var(--color-brand-secondary)]"
+            className="inline-flex items-center gap-1 text-xs sm:text-[13px] font-semibold text-[#BF5330] hover:text-[#8F3E20] hover:underline transition-colors shrink-0 self-start sm:self-auto"
           >
-            View all orders &rarr;
+            <span>View all orders</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {Object.entries(STATUS_CONFIG).map(([statusKey, cfg]) => {
-            const count = data.ordersByStatus[statusKey] ?? 0;
+        {/* 8 Status Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {STATUS_ITEMS.map((item) => {
+            const count = d.ordersByStatus[item.key] ?? 0;
+            const Icon = item.icon;
+
             return (
               <Link
-                key={statusKey}
-                href={`/admin/orders?status=${statusKey}`}
-                className="p-3 rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 hover:bg-[var(--color-surface-warm)] transition-colors flex items-center justify-between"
+                key={item.key}
+                href={`/admin/orders?status=${item.key}`}
+                className="p-3.5 rounded-xl border border-[#E8DFD4] bg-[#FFFBF7]/60 hover:bg-[#FAF5EF] hover:border-[#BF5330]/40 transition-colors flex items-center justify-between gap-3 group"
               >
-                <div>
-                  <span className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded border ${cfg.color}`}>
-                    {cfg.label}
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div
+                    className={`w-8 h-8 rounded-lg ${item.iconBg} ${item.iconColor} border flex items-center justify-center shrink-0`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span
+                    className={`text-[11.5px] font-semibold px-2 py-0.5 rounded-md border ${item.pillBg} truncate`}
+                  >
+                    {item.label}
                   </span>
                 </div>
-                <span className="text-base font-bold font-[family-name:var(--font-heading)] text-[var(--color-text-primary)]">
+
+                <span className="text-base sm:text-lg font-bold font-[family-name:var(--font-heading)] text-[#1A1614] shrink-0 pl-1">
                   {count}
                 </span>
               </Link>
@@ -224,67 +418,91 @@ export function DashboardView() {
         </div>
       </div>
 
-      {/* Operational Quick Actions */}
-      <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-5">
-        <h2 className="font-[family-name:var(--font-heading)] text-base font-bold text-[var(--color-text-primary)] mb-3">
-          Catalogue &amp; Fulfilment Operations
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* ── Catalogue & Fulfilment Operations Section ───────────────────────── */}
+      <div className="rounded-2xl border border-[#E8DFD4] bg-white p-6 sm:p-7 shadow-xs">
+        <div className="mb-4">
+          <h2
+            className="font-[family-name:var(--font-heading)] text-xl sm:text-2xl font-normal text-[#1A1614]"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            Catalogue &amp; Fulfilment Operations
+          </h2>
+          <p className="text-xs sm:text-[13px] text-[#635850] mt-0.5">
+            Quick access to essential operational tools.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Action 1: Add New Product */}
           <Link
             href="/admin/products/new"
-            className="flex items-center gap-3 p-3.5 rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)] hover:border-[var(--color-brand-primary)]/50 transition-colors group"
+            className="p-4 rounded-xl border border-[#E8DFD4] bg-[#FFFBF7]/60 hover:bg-[#FAF5EF] hover:border-[#BF5330]/40 transition-all flex items-center justify-between gap-3 group"
           >
-            <div className="w-9 h-9 rounded-md bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#BF5330]/10 border border-[#BF5330]/20 text-[#BF5330] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
+                <Plus className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-bold text-[#1A1614] group-hover:text-[#BF5330] transition-colors truncate">
+                  Add New Product
+                </span>
+                <span className="block text-xs text-[#635850] mt-0.5 truncate">
+                  Create title, slug, and product details
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="block text-sm font-semibold text-[var(--color-text-primary)] group-hover:text-[var(--color-brand-primary)]">
-                Add New Product
-              </span>
-              <span className="block text-xs text-[var(--color-text-muted)]">
-                Create title, slug, and packaging version
-              </span>
-            </div>
+
+            <span className="w-6 h-6 rounded-full bg-[#BF5330]/10 text-[#BF5330] group-hover:bg-[#BF5330] group-hover:text-white flex items-center justify-center text-xs transition-all shrink-0">
+              &rarr;
+            </span>
           </Link>
 
+          {/* Action 2: Manage Categories */}
           <Link
             href="/admin/categories"
-            className="flex items-center gap-3 p-3.5 rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)] hover:border-[var(--color-brand-primary)]/50 transition-colors group"
+            className="p-4 rounded-xl border border-[#E8DFD4] bg-[#FFFBF7]/60 hover:bg-[#FAF5EF] hover:border-[#BF5330]/40 transition-all flex items-center justify-between gap-3 group"
           >
-            <div className="w-9 h-9 rounded-md bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#BF5330]/10 border border-[#BF5330]/20 text-[#BF5330] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
+                <FolderKanban className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-bold text-[#1A1614] group-hover:text-[#BF5330] transition-colors truncate">
+                  Manage Categories
+                </span>
+                <span className="block text-xs text-[#635850] mt-0.5 truncate">
+                  Organise and order store taxonomy
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="block text-sm font-semibold text-[var(--color-text-primary)] group-hover:text-[var(--color-brand-primary)]">
-                Manage Categories
-              </span>
-              <span className="block text-xs text-[var(--color-text-muted)]">
-                Organise and order store taxonomy
-              </span>
-            </div>
+
+            <span className="w-6 h-6 rounded-full bg-[#BF5330]/10 text-[#BF5330] group-hover:bg-[#BF5330] group-hover:text-white flex items-center justify-center text-xs transition-all shrink-0">
+              &rarr;
+            </span>
           </Link>
 
+          {/* Action 3: Process Orders */}
           <Link
             href="/admin/orders"
-            className="flex items-center gap-3 p-3.5 rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)] hover:border-[var(--color-brand-primary)]/50 transition-colors group"
+            className="p-4 rounded-xl border border-[#E8DFD4] bg-[#FFFBF7]/60 hover:bg-[#FAF5EF] hover:border-[#BF5330]/40 transition-all flex items-center justify-between gap-3 group"
           >
-            <div className="w-9 h-9 rounded-md bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-              </svg>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#BF5330]/10 border border-[#BF5330]/20 text-[#BF5330] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
+                <ClipboardCheck className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-bold text-[#1A1614] group-hover:text-[#BF5330] transition-colors truncate">
+                  Process Orders
+                </span>
+                <span className="block text-xs text-[#635850] mt-0.5 truncate">
+                  Update status, dispatch, and add tracking
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="block text-sm font-semibold text-[var(--color-text-primary)] group-hover:text-[var(--color-brand-primary)]">
-                Process Orders
-              </span>
-              <span className="block text-xs text-[var(--color-text-muted)]">
-                Update status, dispatch, and add tracking
-              </span>
-            </div>
+
+            <span className="w-6 h-6 rounded-full bg-[#BF5330]/10 text-[#BF5330] group-hover:bg-[#BF5330] group-hover:text-white flex items-center justify-center text-xs transition-all shrink-0">
+              &rarr;
+            </span>
           </Link>
         </div>
       </div>

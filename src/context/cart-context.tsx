@@ -9,7 +9,6 @@ import React, {
   useRef,
 } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
 import { useToast } from "@/components/ui/toast";
 import type { CartLineView, CartSummary, CartView } from "@/lib/cart/cart";
 
@@ -18,6 +17,8 @@ interface CartContextValue {
   itemCount: number;
   isLoading: boolean;
   isMutating: boolean;
+  mutatingVariantIds: string[];
+  isVariantMutating: (variantId?: string | null) => boolean;
   addItem: (variantId: string, quantity?: number) => Promise<boolean>;
   updateQuantity: (variantId: string, quantity: number) => Promise<boolean>;
   removeItem: (variantId: string) => Promise<boolean>;
@@ -28,20 +29,6 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-const HAS_CLERK = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
-
-function ClerkAuthBridge({
-  onChange,
-}: {
-  onChange: (state: { isSignedIn: boolean; isLoaded: boolean }) => void;
-}) {
-  const { isSignedIn, isLoaded } = useAuth();
-  useEffect(() => {
-    onChange({ isSignedIn: Boolean(isSignedIn), isLoaded: Boolean(isLoaded) });
-  }, [isSignedIn, isLoaded, onChange]);
-  return null;
-}
-
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -49,16 +36,52 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const { showToast } = useToast();
 
   const [authState, setAuthState] = useState<{ isSignedIn: boolean; isLoaded: boolean }>({
-    isSignedIn: !HAS_CLERK,
-    isLoaded: !HAS_CLERK,
+    isSignedIn: false,
+    isLoaded: false,
   });
 
   const [cart, setCart] = useState<CartView | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMutating, setIsMutating] = useState(false);
+  const [mutatingVariantIds, setMutatingVariantIds] = useState<string[]>([]);
+
+  // Check auth state from application session API
+  useEffect(() => {
+    let active = true;
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : { authenticated: false }))
+      .then((data) => {
+        if (active) {
+          setAuthState({
+            isSignedIn: Boolean(data?.authenticated),
+            isLoaded: true,
+          });
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setAuthState({ isSignedIn: false, isLoaded: true });
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
 
   // Prevent duplicate execution of post-login add parameter
   const processedAddParamRef = useRef<string | null>(null);
+
+function parseCartResponse(data: unknown): CartView | null {
+  if (!data || typeof data !== "object") return null;
+  const obj = data as Record<string, unknown>;
+  if (obj.cart && typeof obj.cart === "object" && "items" in obj.cart && "summary" in obj.cart) {
+    return obj.cart as CartView;
+  }
+  if ("items" in obj && "summary" in obj) {
+    return obj as unknown as CartView;
+  }
+  return null;
+}
 
   const fetchCart = useCallback(async () => {
     setIsLoading(true);
@@ -67,31 +90,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
       });
-      if (res.status === 200) {
+      if (res.ok) {
         const data = await res.json();
-        setCart(data);
+        setCart(parseCartResponse(data));
       } else if (res.status === 401) {
         setCart(null);
       }
     } catch (err) {
-      console.error("Failed to load cart:", err);
+      console.error("Failed to fetch cart:", err);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // When auth changes or mounts
+  // Fetch cart initially and whenever auth status changes
   useEffect(() => {
-    if (authState.isSignedIn) {
+    if (authState.isLoaded) {
       fetchCart();
-    } else if (authState.isLoaded) {
-      setCart(null);
-      setIsLoading(false);
     }
-  }, [authState.isSignedIn, authState.isLoaded, fetchCart]);
+  }, [fetchCart, authState.isLoaded, authState.isSignedIn]);
 
   const addItem = useCallback(
     async (variantId: string, quantity = 1): Promise<boolean> => {
+      setMutatingVariantIds((prev) => (prev.includes(variantId) ? prev : [...prev, variantId]));
       setIsMutating(true);
       try {
         const res = await fetch("/api/cart/items", {
@@ -101,38 +122,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (res.status === 401) {
-          // Unauthenticated redirect per rule:
-          // /sign-in?redirect_url=<current-page>&add=<variantId>:<quantity>
-          const returnUrl = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
-          const target = `/sign-in?redirect_url=${encodeURIComponent(returnUrl)}&add=${encodeURIComponent(`${variantId}:${quantity}`)}`;
-          router.push(target);
+          showToast("Please sign in to add items to your cart", "info");
+          // Redirect to sign in with return and add instructions
+          const currentUrl = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
+          router.push(
+            `/sign-in?redirect_url=${encodeURIComponent(currentUrl)}&add=${encodeURIComponent(variantId)}&qty=${encodeURIComponent(String(quantity))}`
+          );
           return false;
         }
 
-        if (!res.ok) {
-          const body = await res.json().catch(() => null);
-          const errorMsg = body?.error?.message || "Could not add item to cart. Please try again.";
-          showToast(errorMsg, "error");
+        if (res.ok) {
+          const data = await res.json();
+          const nextCart = parseCartResponse(data);
+          setCart(nextCart);
+          showToast("Added to cart", "success");
+          return true;
+        } else {
+          const errorData = await res.json().catch(() => ({}));
+          const message = errorData?.error?.message || errorData?.message || "Failed to add item to cart";
+          showToast(message, "error");
           return false;
         }
-
-        const updatedCart: CartView = await res.json();
-        setCart(updatedCart);
-        showToast("Added to cart", "success");
-        return true;
       } catch (err) {
-        console.error("Add item error:", err);
-        showToast("Something went wrong. Please check your connection.", "error");
+        console.error("Add item failed:", err);
+        showToast("Network error. Please try again.", "error");
         return false;
       } finally {
+        setMutatingVariantIds((prev) => prev.filter((id) => id !== variantId));
         setIsMutating(false);
       }
     },
-    [pathname, searchParams, router, showToast]
+    [pathname, router, searchParams, showToast]
   );
 
   const updateQuantity = useCallback(
     async (variantId: string, quantity: number): Promise<boolean> => {
+      setMutatingVariantIds((prev) => (prev.includes(variantId) ? prev : [...prev, variantId]));
       setIsMutating(true);
       try {
         const res = await fetch(`/api/cart/items/${variantId}`, {
@@ -141,32 +166,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({ quantity }),
         });
 
-        if (!res.ok) {
-          const body = await res.json().catch(() => null);
-          const errorMsg = body?.error?.message || "Could not update quantity.";
-          showToast(errorMsg, "error");
-          // Reconcile with server
-          await fetchCart();
+        if (res.ok) {
+          const data = await res.json();
+          const nextCart = parseCartResponse(data);
+          setCart(nextCart);
+          return true;
+        } else {
+          const errorData = await res.json().catch(() => ({}));
+          const message = errorData?.error?.message || errorData?.message || "Failed to update quantity";
+          showToast(message, "error");
           return false;
         }
-
-        const updatedCart: CartView = await res.json();
-        setCart(updatedCart);
-        return true;
       } catch (err) {
-        console.error("Update quantity error:", err);
+        console.error("Update quantity failed:", err);
         showToast("Network error. Please try again.", "error");
-        await fetchCart();
         return false;
       } finally {
+        setMutatingVariantIds((prev) => prev.filter((id) => id !== variantId));
         setIsMutating(false);
       }
     },
-    [fetchCart, showToast]
+    [showToast]
   );
 
   const removeItem = useCallback(
     async (variantId: string): Promise<boolean> => {
+      setMutatingVariantIds((prev) => (prev.includes(variantId) ? prev : [...prev, variantId]));
       setIsMutating(true);
       try {
         const res = await fetch(`/api/cart/items/${variantId}`, {
@@ -174,25 +199,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           headers: { "Content-Type": "application/json" },
         });
 
-        if (!res.ok) {
-          showToast("Could not remove item. Please try again.", "error");
-          await fetchCart();
+        if (res.ok) {
+          const data = await res.json();
+          const nextCart = parseCartResponse(data);
+          setCart(nextCart);
+          showToast("Item removed from cart", "info");
+          return true;
+        } else {
+          const errorData = await res.json().catch(() => ({}));
+          const message = errorData?.error?.message || errorData?.message || "Failed to remove item";
+          showToast(message, "error");
           return false;
         }
-
-        const updatedCart: CartView = await res.json();
-        setCart(updatedCart);
-        showToast("Item removed from cart", "info");
-        return true;
       } catch (err) {
-        console.error("Remove item error:", err);
+        console.error("Remove item failed:", err);
         showToast("Network error. Please try again.", "error");
         return false;
       } finally {
+        setMutatingVariantIds((prev) => prev.filter((id) => id !== variantId));
         setIsMutating(false);
       }
     },
-    [fetchCart, showToast]
+    [showToast]
   );
 
   const clearCart = useCallback(async (): Promise<boolean> => {
@@ -203,17 +231,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         headers: { "Content-Type": "application/json" },
       });
 
-      if (!res.ok) {
-        showToast("Could not clear cart.", "error");
+      if (res.ok) {
+        const data = await res.json();
+        const nextCart = parseCartResponse(data);
+        setCart(nextCart);
+        showToast("Cart cleared", "info");
+        return true;
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        const message = errorData?.error?.message || errorData?.message || "Failed to clear cart";
+        showToast(message, "error");
         return false;
       }
-
-      const updatedCart: CartView = await res.json();
-      setCart(updatedCart);
-      showToast("Cart cleared", "info");
-      return true;
     } catch (err) {
-      console.error("Clear cart error:", err);
+      console.error("Clear cart failed:", err);
       showToast("Network error. Please try again.", "error");
       return false;
     } finally {
@@ -221,27 +252,33 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [showToast]);
 
-  // Handle post-login ?add=variantId:quantity parameter
+  const isVariantMutating = useCallback(
+    (variantId?: string | null) => {
+      if (!variantId) return false;
+      return mutatingVariantIds.includes(variantId);
+    },
+    [mutatingVariantIds]
+  );
+
+  // Handle post-login ?add=[variantId]&qty=[quantity] recovery
   useEffect(() => {
-    const addParam = searchParams.get("add");
-    if (!addParam || !authState.isSignedIn) return;
+    const addVariantId = searchParams.get("add");
+    if (!addVariantId || !authState.isSignedIn) return;
 
-    // Ensure it runs exactly once per parameter value
-    if (processedAddParamRef.current === addParam) return;
-    processedAddParamRef.current = addParam;
+    if (processedAddParamRef.current === addVariantId) return;
+    processedAddParamRef.current = addVariantId;
 
-    const [vId, qtyStr] = addParam.split(":");
-    const qty = parseInt(qtyStr || "1", 10);
-    if (!vId) return;
+    const rawQty = searchParams.get("qty");
+    const parsedQty = rawQty ? parseInt(rawQty, 10) : 1;
+    const addQty = Number.isInteger(parsedQty) && parsedQty > 0 ? parsedQty : 1;
 
     (async () => {
-      const success = await addItem(vId, isNaN(qty) ? 1 : qty);
+      const success = await addItem(addVariantId, addQty);
       if (success) {
-        // Strip ?add=... from query params cleanly using router.replace
         const params = new URLSearchParams(searchParams.toString());
         params.delete("add");
-        const newQuery = params.toString();
-        const cleanPath = pathname + (newQuery ? `?${newQuery}` : "");
+        params.delete("qty");
+        const cleanPath = pathname + (params.toString() ? `?${params.toString()}` : "");
         router.replace(cleanPath);
       }
     })();
@@ -256,6 +293,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         itemCount,
         isLoading,
         isMutating,
+        mutatingVariantIds,
+        isVariantMutating,
         addItem,
         updateQuantity,
         removeItem,
@@ -264,7 +303,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         isSignedIn: authState.isSignedIn,
       }}
     >
-      {HAS_CLERK && <ClerkAuthBridge onChange={setAuthState} />}
       {children}
     </CartContext.Provider>
   );

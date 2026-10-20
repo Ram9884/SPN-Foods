@@ -54,7 +54,7 @@ export default async function HomePage() {
           className="relative overflow-hidden bg-[#FFFBF7] flex-1 flex flex-col justify-center pt-0 pb-0"
         >
           {/* Botanical leaf accent at top-left matching reference */}
-          <div className="absolute top-0 left-0 w-28 sm:w-40 lg:w-48 pointer-events-none select-none z-10">
+          <div className="absolute -top-3 sm:-top-4 lg:-top-5 left-0 w-28 sm:w-40 lg:w-48 pointer-events-none select-none z-10">
             <Image
               src="/hero-leaves.png"
               alt=""
@@ -76,10 +76,10 @@ export default async function HomePage() {
               {/* Editorial Headline: Strictly 2-line natural wrap on desktop */}
               <h1
                 id="hero-heading"
-                className="font-[family-name:var(--font-heading)] font-normal text-[36px] xs:text-[42px] sm:text-[48px] lg:text-[48px] xl:text-[54px] leading-[1.04] tracking-[-0.035em] text-[#1A1614] mb-3.5 sm:mb-4 whitespace-normal"
+                className="font-[family-name:var(--font-heading)] font-medium text-[34px] xs:text-[36px] sm:text-[44px] lg:text-[46px] xl:text-[48px] leading-[1.06] tracking-[-0.03em] text-[#1A1614] mb-3.5 sm:mb-4 whitespace-normal"
               >
                 The honest taste of a{" "}
-                <span className="italic font-normal text-[#BF5330]">
+                <span className="text-[#BF5330]">
                   homestyle
                 </span>{" "}
                 kitchen
@@ -112,29 +112,29 @@ export default async function HomePage() {
               </div>
 
               {/* Mobile Image: In-flow under CTAs on small screens */}
-              <div className="lg:hidden relative w-full max-w-[480px] mx-auto aspect-[946/628] select-none mt-5">
+              <div className="lg:hidden relative w-full max-w-[480px] mx-auto aspect-[1218/764] select-none mt-5">
                 <Image
-                  src="/hero-composition.png"
+                  src="/hero-visual.png"
                   alt="SPN Foods Black Rice Porridge Mix and Multi Grain Health Mix authentic traditional packaging"
                   fill
                   priority
-                  sizes="100vw"
+                  sizes="(max-width: 512px) calc(100vw - 32px), 480px"
                   className="object-contain object-bottom pointer-events-none"
                 />
               </div>
             </div>
           </div>
 
-          {/* Desktop Image: Pinned flush to right corner, enlarged to reach dividing guide line & navbar */}
-          <div className="hidden lg:flex absolute right-0 bottom-0 top-0 items-end justify-end pointer-events-none z-10 select-none w-[58vw] xl:w-[60vw] max-w-[1120px]">
-            <div className="relative w-full aspect-[946/628] max-h-full">
+          {/* Desktop Image: Flush to right edge, spanning full height from top to bottom */}
+          <div className="hidden lg:flex absolute right-0 bottom-0 top-0 justify-end pointer-events-none z-10 select-none w-[58vw] xl:w-[60vw] max-w-[1120px]">
+            <div className="relative h-full aspect-[1218/764] max-w-full">
               <Image
-                src="/hero-composition.png"
+                src="/hero-visual.png"
                 alt="SPN Foods Black Rice Porridge Mix and Multi Grain Health Mix authentic traditional packaging"
                 fill
                 priority
-                sizes="(max-width: 1440px) 62vw, 58vw"
-                className="object-contain object-right-bottom pointer-events-none"
+                sizes="(min-width: 1867px) 1120px, (min-width: 1280px) 60vw, 58vw"
+                className="object-cover object-right pointer-events-none"
               />
             </div>
           </div>

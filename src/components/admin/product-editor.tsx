@@ -35,7 +35,6 @@ type ProductDetail = {
   description: string | null;
   ingredients: string | null;
   usage: string | null;
-  designVersion: "old" | "new";
   isActive: boolean;
   isFeatured: boolean;
   sortOrder: number;
@@ -76,7 +75,6 @@ export function ProductEditor({ productId }: { productId: string }) {
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [usage, setUsage] = useState("");
-  const [designVersion, setDesignVersion] = useState<"old" | "new">("new");
   const [isActive, setIsActive] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
   const [sortOrder, setSortOrder] = useState(0);
@@ -139,7 +137,6 @@ export function ProductEditor({ productId }: { productId: string }) {
       setDescription(data.description || "");
       setIngredients(data.ingredients || "");
       setUsage(data.usage || "");
-      setDesignVersion(data.designVersion);
       setIsActive(data.isActive);
       setIsFeatured(data.isFeatured);
       setSortOrder(data.sortOrder);
@@ -169,7 +166,6 @@ export function ProductEditor({ productId }: { productId: string }) {
       description: description.trim() || null,
       ingredients: ingredients.trim() || null,
       usage: usage.trim() || null,
-      designVersion,
       isActive,
       isFeatured,
       sortOrder: Number(sortOrder),
@@ -587,39 +583,22 @@ export function ProductEditor({ productId }: { productId: string }) {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="p-cat" className="block font-medium text-[var(--color-text-primary)] mb-1">
-                Category *
-              </label>
-              <select
-                id="p-cat"
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full px-3 py-2 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)] text-xs"
-              >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="p-pack" className="block font-medium text-[var(--color-text-primary)] mb-1">
-                Packaging Design Version *
-              </label>
-              <select
-                id="p-pack"
-                value={designVersion}
-                onChange={(e) => setDesignVersion(e.target.value as "old" | "new")}
-                className="w-full px-3 py-2 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)] text-xs"
-              >
-                <option value="new">New Packaging (Modern Branding)</option>
-                <option value="old">Old Packaging (Classic Version)</option>
-              </select>
-            </div>
+          <div>
+            <label htmlFor="p-cat" className="block font-medium text-[var(--color-text-primary)] mb-1">
+              Category *
+            </label>
+            <select
+              id="p-cat"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full px-3 py-2 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)] text-xs"
+            >
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

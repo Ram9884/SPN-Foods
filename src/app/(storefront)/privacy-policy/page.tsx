@@ -37,7 +37,7 @@ export default async function PrivacyPolicyPage() {
             </p>
             <ul className="list-disc pl-5 space-y-2 text-[#4A3E37]">
               <li>
-                <strong>Account Information:</strong> When you register or sign in, authentication and profile information (name, verified email address) are managed securely through our authentication partner, Clerk.
+                <strong>Account Information:</strong> When you register or sign in, authentication and profile information (name, email address, and securely hashed passwords) are managed directly by our application and database. Passwords are never stored in plaintext.
               </li>
               <li>
                 <strong>Order &amp; Delivery Details:</strong> When you complete checkout, we collect delivery recipient names, physical delivery addresses, phone numbers, and landmarks needed to fulfill and deliver your package.
@@ -97,7 +97,6 @@ export default async function PrivacyPolicyPage() {
               To operate a secure and reliable e-commerce experience, we work with established infrastructure providers who process data strictly under their respective security commitments:
             </p>
             <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Clerk:</strong> User authentication and session security.</li>
               <li><strong>Razorpay:</strong> Payment gateway processing.</li>
               <li><strong>Logistics &amp; Courier Partners:</strong> Physical parcel dispatch, shipping label generation, and tracking.</li>
               <li><strong>Cloudflare:</strong> Edge hosting, application routing, and content delivery network.</li>

@@ -127,7 +127,7 @@ export async function deleteCategory(db: AnyDb, adminId: string, id: string): Pr
 
 type ProductInput = {
   categoryId: string; slug?: string; name: string; shortDescription?: string | null; description?: string | null;
-  ingredients?: string | null; usage?: string | null; designVersion?: "old" | "new"; isActive?: boolean;
+  ingredients?: string | null; usage?: string | null; isActive?: boolean;
   isFeatured?: boolean; sortOrder?: number;
 };
 
@@ -145,7 +145,7 @@ export async function listProducts(
   const rows = await db
     .select({
       id: products.id, slug: products.slug, name: products.name, isActive: products.isActive, isFeatured: products.isFeatured,
-      designVersion: products.designVersion, sortOrder: products.sortOrder,
+      sortOrder: products.sortOrder,
       category: { id: categories.id, name: categories.name, slug: categories.slug },
       variantCount: sql<number>`(select count(*)::int from product_variants v where v.product_id = ${products.id})`,
       minPricePaise: sql<number | null>`(select min(v.price_paise) from product_variants v where v.product_id = ${products.id} and v.is_active)`,
@@ -198,7 +198,7 @@ export async function createProduct(db: AnyDb, adminId: string, input: ProductIn
             categoryId: input.categoryId, slug, name: input.name,
             shortDescription: input.shortDescription ?? null, description: input.description ?? null,
             ingredients: input.ingredients ?? null, usage: input.usage ?? null,
-            designVersion: input.designVersion ?? "old", isActive: input.isActive ?? true,
+            isActive: input.isActive ?? true,
             isFeatured: input.isFeatured ?? false, sortOrder: input.sortOrder ?? 0,
           })
           .returning({ id: products.id });

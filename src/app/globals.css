@@ -1,21 +1,21 @@
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=Noto+Serif+Tamil:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@400;500;600;700;800&family=Noto+Serif+Tamil:wght@400;600;700&display=swap");
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SPN Foods Design System — Tailwind v4 theme
-   3-Font Typography: Instrument Serif, Manrope, Noto Serif Tamil
+   Typography: Lora (Logo), DM Serif Display (Headings), Manrope (UI/Body)
    Palette: Warm Ivory #FFFBF7, Terracotta #BF5330, Deep Terracotta #8F3E20,
             Warm Sand #D9C6AA, Muted Olive #56634A, Main Text #1A1614,
             Secondary Text #635850, Warm Border #E8DFD4, White #FFFFFF
    ───────────────────────────────────────────────────────────────────────────── */
 
 @theme {
-  /* Fonts — 3-Font System */
-  --font-logo:    "Instrument Serif", Georgia, serif;
-  --font-heading: "Instrument Serif", Georgia, serif;
-  --font-product: "Manrope", system-ui, sans-serif;
-  --font-body:    "Manrope", system-ui, sans-serif;
-  --font-price:   "Manrope", system-ui, sans-serif;
+  /* Fonts — Multi-Font System */
+  --font-logo:    var(--font-lora), "Lora", Georgia, serif;
+  --font-heading: var(--font-dm-serif), "DM Serif Display", Georgia, serif;
+  --font-product: var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --font-body:    var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --font-price:   var(--font-manrope), "Manrope", system-ui, sans-serif;
   --font-tamil:   "Noto Serif Tamil", serif;
 
   /* ── Brand Colors (Approved Heritage Palette) ───────────────────────────── */

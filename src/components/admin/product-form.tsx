@@ -22,7 +22,6 @@ export function ProductForm() {
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [usage, setUsage] = useState("");
-  const [designVersion, setDesignVersion] = useState<"old" | "new">("new");
   const [isActive, setIsActive] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
   const [sortOrder, setSortOrder] = useState<number>(0);
@@ -56,7 +55,6 @@ export function ProductForm() {
       description: description.trim() ? description.trim() : null,
       ingredients: ingredients.trim() ? ingredients.trim() : null,
       usage: usage.trim() ? usage.trim() : null,
-      designVersion,
       isActive,
       isFeatured,
       sortOrder: Number(sortOrder),
@@ -127,48 +125,31 @@ export function ProductForm() {
             Primary Details
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="prod-category" className="block font-medium text-[var(--color-text-primary)] mb-1">
-                Category *
-              </label>
-              {loadingCategories ? (
-                <div className="h-9 bg-stone-100 animate-pulse rounded border border-[var(--color-border-subtle)]" />
-              ) : categories.length === 0 ? (
-                <div className="text-rose-600 text-xs">
-                  No categories found. Please create a category first.
-                </div>
-              ) : (
-                <select
-                  id="prod-category"
-                  required
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  className="w-full px-3 py-2 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)] text-xs"
-                >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="prod-packaging" className="block font-medium text-[var(--color-text-primary)] mb-1">
-                Packaging Design Version *
-              </label>
+          <div>
+            <label htmlFor="prod-category" className="block font-medium text-[var(--color-text-primary)] mb-1">
+              Category *
+            </label>
+            {loadingCategories ? (
+              <div className="h-9 bg-stone-100 animate-pulse rounded border border-[var(--color-border-subtle)]" />
+            ) : categories.length === 0 ? (
+              <div className="text-rose-600 text-xs">
+                No categories found. Please create a category first.
+              </div>
+            ) : (
               <select
-                id="prod-packaging"
-                value={designVersion}
-                onChange={(e) => setDesignVersion(e.target.value as "old" | "new")}
+                id="prod-category"
+                required
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
                 className="w-full px-3 py-2 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)] text-xs"
               >
-                <option value="new">New Packaging (Modern Branding)</option>
-                <option value="old">Old Packaging (Classic Version)</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
               </select>
-            </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -10,8 +10,8 @@ import { Breadcrumb } from "@/components/catalogue/breadcrumb";
 import type { SortOption } from "@/lib/storefront/types";
 
 export const metadata: Metadata = {
-  title: "Shop All Products",
-  description: "Browse all SPN Foods products — health mixes, masalas, podis, snacks and more.",
+  title: "Shop All Products — SPN Foods",
+  description: "Explore our traditional health mixes, podis, masalas, and snacks made with heritage recipes.",
   alternates: { canonical: "/shop" },
 };
 
@@ -37,52 +37,53 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   ]);
 
   const { products, total } = productsData;
-
   const totalAllCategories = categories.reduce((sum, c) => sum + c.productCount, 0);
 
   return (
-    <div className="py-8 lg:py-12">
+    <div className="py-8 lg:py-12 bg-[#FFFBF7] min-h-screen">
       <div className="container-spn">
 
-        {/* Breadcrumb */}
+        {/* Breadcrumb Navigation */}
         <Breadcrumb
           items={[
             { label: "Home", href: "/" },
             { label: "Shop" },
           ]}
-          className="mb-4"
+          className="mb-5"
         />
 
-        {/* Page header */}
-        <div className="mb-6">
-          <h1 className="font-[family-name:var(--font-heading)] text-2xl lg:text-3xl text-[var(--color-text-primary)]">
+        {/* Editorial Page Header */}
+        <div className="mb-8">
+          <h1
+            className="text-3xl sm:text-4xl lg:text-[44px] text-[#1A1614] leading-[1.15] font-normal"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
             All Products
           </h1>
-          <p className="font-[family-name:var(--font-body)] text-sm text-[var(--color-text-muted)] mt-1">
-            {total} product{total !== 1 ? "s" : ""}
+          <p className="font-[family-name:var(--font-body)] text-[15px] sm:text-[16px] text-[#635850] mt-2 max-w-2xl leading-relaxed">
+            Explore our traditional health mixes, podis, masalas and snacks.
+          </p>
+          <p className="font-[family-name:var(--font-body)] text-xs font-semibold uppercase tracking-[0.14em] text-[#BF5330] mt-3">
+            {total} {total === 1 ? "Product" : "Products"} Available
           </p>
         </div>
 
-        {/* Category filter chips */}
-        <Suspense>
-          <CategoryChips
-            categories={categories}
-            totalCount={totalAllCategories}
-            className="mb-5"
-          />
-        </Suspense>
-
-        {/* Sort bar */}
-        <div
-          id="product-grid-top"
-          className="sticky top-14 lg:top-16 z-20 bg-[var(--color-surface)] border-b border-[var(--color-border)] -mx-4 px-4 md:-mx-6 md:px-6 xl:-mx-10 xl:px-10 h-12 flex items-center justify-end mb-8"
-        >
+        {/* Category Filter Pills and Sorting Bar neatly positioned */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-7 sm:mb-8 border-b border-[#E8DFD4] pb-4">
           <Suspense>
-            <SortSelect currentSort={sort} />
+            <CategoryChips
+              categories={categories}
+              totalCount={totalAllCategories}
+            />
           </Suspense>
+          <div className="flex items-center justify-end shrink-0">
+            <Suspense>
+              <SortSelect currentSort={sort} />
+            </Suspense>
+          </div>
         </div>
 
-        {/* Product grid */}
+        {/* Product Grid in Homepage Bestseller Card Design */}
         {products.length > 0 ? (
           <>
             <ProductGrid products={products} priorityCount={4} />
@@ -91,25 +92,30 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             </Suspense>
           </>
         ) : (
-          <div className="py-20">
-            <p className="font-[family-name:var(--font-body)] text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">Catalogue</p>
-            <h2 className="font-[family-name:var(--font-heading)] text-2xl text-[var(--color-text-primary)] mb-3">
+          <div className="py-20 text-center rounded-[20px] bg-white border border-[#E8DFD4] p-8">
+            <p className="font-[family-name:var(--font-body)] text-xs font-semibold uppercase tracking-wider text-[#635850] mb-2">
+              Catalogue
+            </p>
+            <h2
+              className="text-2xl text-[#1A1614] mb-3"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
               No products available right now
             </h2>
-            <p className="font-[family-name:var(--font-body)] text-base text-[var(--color-text-body)] mb-8 max-w-sm leading-relaxed">
+            <p className="font-[family-name:var(--font-body)] text-base text-[#635850] mb-6 max-w-sm mx-auto leading-relaxed">
               Browse a category or check back later.
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap justify-center gap-2.5">
               {[
                 { label: "Health Mix Powders", href: "/shop/health-mix-powders" },
-                { label: "Masalas & Powders", href: "/shop/masalas-and-powders" },
                 { label: "Podi Varieties", href: "/shop/podi-varieties" },
+                { label: "Masalas & Powders", href: "/shop/masalas-and-powders" },
                 { label: "Snacks", href: "/shop/snacks" },
               ].map(({ label, href }) => (
                 <Link
                   key={href}
                   href={href}
-                  className="inline-flex items-center h-9 px-4 font-[family-name:var(--font-body)] text-sm font-medium text-[var(--color-text-body)] bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[8px] hover:border-[var(--color-brand-primary)] hover:text-[var(--color-brand-primary)] transition-colors"
+                  className="inline-flex items-center h-10 px-4.5 rounded-full font-[family-name:var(--font-body)] text-sm font-medium text-[#1A1614] bg-[#FFFBF7] border border-[#E8DFD4] hover:border-[#BF5330] hover:text-[#BF5330] transition-colors"
                 >
                   {label}
                 </Link>

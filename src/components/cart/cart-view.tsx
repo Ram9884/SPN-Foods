@@ -263,27 +263,39 @@ function CartItemRow({
     if (item.quantity <= 1) {
       if (confirm(`Remove ${item.productName} from your cart?`)) {
         setLocalUpdating(true);
-        await onRemove(item.variantId);
-        setLocalUpdating(false);
+        try {
+          await onRemove(item.variantId);
+        } finally {
+          setLocalUpdating(false);
+        }
       }
     } else {
       setLocalUpdating(true);
-      await onUpdateQuantity(item.variantId, item.quantity - 1);
-      setLocalUpdating(false);
+      try {
+        await onUpdateQuantity(item.variantId, item.quantity - 1);
+      } finally {
+        setLocalUpdating(false);
+      }
     }
   };
 
   const handleIncrement = async () => {
     if (item.quantity >= 99) return;
     setLocalUpdating(true);
-    await onUpdateQuantity(item.variantId, item.quantity + 1);
-    setLocalUpdating(false);
+    try {
+      await onUpdateQuantity(item.variantId, item.quantity + 1);
+    } finally {
+      setLocalUpdating(false);
+    }
   };
 
   const handleRemove = async () => {
     setLocalUpdating(true);
-    await onRemove(item.variantId);
-    setLocalUpdating(false);
+    try {
+      await onRemove(item.variantId);
+    } finally {
+      setLocalUpdating(false);
+    }
   };
 
   const isBusy = isMutating || localUpdating;

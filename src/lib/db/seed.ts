@@ -22,7 +22,6 @@ type SeedItem = {
 type SeedCategory = {
   slug: string;
   name: string;
-  design: "old" | "new";
   items: SeedItem[];
 };
 
@@ -30,7 +29,6 @@ const CATALOGUE: SeedCategory[] = [
   {
     slug: "health-mix-powders",
     name: "Health Mix Powders",
-    design: "old",
     items: [
       {
         name: "Nendram Raw Banana Powder",
@@ -109,7 +107,6 @@ const CATALOGUE: SeedCategory[] = [
   {
     slug: "podi-varieties",
     name: "Podi Varieties",
-    design: "old",
     items: [
       {
         name: "Paruppu Podi",
@@ -212,7 +209,6 @@ const CATALOGUE: SeedCategory[] = [
   {
     slug: "masalas-and-powders",
     name: "Masalas & Powders",
-    design: "old",
     items: [
       {
         name: "Red Chilli Powder",
@@ -379,7 +375,6 @@ const CATALOGUE: SeedCategory[] = [
   {
     slug: "snacks",
     name: "Snacks",
-    design: "new",
     items: [
       {
         name: "Kadalai Urundai",
@@ -414,7 +409,6 @@ const CATALOGUE: SeedCategory[] = [
   {
     slug: "thokku",
     name: "Thokku",
-    design: "new",
     items: [],
   },
 ];
@@ -466,7 +460,6 @@ async function main() {
           description: item.description,
           ingredients: item.ingredients,
           usage: item.usage,
-          designVersion: cat.design,
           sortOrder: i,
           isActive: true,
           isFeatured: false,
@@ -480,7 +473,6 @@ async function main() {
             description: item.description,
             ingredients: item.ingredients,
             usage: item.usage,
-            designVersion: cat.design,
             sortOrder: i,
             isActive: true,
           },

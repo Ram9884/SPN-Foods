@@ -12,13 +12,13 @@ export function ProductGrid({ products, className, priorityCount = 0 }: ProductG
   return (
     <ul
       className={cn(
-        "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-4 lg:gap-x-5 lg:gap-y-8",
+        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6",
         className
       )}
       aria-label="Products"
     >
       {products.map((product, index) => (
-        <li key={product.id}>
+        <li key={product.id} className="flex flex-col h-full list-none">
           <ProductCard
             product={product}
             priority={index < priorityCount}
@@ -38,14 +38,14 @@ export function ProductGridSkeleton({ count = 8, className }: ProductGridSkeleto
   return (
     <ul
       className={cn(
-        "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-4 lg:gap-x-5 lg:gap-y-8",
+        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6",
         className
       )}
       aria-label="Loading products"
       aria-busy="true"
     >
       {Array.from({ length: count }).map((_, i) => (
-        <li key={i}>
+        <li key={i} className="flex flex-col h-full list-none">
           <ProductCardSkeleton />
         </li>
       ))}

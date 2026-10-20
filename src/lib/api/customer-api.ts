@@ -53,7 +53,7 @@ export const MAX_OPEN_PENDING_ORDERS = 3;
  * Every endpoint goes through here, so none can forget the basics:
  *   1. CSRF defence for state-changing calls: Origin must be an allowed site (when sent),
  *      and bodies must be application/json (plain cross-site <form> posts can't send that).
- *   2. Authentication from the verified Clerk session, else 401.
+ *   2. Authentication from the verified database session, else 401.
  *   3. One place that converts errors into safe responses.
  */
 export function secured(deps: ApiDeps, req: Request, opts: { mutating: boolean; requireOrigin?: boolean }, fn: (c: Ctx) => Promise<Response>) {

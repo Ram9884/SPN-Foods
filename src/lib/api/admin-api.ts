@@ -40,7 +40,7 @@ type AdminCtx = Ctx & { adminId: string };
 /**
  * Every admin endpoint goes through here:
  *   1. Mutating calls must carry an Origin that is one of our own sites (CSRF).
- *   2. Signed in (Clerk session), else 401.
+ *   2. Signed in (verified database session), else 401.
  *   3. profiles.role = 'admin' and not deleted, read from OUR database on every request, else 403.
  * Nothing about "being an admin" comes from the client.
  */

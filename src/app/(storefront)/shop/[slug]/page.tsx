@@ -16,7 +16,7 @@ import type { SortOption } from "@/lib/storefront/types";
 
 export const revalidate = 60;
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 24;
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -35,10 +35,10 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   }
 
   return {
-    title: category.name,
+    title: `${category.name} — SPN Foods`,
     description:
       category.description ??
-      `Shop ${category.name} from SPN Foods. ${category.productCount} products available.`,
+      `Shop traditional ${category.name} from SPN Foods. ${category.productCount} products available.`,
     alternates: { canonical: `/shop/${slug}` },
   };
 }
@@ -62,7 +62,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const totalAllCategories = categories.reduce((sum, c) => sum + c.productCount, 0);
 
   return (
-    <div className="py-8 lg:py-12">
+    <div className="py-8 lg:py-12 bg-[#FFFBF7] min-h-screen">
       <div className="container-spn">
 
         {/* Breadcrumb */}
@@ -72,45 +72,44 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             { label: "Shop", href: "/shop" },
             { label: category.name },
           ]}
-          className="mb-4"
+          className="mb-5"
         />
 
-        {/* Page header */}
-        <div className="mb-6">
-          <h1 className="font-[family-name:var(--font-product)] font-medium text-2xl lg:text-3xl text-[var(--color-text-primary)]">
+        {/* Editorial Category Page Header */}
+        <div className="mb-8">
+          <h1
+            className="text-3xl sm:text-4xl lg:text-[44px] text-[#1A1614] leading-[1.15] font-normal"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
             {category.name}
           </h1>
           {category.description && (
-            <p className="font-[family-name:var(--font-body)] text-base text-[var(--color-text-body)] mt-2 max-w-xl leading-relaxed">
+            <p className="font-[family-name:var(--font-body)] text-[15px] sm:text-[16px] text-[#635850] mt-2 max-w-2xl leading-relaxed">
               {category.description}
             </p>
           )}
-          <p className="font-[family-name:var(--font-body)] text-sm text-[var(--color-text-muted)] mt-1.5">
-            {total} product{total !== 1 ? "s" : ""}
+          <p className="font-[family-name:var(--font-body)] text-xs font-semibold uppercase tracking-[0.14em] text-[#BF5330] mt-3">
+            {total} {total === 1 ? "Product" : "Products"} in {category.name}
           </p>
         </div>
 
-        {/* Category filter chips */}
-        <Suspense>
-          <CategoryChips
-            categories={categories}
-            activeSlug={slug}
-            totalCount={totalAllCategories}
-            className="mb-5"
-          />
-        </Suspense>
-
-        {/* Sort bar */}
-        <div
-          id="product-grid-top"
-          className="sticky top-14 lg:top-16 z-20 bg-[var(--color-surface)] border-b border-[var(--color-border)] -mx-4 px-4 md:-mx-6 md:px-6 xl:-mx-10 xl:px-10 h-12 flex items-center justify-end mb-8"
-        >
+        {/* Category Filter Pills and Sorting Bar neatly positioned */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-7 sm:mb-8 border-b border-[#E8DFD4] pb-4">
           <Suspense>
-            <SortSelect currentSort={sort} />
+            <CategoryChips
+              categories={categories}
+              activeSlug={slug}
+              totalCount={totalAllCategories}
+            />
           </Suspense>
+          <div className="flex items-center justify-end shrink-0">
+            <Suspense>
+              <SortSelect currentSort={sort} />
+            </Suspense>
+          </div>
         </div>
 
-        {/* Product grid */}
+        {/* Product Grid in Homepage Bestseller Card Design */}
         {products.length > 0 ? (
           <>
             <ProductGrid products={products} priorityCount={4} />
@@ -119,29 +118,33 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             </Suspense>
           </>
         ) : (
-          <div className="py-20">
-            <p className="font-[family-name:var(--font-body)] text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">Catalogue</p>
-            <h2 className="font-[family-name:var(--font-heading)] text-2xl text-[var(--color-text-primary)] mb-3">
+          <div className="py-20 text-center rounded-[20px] bg-white border border-[#E8DFD4] p-8">
+            <p className="font-[family-name:var(--font-body)] text-xs font-semibold uppercase tracking-wider text-[#635850] mb-2">
+              Catalogue
+            </p>
+            <h2
+              className="text-2xl text-[#1A1614] mb-3"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
               No products in {category.name} right now
             </h2>
-            <p className="font-[family-name:var(--font-body)] text-base text-[var(--color-text-body)] mb-8 max-w-sm leading-relaxed">
+            <p className="font-[family-name:var(--font-body)] text-base text-[#635850] mb-6 max-w-sm mx-auto leading-relaxed">
               Have a look at everything else in the shop.
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap justify-center gap-2.5">
               <Link
                 href="/shop"
-                className="inline-flex items-center justify-center h-11 px-6 font-[family-name:var(--font-body)] font-semibold text-base text-white bg-[var(--color-brand-primary)] rounded-[8px] hover:bg-[var(--color-brand-primary-dark)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]"
+                className="inline-flex items-center justify-center h-10 px-5 font-[family-name:var(--font-body)] font-semibold text-sm text-white bg-[#BF5330] rounded-full hover:bg-[#8F3E20] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330]"
               >
                 All Products
               </Link>
               {categories
-                .filter((c) => c.slug !== slug)
-                .slice(0, 3)
+                .filter((c) => c.slug !== slug && c.slug !== "thokku")
                 .map((c) => (
                   <Link
                     key={c.slug}
                     href={`/shop/${c.slug}`}
-                    className="inline-flex items-center h-11 px-5 font-[family-name:var(--font-body)] text-sm font-medium text-[var(--color-text-body)] bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[8px] hover:border-[var(--color-brand-primary)] hover:text-[var(--color-brand-primary)] transition-colors"
+                    className="inline-flex items-center h-10 px-4.5 rounded-full font-[family-name:var(--font-body)] text-sm font-medium text-[#1A1614] bg-[#FFFBF7] border border-[#E8DFD4] hover:border-[#BF5330] hover:text-[#BF5330] transition-colors"
                   >
                     {c.name}
                   </Link>

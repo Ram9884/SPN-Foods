@@ -141,14 +141,14 @@ export const fetchProductRatingSummary = cache(async (productId: string) => {
 });
 
 export const FEATURED_BESTSELLER_SLUGS = [
-  "nendram-raw-banana-powder",
-  "karuppu-kavuni-kanji-mix",
   "nuts-protein-powder",
   "abc-malt-nuts-mixed-powder",
-  "babys-instant-cerelac",
-  "paruppu-podi",
   "idli-podi",
-  "poondu-podi",
+  "karuveppilai-sadham-podi",
+  "garam-masala",
+  "black-pepper-powder",
+  "meen-kuzhambu-masala",
+  "ellu-urundai",
 ] as const;
 
 export const fetchBestsellerProducts = cache(async (): Promise<{

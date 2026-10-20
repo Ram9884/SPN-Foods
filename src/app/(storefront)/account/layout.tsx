@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth/server";
 import { AccountNav } from "@/components/account/account-nav";
 
 export const dynamic = "force-dynamic";
@@ -11,25 +11,14 @@ export const metadata: Metadata = {
   description: "Manage your personal profile, view past orders, and manage saved delivery addresses.",
 };
 
-const HAS_CLERK = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
-
 export default async function AccountLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  if (HAS_CLERK) {
-    try {
-      const { userId } = await auth();
-      if (!userId) {
-        redirect("/sign-in?redirect_url=/account");
-      }
-    } catch (err) {
-      if ((err as any)?.digest?.startsWith("NEXT_REDIRECT")) {
-        throw err;
-      }
-      console.warn("Clerk auth check encountered error in account layout:", err);
-    }
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/sign-in?redirect_url=/account");
   }
 
   return (
@@ -61,7 +50,7 @@ export default async function AccountLayout({
               My Account
             </h1>
             <p className="text-xs text-[var(--color-text-muted)] mt-1">
-              Welcome back to SPN Foods
+              Welcome back, {user.name || user.email}
             </p>
           </div>
           <AccountNav />

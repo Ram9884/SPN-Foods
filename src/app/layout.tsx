@@ -1,6 +1,29 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
+import { DM_Serif_Display, Lora, Manrope } from "next/font/google";
 import "./globals.css";
+
+const lora = Lora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-lora",
+});
+
+const dmSerifDisplay = DM_Serif_Display({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-dm-serif",
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-manrope",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -32,17 +55,18 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const content = (
-    <html lang="en-IN">
+  return (
+    <html lang="en-IN" data-scroll-behavior="smooth">
       <head />
       <body
+        className={`${lora.variable} ${dmSerifDisplay.variable} ${manrope.variable}`}
         style={
           {
-            "--font-logo": `"Instrument Serif", Georgia, serif`,
-            "--font-heading": `"Instrument Serif", Georgia, serif`,
-            "--font-product": `"Manrope", system-ui, sans-serif`,
-            "--font-body": `"Manrope", system-ui, sans-serif`,
-            "--font-price": `"Manrope", system-ui, sans-serif`,
+            "--font-logo": `var(--font-lora), "Lora", Georgia, serif`,
+            "--font-heading": `var(--font-dm-serif), "DM Serif Display", Georgia, serif`,
+            "--font-product": `var(--font-manrope), "Manrope", system-ui, sans-serif`,
+            "--font-body": `var(--font-manrope), "Manrope", system-ui, sans-serif`,
+            "--font-price": `var(--font-manrope), "Manrope", system-ui, sans-serif`,
             "--font-tamil": `"Noto Serif Tamil", serif`,
           } as React.CSSProperties
         }
@@ -51,21 +75,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-
-  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  if (clerkKey) {
-    return (
-      <ClerkProvider
-        publishableKey={clerkKey}
-        signInUrl="/sign-in"
-        signUpUrl="/sign-up"
-        signInFallbackRedirectUrl="/"
-        signUpFallbackRedirectUrl="/"
-      >
-        {content}
-      </ClerkProvider>
-    );
-  }
-
-  return content;
 }

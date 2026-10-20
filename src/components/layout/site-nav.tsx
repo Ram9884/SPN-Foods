@@ -133,8 +133,10 @@ export function SiteNav({ categories }: SiteNavProps) {
       <header
         role="banner"
         className={cn(
-          "sticky top-0 left-0 right-0 z-40 bg-[var(--color-surface-raised)] border-b border-[var(--color-border)] transition-shadow duration-150",
-          scrolled && "shadow-[var(--shadow-xs)]"
+          "sticky top-0 left-0 right-0 z-40 transition-colors duration-200",
+          scrolled
+            ? "bg-white/95 backdrop-blur-md border-b border-[var(--color-border)] shadow-[var(--shadow-xs)]"
+            : "bg-[#FFFBF7] border-b border-transparent"
         )}
       >
         <div className="container-spn h-[60px] lg:h-[64px] flex items-center justify-between gap-4">
@@ -160,13 +162,13 @@ export function SiteNav({ categories }: SiteNavProps) {
             <Image
               src="/logo.png"
               alt="SPN Foods Emblem"
-              width={40}
-              height={40}
+              width={36}
+              height={36}
               priority
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-contain drop-shadow-xs transition-transform duration-200 group-hover:scale-105"
+              className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain drop-shadow-xs transition-transform duration-200 group-hover:scale-105"
             />
             <span
-              className="font-[family-name:var(--font-heading)] text-2xl lg:text-[27px] text-[var(--color-brand-primary)] tracking-tight font-normal"
+              className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] text-[var(--color-brand-primary)] tracking-tight font-normal leading-none"
             >
               SPN Foods
             </span>
@@ -449,7 +451,7 @@ export function SiteNav({ categories }: SiteNavProps) {
               className="w-7 h-7 rounded-full object-contain"
             />
             <span
-              className="font-[family-name:var(--font-logo)] text-xl text-[var(--color-brand-primary)] font-normal"
+              className="font-[family-name:var(--font-logo)] text-xl text-[var(--color-brand-primary)] font-normal leading-none"
             >
               SPN Foods
             </span>

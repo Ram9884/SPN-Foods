@@ -13,6 +13,12 @@ export async function PUT(req: Request, { params }: RouteProps) {
   return putCartItem(req, deps, variantId);
 }
 
+export async function PATCH(req: Request, { params }: RouteProps) {
+  const { variantId } = await params;
+  const deps = getCustomerDeps(req);
+  return putCartItem(req, deps, variantId);
+}
+
 export async function DELETE(req: Request, { params }: RouteProps) {
   const { variantId } = await params;
   const deps = getCustomerDeps(req);

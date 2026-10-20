@@ -31,7 +31,6 @@ const updatedAt = () =>
 /* ------------------------------- Enums ------------------------------------ */
 
 export const userRole = pgEnum("user_role", ["customer", "admin"]);
-export const designVersion = pgEnum("design_version", ["old", "new"]);
 export const orderStatus = pgEnum("order_status", [
   "pending_payment",
   "confirmed",
@@ -63,15 +62,18 @@ export const discountType = pgEnum("discount_type", ["percentage", "flat"]);
 export const offerScope = pgEnum("offer_scope", ["product", "category"]);
 export const reviewStatus = pgEnum("review_status", ["pending", "published", "hidden"]);
 
-/* ----------------------------- Profiles ----------------------------------- */
-// Clerk owns identity. This table holds business data keyed by the Clerk user id.
+/* ----------------------------- Profiles & Auth ----------------------------- */
+// Profiles represent registered customers and admins with application-managed authentication.
+// Existing clerkUserId is preserved for historical account association.
 
 export const profiles = pgTable(
   "profiles",
   {
     id: id(),
-    clerkUserId: text("clerk_user_id").notNull(),
+    clerkUserId: text("clerk_user_id"),
     email: text("email").notNull(),
+    passwordHash: text("password_hash"),
+    emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     name: text("name"),
     phone: text("phone"),
     role: userRole("role").notNull().default("customer"),
@@ -80,8 +82,47 @@ export const profiles = pgTable(
     updatedAt: updatedAt(),
   },
   (t) => [
-    uniqueIndex("profiles_clerk_user_id_uq").on(t.clerkUserId),
+    uniqueIndex("profiles_email_uq").on(sql`lower(${t.email})`),
+    uniqueIndex("profiles_clerk_user_id_uq")
+      .on(t.clerkUserId)
+      .where(sql`${t.clerkUserId} IS NOT NULL`),
     check("profiles_phone_format", sql`${t.phone} IS NULL OR ${t.phone} ~ '^[6-9][0-9]{9}$'`),
+  ],
+);
+
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: id(),
+    tokenHash: text("token_hash").notNull(),
+    profileId: uuid("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex("sessions_token_hash_uq").on(t.tokenHash),
+    index("sessions_profile_id_idx").on(t.profileId),
+  ],
+);
+
+export const passwordResetTokens = pgTable(
+  "password_reset_tokens",
+  {
+    id: id(),
+    tokenHash: text("token_hash").notNull(),
+    profileId: uuid("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex("password_reset_tokens_token_hash_uq").on(t.tokenHash),
+    index("password_reset_tokens_profile_id_idx").on(t.profileId),
   ],
 );
 
@@ -143,7 +184,6 @@ export const products = pgTable(
     description: text("description"),
     ingredients: text("ingredients"),
     usage: text("usage"),
-    designVersion: designVersion("design_version").notNull().default("old"),
     isActive: boolean("is_active").notNull().default(true),
     isFeatured: boolean("is_featured").notNull().default(false),
     sortOrder: integer("sort_order").notNull().default(0),
@@ -505,6 +545,16 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   addresses: many(addresses),
   orders: many(orders),
   cart: one(carts),
+  sessions: many(sessions),
+  passwordResetTokens: many(passwordResetTokens),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  profile: one(profiles, { fields: [sessions.profileId], references: [profiles.id] }),
+}));
+
+export const passwordResetTokensRelations = relations(passwordResetTokens, ({ one }) => ({
+  profile: one(profiles, { fields: [passwordResetTokens.profileId], references: [profiles.id] }),
 }));
 
 export const cartsRelations = relations(carts, ({ one, many }) => ({
@@ -570,4 +620,3 @@ export const adminAuditLog = pgTable(
     index("audit_action_idx").on(t.action, t.createdAt),
   ],
 );
-
