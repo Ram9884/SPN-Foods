@@ -62,7 +62,7 @@ export function SiteFooter({ categories, settings }: SiteFooterProps) {
           <div className="sm:col-span-2 lg:col-span-5 space-y-3.5">
             <Link
               href="/"
-              className="inline-flex items-center gap-2.5 font-[family-name:var(--font-heading)] text-2xl lg:text-[26px] text-[var(--color-brand-primary)] group font-normal"
+              className="inline-flex items-center gap-2.5 font-[family-name:var(--font-logo)] text-2xl lg:text-[26px] text-[var(--color-brand-primary)] tracking-tight font-normal leading-none group"
             >
               <Image
                 src="/logo.png"
@@ -261,7 +261,6 @@ export function SiteFooter({ categories, settings }: SiteFooterProps) {
                   href: "/cancellation-refund-policy",
                 },
                 { label: "Privacy Policy", href: "/privacy-policy" },
-                { label: "Terms & Conditions", href: "/terms" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link

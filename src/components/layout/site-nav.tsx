@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Menu, Search, ShoppingBag, User, Package, X, ChevronDown } from "lucide-react";
+import { Menu, Search, ShoppingBag, User, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import type { CategoryCard } from "@/lib/storefront/types";
@@ -451,7 +451,7 @@ export function SiteNav({ categories }: SiteNavProps) {
               className="w-7 h-7 rounded-full object-contain"
             />
             <span
-              className="font-[family-name:var(--font-logo)] text-xl text-[var(--color-brand-primary)] font-normal leading-none"
+              className="font-[family-name:var(--font-logo)] text-xl text-[var(--color-brand-primary)] tracking-tight font-normal leading-none"
             >
               SPN Foods
             </span>
@@ -615,45 +615,6 @@ export function SiteNav({ categories }: SiteNavProps) {
             )}
           </div>
 
-          <div className="my-2 border-t border-[var(--color-border)]" />
-
-          {/* Account, Orders, Cart */}
-          <Link
-            href="/account"
-            prefetch={false}
-            onClick={() => setDrawerOpen(false)}
-            className="flex items-center gap-2.5 px-5 py-3 text-base font-[family-name:var(--font-body)] font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-brand-primary)] transition-colors"
-          >
-            <User className="h-4 w-4 text-[var(--color-text-body)]" aria-hidden />
-            <span>My Account</span>
-          </Link>
-
-          <Link
-            href="/account/orders"
-            prefetch={false}
-            onClick={() => setDrawerOpen(false)}
-            className="flex items-center gap-2.5 px-5 py-3 text-base font-[family-name:var(--font-body)] font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-brand-primary)] transition-colors"
-          >
-            <Package className="h-4 w-4 text-[var(--color-text-body)]" aria-hidden />
-            <span>My Orders</span>
-          </Link>
-
-          <Link
-            href="/cart"
-            prefetch={false}
-            onClick={() => setDrawerOpen(false)}
-            className="flex items-center justify-between px-5 py-3 text-base font-[family-name:var(--font-body)] font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-brand-primary)] transition-colors"
-          >
-            <span className="flex items-center gap-2.5">
-              <ShoppingBag className="h-4 w-4 text-[var(--color-text-body)]" aria-hidden />
-              Cart
-            </span>
-            {itemCount > 0 && (
-              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--color-brand-primary)] text-white">
-                {itemCount}
-              </span>
-            )}
-          </Link>
         </nav>
       </div>
     </>

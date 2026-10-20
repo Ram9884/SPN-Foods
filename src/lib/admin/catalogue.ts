@@ -146,6 +146,7 @@ export async function listProducts(
     .select({
       id: products.id, slug: products.slug, name: products.name, isActive: products.isActive, isFeatured: products.isFeatured,
       sortOrder: products.sortOrder,
+      createdAt: products.createdAt,
       category: { id: categories.id, name: categories.name, slug: categories.slug },
       variantCount: sql<number>`(select count(*)::int from product_variants v where v.product_id = ${products.id})`,
       minPricePaise: sql<number | null>`(select min(v.price_paise) from product_variants v where v.product_id = ${products.id} and v.is_active)`,
@@ -160,7 +161,31 @@ export async function listProducts(
     .limit(q.limit)
     .offset(q.offset);
   const [{ total }] = await db.select({ total: sql<number>`count(*)::int` }).from(products).where(cond);
-  return { products: rows.map((r) => ({ ...r, imageUrl: imageUrl(o.imageBaseUrl, r.imageKey) })), total, limit: q.limit, offset: q.offset };
+
+  const [stats] = await db
+    .select({
+      total: sql<number>`count(*)::int`,
+      active: sql<number>`count(*) filter (where ${products.isActive})::int`,
+      inactive: sql<number>`count(*) filter (where not ${products.isActive})::int`,
+    })
+    .from(products);
+
+  const [{ categoriesCount }] = await db
+    .select({ categoriesCount: sql<number>`count(*)::int` })
+    .from(categories);
+
+  return {
+    products: rows.map((r) => ({ ...r, imageUrl: imageUrl(o.imageBaseUrl, r.imageKey) })),
+    total,
+    stats: {
+      total: stats?.total ?? total,
+      active: stats?.active ?? 0,
+      inactive: stats?.inactive ?? 0,
+      categoriesCount: categoriesCount ?? 0,
+    },
+    limit: q.limit,
+    offset: q.offset,
+  };
 }
 
 export async function getProduct(db: AnyDb, id: string, o: Base) {

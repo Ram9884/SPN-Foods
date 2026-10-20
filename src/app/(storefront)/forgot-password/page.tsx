@@ -64,7 +64,7 @@ function ForgotPasswordContent() {
               priority
               className="w-16 h-16 rounded-full object-contain drop-shadow-md mb-2.5 transition-transform duration-200 group-hover:scale-105"
             />
-            <span className="font-[family-name:var(--font-logo)] text-2xl font-bold text-[var(--color-brand-primary)]">
+            <span className="font-[family-name:var(--font-logo)] text-2xl lg:text-[26px] font-normal tracking-tight text-[var(--color-brand-primary)] leading-none">
               SPN Foods
             </span>
           </Link>
