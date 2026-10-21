@@ -2,23 +2,45 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { formatPrice } from "@/lib/utils";
+import Image from "next/image";
+import {
+  Package,
+  Clock,
+  History,
+  CreditCard,
+  Truck,
+  User,
+  MapPin,
+  FileText,
+  Pencil,
+  AlertCircle,
+  ExternalLink,
+  ChevronRight,
+  ArrowRight,
+  RefreshCw,
+  X,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type OrderItem = {
   id: string;
   orderId: string;
-  productId: string;
-  variantId: string;
-  title: string;
+  productId: string | null;
+  variantId: string | null;
+  productName?: string;
+  title?: string;
   variantLabel: string;
   sku: string;
   quantity: number;
-  pricePaise: number;
-  totalPaise: number;
+  unitPricePaise?: number;
+  pricePaise?: number;
+  lineTotalPaise?: number;
+  totalPaise?: number;
 };
 
 type Payment = {
   id: string;
+  razorpayOrderId?: string;
   razorpayPaymentId: string | null;
   status: string;
   amountPaise: number;
@@ -44,7 +66,6 @@ type Shipment = {
   }>;
 };
 
-
 type AuditActivity = {
   id: string;
   action: string;
@@ -60,10 +81,13 @@ type OrderDetail = {
   id: string;
   orderNumber: string;
   status: string;
-  notes: string | null;
-  attentionReason: string | null;
+  notes?: string | null;
+  adminNote?: string | null;
+  customerNote?: string | null;
+  attentionReason?: string | null;
   subtotalPaise: number;
-  shippingAmountPaise: number;
+  shippingPaise?: number;
+  shippingAmountPaise?: number;
   discountPaise: number;
   totalPaise: number;
   couponId?: string | null;
@@ -74,10 +98,12 @@ type OrderDetail = {
     phone: string;
     line1: string;
     line2?: string | null;
+    landmark?: string | null;
     city: string;
     state: string;
-    postalCode: string;
-    country: string;
+    pincode?: string;
+    postalCode?: string;
+    country?: string;
   };
   customer: {
     id: string;
@@ -91,19 +117,75 @@ type OrderDetail = {
   activity: AuditActivity[];
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  confirmed: { label: "Confirmed", color: "bg-blue-50 text-blue-700 border-blue-200" },
-  processing: { label: "Processing", color: "bg-amber-50 text-amber-700 border-amber-200" },
-  packed: { label: "Packed", color: "bg-purple-50 text-purple-700 border-purple-200" },
-  shipped: { label: "Shipped", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  delivered: { label: "Delivered", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  pending_payment: { label: "Pending Payment", color: "bg-stone-50 text-stone-700 border-stone-200" },
-  cancelled: { label: "Cancelled", color: "bg-rose-50 text-rose-700 border-rose-200" },
-  refunded: { label: "Refunded", color: "bg-orange-50 text-orange-700 border-orange-200" },
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; description: string; badgeClass: string }
+> = {
+  pending_payment: {
+    label: "Pending Payment",
+    description: "Payment is pending from the customer.",
+    badgeClass: "bg-[#FDF4ED] text-[#BF5330] border-[#F0DCD3]",
+  },
+  confirmed: {
+    label: "Confirmed",
+    description: "Payment confirmed. Order is queued for packaging.",
+    badgeClass: "bg-[#EFF8FF] text-[#175CD3] border-[#B2DDFF]",
+  },
+  processing: {
+    label: "Processing",
+    description: "Order is currently being processed and prepared.",
+    badgeClass: "bg-[#FEF6EE] text-[#B93815] border-[#F9DBAF]",
+  },
+  packed: {
+    label: "Packed",
+    description: "Items are packed and ready for carrier dispatch.",
+    badgeClass: "bg-[#F4F3FF] text-[#5925DC] border-[#D9D6FE]",
+  },
+  shipped: {
+    label: "Shipped",
+    description: "Consignment dispatched with courier tracking.",
+    badgeClass: "bg-[#ECFDF3] text-[#027A48] border-[#A6F4C5]",
+  },
+  delivered: {
+    label: "Delivered",
+    description: "Shipment successfully delivered to the customer.",
+    badgeClass: "bg-[#ECFDF3] text-[#027A48] border-[#A6F4C5]",
+  },
+  cancelled: {
+    label: "Cancelled",
+    description: "Order was cancelled and inventory released.",
+    badgeClass: "bg-[#FEF3F2] text-[#B42318] border-[#FECDCA]",
+  },
+  refunded: {
+    label: "Refunded",
+    description: "Order was refunded back to customer payment source.",
+    badgeClass: "bg-[#FEF6EE] text-[#C4320A] border-[#F9DBAF]",
+  },
 };
 
 const FORWARD_SEQUENCE = ["confirmed", "processing", "packed", "shipped", "delivered"];
 const CANCELLABLE_STATUSES = ["pending_payment", "confirmed", "processing", "packed"];
+
+/** Safely formats integer paise into Indian Rupee string without NaN */
+function safeFormatPrice(paise: number | null | undefined): string {
+  if (paise === null || paise === undefined || isNaN(Number(paise))) {
+    return "₹0";
+  }
+  const num = Number(paise);
+  const rupees = Math.round(num / 100);
+  return `₹${rupees.toLocaleString("en-IN")}`;
+}
+
+/** Generates product image URL from slug matching public/products catalogue */
+function getProductImage(productName: string): string {
+  const slug = (productName || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+  return `/products/${slug}/main.jpg`;
+}
 
 export function OrderDetailView({ orderId }: { orderId: string }) {
   const [order, setOrder] = useState<OrderDetail | null>(null);
@@ -137,7 +219,6 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
   const [shipmentError, setShipmentError] = useState<string | null>(null);
 
   const fetchOrder = async () => {
-
     setLoading(true);
     setError(null);
     try {
@@ -148,8 +229,9 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
       }
       const data: OrderDetail = await res.json();
       setOrder(data);
-      setNoteContent(data.notes || "");
-      if (data.shipments.length > 0) {
+      const note = data.adminNote ?? data.notes ?? "";
+      setNoteContent(note);
+      if (data.shipments && data.shipments.length > 0) {
         setShipCourier(data.shipments[0].courierName || "");
         setShipAwb(data.shipments[0].awb || "");
         setShipUrl(data.shipments[0].trackingUrl || "");
@@ -169,9 +251,9 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
   const openStatusTransition = (nextStatus: string) => {
     setTargetStatus(nextStatus);
     setCancelReason("");
-    setCourierName(order?.shipments[0]?.courierName || "India Post / Delhivery");
-    setAwb(order?.shipments[0]?.awb || "");
-    setTrackingUrl(order?.shipments[0]?.trackingUrl || "");
+    setCourierName(order?.shipments?.[0]?.courierName || "India Post / Delhivery");
+    setAwb(order?.shipments?.[0]?.awb || "");
+    setTrackingUrl(order?.shipments?.[0]?.trackingUrl || "");
     setTransitionError(null);
     setStatusModalOpen(true);
   };
@@ -341,82 +423,132 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
     }
   };
 
-
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="h-6 w-32 bg-stone-200 animate-pulse rounded" />
-        <div className="h-10 w-72 bg-stone-200 animate-pulse rounded" />
-        <div className="h-96 bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg animate-pulse" />
+      <div className="space-y-6 max-w-6xl font-[family-name:var(--font-body)]">
+        <div className="h-5 w-40 bg-[#E8DFD4]/50 animate-pulse rounded" />
+        <div className="flex justify-between items-center">
+          <div className="h-9 w-64 bg-[#E8DFD4]/50 animate-pulse rounded" />
+          <div className="h-9 w-32 bg-[#E8DFD4]/50 animate-pulse rounded" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 space-y-6">
+            <div className="h-72 bg-white border border-[#E8DFD4] rounded-[10px] animate-pulse" />
+            <div className="h-32 bg-white border border-[#E8DFD4] rounded-[10px] animate-pulse" />
+          </div>
+          <div className="lg:col-span-4 space-y-6">
+            <div className="h-28 bg-white border border-[#E8DFD4] rounded-[10px] animate-pulse" />
+            <div className="h-40 bg-white border border-[#E8DFD4] rounded-[10px] animate-pulse" />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error || !order) {
     return (
-      <div className="p-6 rounded-lg border border-rose-200 bg-rose-50 text-rose-800">
-        <h2 className="text-sm font-semibold mb-1">Failed to load order</h2>
-        <p className="text-xs mb-3">{error || "Order not found."}</p>
+      <div className="p-6 rounded-[10px] border border-[#FECDCA] bg-[#FEF3F2] text-[#B42318] max-w-xl font-[family-name:var(--font-body)]">
+        <h2 className="text-base font-semibold mb-1">Failed to load order</h2>
+        <p className="text-xs mb-4">{error || "Order not found."}</p>
         <Link
           href="/admin/orders"
-          className="inline-block px-3 py-1.5 text-xs font-semibold rounded bg-rose-700 text-white hover:bg-rose-800"
+          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-[6px] bg-[#BF5330] text-white hover:bg-[#8F3E20] transition-colors"
         >
-          Back to Orders List
+          &larr; Back to Orders List
         </Link>
       </div>
     );
   }
 
-  const statusCfg = STATUS_CONFIG[order.status] || { label: order.status, color: "bg-stone-50 text-stone-700" };
+  const statusCfg = STATUS_CONFIG[order.status] || {
+    label: order.status,
+    description: "Current operational state of this order.",
+    badgeClass: "bg-[#FDF4ED] text-[#BF5330] border-[#F0DCD3]",
+  };
+
   const currentForwardIndex = FORWARD_SEQUENCE.indexOf(order.status);
-  const nextForwardStatus = currentForwardIndex >= 0 && currentForwardIndex < FORWARD_SEQUENCE.length - 1
-    ? FORWARD_SEQUENCE[currentForwardIndex + 1]
-    : null;
+  const nextForwardStatus =
+    currentForwardIndex >= 0 && currentForwardIndex < FORWARD_SEQUENCE.length - 1
+      ? FORWARD_SEQUENCE[currentForwardIndex + 1]
+      : null;
   const isCancellable = CANCELLABLE_STATUSES.includes(order.status);
 
+  // Financial calculations with robust fallbacks
+  const subtotalPaise =
+    order.subtotalPaise ??
+    order.items.reduce(
+      (sum, item) =>
+        sum +
+        (item.lineTotalPaise ??
+          item.totalPaise ??
+          (item.unitPricePaise ?? item.pricePaise ?? 0) * (item.quantity || 1)),
+      0
+    );
+
+  const shippingPaise = order.shippingPaise ?? order.shippingAmountPaise ?? 0;
+  const discountPaise = order.discountPaise ?? 0;
+  const totalPaise = order.totalPaise ?? Math.max(0, subtotalPaise - discountPaise + shippingPaise);
+  const totalQuantity = order.items.reduce((acc, it) => acc + (it.quantity || 1), 0);
+
+  // Address postal code fallback
+  const pincode =
+    order.shippingAddress?.pincode || (order.shippingAddress as any)?.postalCode || "";
+
+  const orderNote = order.adminNote ?? order.notes ?? "";
+
   return (
-    <div className="space-y-6 max-w-5xl">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
-        <Link href="/admin/orders" className="hover:text-[var(--color-brand-primary)]">
+    <div className="space-y-6 max-w-6xl font-[family-name:var(--font-body)] text-[#1A1614]">
+      {/* ── Breadcrumb ──────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 text-xs text-[#635850]">
+        <Link href="/admin/orders" className="hover:text-[#BF5330] transition-colors">
           Orders
         </Link>
-        <span>&gt;</span>
-        <span className="text-[var(--color-text-primary)] font-medium font-mono">{order.orderNumber}</span>
+        <ChevronRight className="w-3.5 h-3.5 text-[#8A7E74]" />
+        <span className="text-[#1A1614] font-medium font-mono">{order.orderNumber}</span>
       </div>
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-[var(--color-border-subtle)]">
+      {/* ── Order Header ────────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-2">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[var(--color-text-primary)] font-mono">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl font-bold tracking-tight text-[#1A1614] font-mono">
               {order.orderNumber}
             </h1>
-            <span className={`px-2.5 py-0.5 rounded text-xs font-medium border ${statusCfg.color}`}>
+            <span
+              className={cn(
+                "inline-block px-2.5 py-0.5 rounded-[6px] text-xs font-medium border",
+                statusCfg.badgeClass
+              )}
+            >
               {statusCfg.label}
             </span>
           </div>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+          <p className="text-xs text-[#635850] mt-1.5">
             Placed on{" "}
             {new Date(order.createdAt).toLocaleDateString("en-IN", {
               day: "numeric",
               month: "short",
               year: "numeric",
+            })}
+            ,{" "}
+            {new Date(order.createdAt).toLocaleTimeString("en-IN", {
               hour: "2-digit",
               minute: "2-digit",
+              hour12: true,
             })}
           </p>
         </div>
 
-        {/* Status Transition Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Header Action Controls */}
+        <div className="flex flex-wrap items-center gap-2.5">
           {nextForwardStatus && (
             <button
               type="button"
               onClick={() => openStatusTransition(nextForwardStatus)}
-              className="px-3.5 py-1.5 text-xs font-semibold rounded bg-[var(--color-brand-primary)] text-white hover:bg-[var(--color-brand-secondary)] transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-[8px] bg-[#BF5330] text-white hover:bg-[#8F3E20] transition-colors shadow-2xs"
             >
-              Move to {STATUS_CONFIG[nextForwardStatus]?.label || nextForwardStatus} &rarr;
+              <span>Move to {STATUS_CONFIG[nextForwardStatus]?.label || nextForwardStatus}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           )}
 
@@ -424,9 +556,10 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
             <button
               type="button"
               onClick={() => openStatusTransition("cancelled")}
-              className="px-3 py-1.5 text-xs font-medium rounded border border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-[8px] border border-[#F0C4B8] text-[#BF5330] bg-white hover:bg-[#FDF4ED] transition-colors shadow-2xs"
             >
-              Cancel Order
+              <Clock className="w-3.5 h-3.5 text-[#BF5330]" />
+              <span>Cancel Order</span>
             </button>
           )}
         </div>
@@ -434,9 +567,13 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
 
       {/* Success Notification */}
       {actionSuccess && (
-        <div className="p-3.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center justify-between">
+        <div className="p-3.5 rounded-[8px] bg-[#ECFDF3] border border-[#A6F4C5] text-[#027A48] text-xs font-medium flex items-center justify-between">
           <span>{actionSuccess}</span>
-          <button type="button" onClick={() => setActionSuccess(null)} className="text-emerald-600 hover:text-emerald-800">
+          <button
+            type="button"
+            onClick={() => setActionSuccess(null)}
+            className="text-[#027A48] hover:text-[#054F31] text-base leading-none"
+          >
             &times;
           </button>
         </div>
@@ -444,156 +581,251 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
 
       {/* Attention Flag Banner */}
       {order.attentionReason && (
-        <div className="p-4 rounded-lg bg-rose-50 border border-rose-300 text-rose-900 text-xs">
+        <div className="p-4 rounded-[8px] bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] text-xs">
           <div className="flex items-center gap-2 font-bold mb-1">
-            <svg className="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+            <AlertCircle className="w-4 h-4 text-[#B42318]" />
             <span>Action Required: {order.attentionReason}</span>
           </div>
-          <p className="text-[11px] text-rose-700">
+          <p className="text-[11px] text-[#912018]">
             This order is flagged for manual administrative review or refund resolution.
           </p>
         </div>
       )}
 
-      {/* 2-Column Overview Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column (Items & Payments) - 2 Cols */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Order Items */}
-          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg overflow-hidden shadow-2xs">
-            <div className="p-4 border-b border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 flex items-center justify-between">
-              <h2 className="font-[family-name:var(--font-heading)] text-sm font-bold text-[var(--color-text-primary)]">
-                Ordered Items ({order.items.length})
-              </h2>
-              <span className="text-xs text-[var(--color-text-muted)]">
-                Historical snapshot prices
-              </span>
+      {/* ── Main Two-Column Layout ───────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* ── Left Column (Approx. 65% width) ───────────────────────────────── */}
+        <div className="lg:col-span-7 xl:col-span-8 space-y-6">
+          {/* A. Ordered Items Card */}
+          <div className="bg-white border border-[#E8DFD4] rounded-[10px] p-5 sm:p-6 shadow-xs">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-[#E8DFD4]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#FAF5EF] flex items-center justify-center text-[#BF5330]">
+                  <Package className="w-4 h-4" />
+                </div>
+                <h2 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#1A1614]">
+                  Ordered Items ({order.items.length})
+                </h2>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-[#BF5330] font-medium">
+                <History className="w-3.5 h-3.5" />
+                <span>Historical snapshot prices</span>
+              </div>
             </div>
 
-            <div className="divide-y divide-[var(--color-border-subtle)]">
-              {order.items.map((item) => (
-                <div key={item.id} className="p-4 flex items-center justify-between gap-4 text-xs">
-                  <div>
-                    <span className="font-semibold text-sm text-[var(--color-text-primary)] block">
-                      {item.title}
-                    </span>
-                    <span className="text-[11px] text-[var(--color-text-muted)] font-mono">
-                      Variant: {item.variantLabel} &bull; SKU: {item.sku}
-                    </span>
-                    <div className="text-[11px] text-[var(--color-text-secondary)] mt-0.5">
-                      {formatPrice(item.pricePaise)} &times; {item.quantity} unit{item.quantity === 1 ? "" : "s"}
-                    </div>
-                  </div>
-                  <div className="font-bold text-sm text-[var(--color-text-primary)] font-mono">
-                    {formatPrice(item.totalPaise)}
-                  </div>
-                </div>
-              ))}
+            {/* Items Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[500px]">
+                <thead>
+                  <tr className="border-b border-[#E8DFD4] text-[12px] font-medium text-[#635850]">
+                    <th className="py-3 pr-4 font-medium">Product</th>
+                    <th className="py-3 px-4 font-medium">Variant / SKU</th>
+                    <th className="py-3 px-4 font-medium text-left">Price</th>
+                    <th className="py-3 px-4 font-medium text-center">Quantity</th>
+                    <th className="py-3 pl-4 font-medium text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E8DFD4]">
+                  {order.items.map((item) => {
+                    const productName = item.productName || item.title || "Product";
+                    const unitPricePaise = item.unitPricePaise ?? item.pricePaise ?? 0;
+                    const lineTotalPaise =
+                      item.lineTotalPaise ??
+                      item.totalPaise ??
+                      unitPricePaise * (item.quantity || 1);
+                    const imageSrc = getProductImage(productName);
+
+                    return (
+                      <tr key={item.id} className="text-sm">
+                        <td className="py-4 pr-4">
+                          <div className="flex items-center gap-3">
+                            <div className="relative w-12 h-12 rounded-[6px] bg-[#FAF5EF] border border-[#E8DFD4] overflow-hidden shrink-0">
+                              <Image
+                                src={imageSrc}
+                                alt={productName}
+                                fill
+                                sizes="48px"
+                                className="object-cover"
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLElement).style.display = "none";
+                                }}
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center text-[#BF5330]/40 -z-10">
+                                <Package className="w-5 h-5" />
+                              </div>
+                            </div>
+                            <span className="font-semibold text-[#1A1614] text-[13.5px] leading-snug">
+                              {productName}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-xs text-[#635850]">
+                          <div className="space-y-0.5">
+                            <div>Size: {item.variantLabel || "Standard"}</div>
+                            <div className="text-[#8A7E74] font-mono text-[11px]">
+                              SKU: {item.sku || "N/A"}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-sm font-medium text-[#1A1614] whitespace-nowrap">
+                          {safeFormatPrice(unitPricePaise)}
+                        </td>
+                        <td className="py-4 px-4 text-sm font-medium text-[#1A1614] text-center">
+                          {item.quantity}
+                        </td>
+                        <td className="py-4 pl-4 text-sm font-semibold text-[#1A1614] text-right whitespace-nowrap">
+                          {safeFormatPrice(lineTotalPaise)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
 
             {/* Financial Summary */}
-            <div className="p-4 border-t border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/20 space-y-1.5 text-xs">
-              <div className="flex justify-between text-[var(--color-text-secondary)]">
-                <span>Subtotal</span>
-                <span className="font-mono">{formatPrice(order.subtotalPaise)}</span>
+            <div className="pt-4 border-t border-[#E8DFD4] space-y-2.5 text-sm">
+              <div className="flex justify-between items-center text-[#635850]">
+                <span>
+                  Items Subtotal ({totalQuantity} item{totalQuantity === 1 ? "" : "s"})
+                </span>
+                <span className="font-medium text-[#1A1614]">
+                  {safeFormatPrice(subtotalPaise)}
+                </span>
               </div>
-              {order.discountPaise > 0 && (
-                <div className="flex justify-between text-emerald-700">
+
+              {discountPaise > 0 && (
+                <div className="flex justify-between items-center text-[#027A48]">
                   <span className="flex items-center gap-1.5">
                     <span>Discount</span>
                     {order.couponCode && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#ECFDF3] text-[#027A48] border border-[#A6F4C5]">
                         {order.couponCode}
                       </span>
                     )}
                   </span>
-                  <span className="font-mono">-{formatPrice(order.discountPaise)}</span>
+                  <span className="font-medium">-{safeFormatPrice(discountPaise)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-[var(--color-text-secondary)]">
-                <span>Shipping</span>
-                <span className="font-mono">
-                  {order.shippingAmountPaise === 0 ? "FREE" : formatPrice(order.shippingAmountPaise)}
+
+              <div className="flex justify-between items-center text-[#635850]">
+                <span>Shipping Charges</span>
+                <span className="font-medium text-[#1A1614]">
+                  {shippingPaise === 0 ? "—" : safeFormatPrice(shippingPaise)}
                 </span>
               </div>
-              <div className="flex justify-between text-sm font-bold text-[var(--color-text-primary)] pt-2 border-t border-[var(--color-border-subtle)]">
-                <span>Total Amount</span>
-                <span className="font-mono text-[var(--color-brand-primary)]">
-                  {formatPrice(order.totalPaise)}
+
+              <div className="flex justify-between items-center pt-3 border-t border-[#E8DFD4]">
+                <span className="font-bold text-[#1A1614] text-base">Total Amount</span>
+                <span className="font-bold text-[#BF5330] text-xl">
+                  {safeFormatPrice(totalPaise)}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Payment Status Card */}
-          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-5">
-            <h2 className="font-[family-name:var(--font-heading)] text-sm font-bold text-[var(--color-text-primary)] mb-3">
-              Payment Gateway Records
-            </h2>
+          {/* B. Payment Gateway Records Card */}
+          <div className="bg-white border border-[#E8DFD4] rounded-[10px] p-5 sm:p-6 shadow-xs">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-[#FAF5EF] flex items-center justify-center text-[#BF5330]">
+                <CreditCard className="w-4 h-4" />
+              </div>
+              <h2 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#1A1614]">
+                Payment Gateway Records
+              </h2>
+            </div>
+
             {order.payments.length === 0 ? (
-              <p className="text-xs text-[var(--color-text-muted)]">No payment records found.</p>
+              <p className="text-xs text-[#635850]">
+                No payment gateway records recorded for this order.
+              </p>
             ) : (
               <div className="space-y-3">
-                {order.payments.map((p) => (
-                  <div
-                    key={p.id}
-                    className="p-3 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/30 text-xs flex items-center justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-medium text-[var(--color-text-primary)]">
-                          {p.razorpayPaymentId || "Payment ID Pending"}
-                        </span>
-                        <span
-                          className={`px-1.5 py-0.2 rounded text-[10px] font-semibold uppercase ${
-                            p.status === "captured"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : p.status === "refunded"
-                              ? "bg-orange-50 text-orange-700 border border-orange-200"
-                              : "bg-stone-100 text-stone-700 border border-stone-200"
-                          }`}
-                        >
-                          {p.status}
-                        </span>
+                {order.payments.map((p) => {
+                  const paymentAmount = p.amountPaise ?? totalPaise;
+                  return (
+                    <div
+                      key={p.id}
+                      className="p-4 rounded-[8px] border border-[#E8DFD4] bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-xs font-semibold text-[#1A1614]">
+                            Payment ID
+                          </span>
+                          <span
+                            className={cn(
+                              "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border",
+                              p.status === "captured"
+                                ? "bg-[#ECFDF3] text-[#027A48] border-[#A6F4C5]"
+                                : p.status === "refunded"
+                                ? "bg-[#FEF6EE] text-[#C4320A] border-[#F9DBAF]"
+                                : "bg-[#EFF8FF] text-[#175CD3] border-[#B2DDFF]"
+                            )}
+                          >
+                            {p.status || "CREATED"}
+                          </span>
+                        </div>
+                        <div className="text-xs text-[#635850]">
+                          Method: {p.method || "Razorpay Online"} &bull;{" "}
+                          {new Date(p.createdAt).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                          ,{" "}
+                          {new Date(p.createdAt).toLocaleTimeString("en-IN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: true,
+                          })}
+                        </div>
                       </div>
-                      <span className="text-[11px] text-[var(--color-text-muted)]">
-                        Method: {p.method || "Razorpay Online"} &bull; {new Date(p.createdAt).toLocaleTimeString()}
-                      </span>
+                      <div className="font-bold text-base text-[#1A1614]">
+                        {safeFormatPrice(paymentAmount)}
+                      </div>
                     </div>
-                    <div className="font-mono font-bold text-[var(--color-text-primary)]">
-                      {formatPrice(p.amountPaise)}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {/* Shipment & Tracking Details */}
-          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-5">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <h2 className="font-[family-name:var(--font-heading)] text-sm font-bold text-[var(--color-text-primary)]">
-                Shipment &amp; Courier Tracking
-              </h2>
+          {/* C. Shipment & Courier Tracking Card */}
+          <div className="bg-white border border-[#E8DFD4] rounded-[10px] p-5 sm:p-6 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#FAF5EF] flex items-center justify-center text-[#BF5330]">
+                  <Truck className="w-4 h-4" />
+                </div>
+                <h2 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#1A1614]">
+                  Shipment &amp; Courier Tracking
+                </h2>
+              </div>
+
               <div className="flex items-center gap-2">
-                {order.shipments.length > 0 ? (
+                {order.shipments && order.shipments.length > 0 ? (
                   <>
                     <button
                       type="button"
                       disabled={syncingTracking}
                       onClick={handleSyncTracking}
-                      className="px-2.5 py-1 text-xs font-semibold rounded bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-700 transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-[6px] bg-[#FAF5EF] hover:bg-[#F4ECE1] border border-[#E8DFD4] text-[#1A1614] transition-colors disabled:opacity-50"
                     >
-                      {syncingTracking ? "Syncing..." : "Refresh Tracking"}
+                      <RefreshCw
+                        className={cn("w-3.5 h-3.5", syncingTracking && "animate-spin")}
+                      />
+                      <span>{syncingTracking ? "Syncing..." : "Refresh Tracking"}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditingShipment(!editingShipment)}
-                      className="text-xs font-semibold text-[var(--color-brand-primary)] hover:underline"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-[6px] border border-[#BF5330] text-[#BF5330] hover:bg-[#FDF4ED] transition-colors"
                     >
-                      {editingShipment ? "Cancel" : "Edit Tracking"}
+                      <Pencil className="w-3.5 h-3.5" />
+                      <span>{editingShipment ? "Cancel" : "Edit Tracking"}</span>
                     </button>
                   </>
                 ) : (
@@ -603,17 +835,18 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                         type="button"
                         disabled={creatingShipment}
                         onClick={() => handleCreateShipment("shiprocket")}
-                        className="px-2.5 py-1 text-xs font-semibold rounded bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white transition-colors disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-[6px] bg-[#BF5330] hover:bg-[#8F3E20] text-white transition-colors disabled:opacity-50 shadow-2xs"
                       >
-                        {creatingShipment ? "Creating..." : "Create Shipment"}
+                        <Truck className="w-3.5 h-3.5" />
+                        <span>{creatingShipment ? "Creating..." : "Create Shipment"}</span>
                       </button>
                     )}
                     <button
                       type="button"
                       onClick={() => setEditingShipment(!editingShipment)}
-                      className="text-xs font-semibold text-[var(--color-brand-primary)] hover:underline"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-[6px] border border-[#BF5330] text-[#BF5330] hover:bg-[#FDF4ED] transition-colors"
                     >
-                      {editingShipment ? "Cancel" : "Manual Dispatch"}
+                      <span>{editingShipment ? "Cancel" : "Manual Dispatch"}</span>
                     </button>
                   </>
                 )}
@@ -621,16 +854,16 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
             </div>
 
             {shipmentError && (
-              <div className="mb-3 p-2.5 rounded bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              <div className="mb-4 p-3 rounded-[8px] bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] text-xs">
                 {shipmentError}
               </div>
             )}
 
             {editingShipment ? (
-              <form onSubmit={handleSaveShipment} className="space-y-3 text-xs">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <form onSubmit={handleSaveShipment} className="space-y-3.5 text-xs pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
-                    <label className="block font-medium text-[var(--color-text-primary)] mb-1">
+                    <label className="block font-medium text-[#1A1614] mb-1">
                       Courier Partner *
                     </label>
                     <input
@@ -639,12 +872,12 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                       value={shipCourier}
                       onChange={(e) => setShipCourier(e.target.value)}
                       placeholder="e.g. India Post, Delhivery, BlueDart"
-                      className="w-full px-3 py-1.5 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)]"
+                      className="w-full px-3 py-2 rounded-[6px] border border-[#E8DFD4] bg-[#FAF5EF]/60 focus:outline-none focus:border-[#BF5330] text-[#1A1614]"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-medium text-[var(--color-text-primary)] mb-1">
+                    <label className="block font-medium text-[#1A1614] mb-1">
                       AWB / Tracking Number *
                     </label>
                     <input
@@ -653,13 +886,13 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                       value={shipAwb}
                       onChange={(e) => setShipAwb(e.target.value)}
                       placeholder="e.g. IN123456789"
-                      className="w-full px-3 py-1.5 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)] font-mono"
+                      className="w-full px-3 py-2 rounded-[6px] border border-[#E8DFD4] bg-[#FAF5EF]/60 focus:outline-none focus:border-[#BF5330] font-mono text-[#1A1614]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-medium text-[var(--color-text-primary)] mb-1">
+                  <label className="block font-medium text-[#1A1614] mb-1">
                     Tracking URL (Optional)
                   </label>
                   <input
@@ -667,48 +900,54 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                     value={shipUrl}
                     onChange={(e) => setShipUrl(e.target.value)}
                     placeholder="https://track.courier.in/..."
-                    className="w-full px-3 py-1.5 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)] font-mono"
+                    className="w-full px-3 py-2 rounded-[6px] border border-[#E8DFD4] bg-[#FAF5EF]/60 focus:outline-none focus:border-[#BF5330] font-mono text-[#1A1614]"
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex justify-end gap-2 pt-2 border-t border-[#E8DFD4]">
                   <button
                     type="button"
                     onClick={() => setEditingShipment(false)}
-                    className="px-3 py-1.5 rounded border border-[var(--color-border-subtle)]"
+                    className="px-3 py-1.5 rounded-[6px] border border-[#E8DFD4] text-[#635850] hover:bg-[#FAF5EF]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={savingShipment}
-                    className="px-4 py-1.5 rounded bg-[var(--color-brand-primary)] text-white font-semibold disabled:opacity-50"
+                    className="px-4 py-1.5 rounded-[6px] bg-[#BF5330] text-white font-semibold hover:bg-[#8F3E20] disabled:opacity-50"
                   >
                     {savingShipment ? "Saving..." : "Save Shipment"}
                   </button>
                 </div>
               </form>
-            ) : order.shipments.length === 0 ? (
-              <p className="text-xs text-[var(--color-text-muted)]">
-                No tracking information recorded yet. Click &quot;Create Shipment&quot; or &quot;Manual Dispatch&quot; to assign courier details.
+            ) : !order.shipments || order.shipments.length === 0 ? (
+              <p className="text-xs text-[#635850] leading-relaxed">
+                No tracking information recorded yet. Click &quot;Create Shipment&quot; or
+                &quot;Manual Dispatch&quot; to assign courier details.
               </p>
             ) : (
               <div className="space-y-4 text-xs">
                 {order.shipments.map((s) => (
-                  <div key={s.id} className="p-3.5 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/30 space-y-2.5">
+                  <div
+                    key={s.id}
+                    className="p-4 rounded-[8px] border border-[#E8DFD4] bg-white space-y-3"
+                  >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-[var(--color-text-primary)]">
+                        <span className="font-semibold text-sm text-[#1A1614]">
                           {s.courierName || "Standard Shipping"}
                         </span>
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono uppercase bg-stone-100 text-stone-700 border border-stone-200">
-                          {s.provider}
-                        </span>
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        {s.provider && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono uppercase bg-[#FAF5EF] text-[#635850] border border-[#E8DFD4]">
+                            {s.provider}
+                          </span>
+                        )}
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#ECFDF3] text-[#027A48] border border-[#A6F4C5]">
                           {s.status}
                         </span>
                       </div>
-                      <span className="font-mono text-xs font-bold text-[var(--color-brand-primary)]">
+                      <span className="font-mono text-xs font-bold text-[#BF5330]">
                         AWB: {s.awb}
                       </span>
                     </div>
@@ -718,40 +957,63 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                         href={s.trackingUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] text-[var(--color-brand-primary)] hover:underline inline-block font-medium"
+                        className="text-xs text-[#BF5330] hover:underline inline-flex items-center gap-1 font-medium"
                       >
-                        Track package on courier portal &rarr;
+                        <span>Track package on courier portal</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     )}
 
-                    <div className="flex flex-wrap gap-4 text-[11px] text-[var(--color-text-muted)] pt-1 border-t border-[var(--color-border-subtle)]">
+                    <div className="flex flex-wrap gap-4 text-[11px] text-[#635850] pt-2 border-t border-[#E8DFD4]/70">
                       {s.shippedAt && (
-                        <span>Dispatched: {new Date(s.shippedAt).toLocaleString()}</span>
+                        <span>
+                          Dispatched:{" "}
+                          {new Date(s.shippedAt).toLocaleString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </span>
                       )}
                       {s.deliveredAt && (
-                        <span>Delivered: {new Date(s.deliveredAt).toLocaleString()}</span>
+                        <span>
+                          Delivered:{" "}
+                          {new Date(s.deliveredAt).toLocaleString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </span>
                       )}
                     </div>
 
-                    {/* Tracking Events timeline if available */}
+                    {/* Tracking Events Timeline */}
                     {s.events && s.events.length > 0 && (
-                      <div className="pt-2 border-t border-[var(--color-border-subtle)]">
-                        <h4 className="font-semibold text-[11px] text-[var(--color-text-primary)] mb-2">
+                      <div className="pt-2 border-t border-[#E8DFD4]/70">
+                        <h4 className="font-semibold text-xs text-[#1A1614] mb-2">
                           Activity Log ({s.events.length})
                         </h4>
-                        <div className="space-y-2 pl-3 border-l-2 border-stone-200 text-[11px]">
+                        <div className="space-y-2 pl-3 border-l-2 border-[#E8DFD4] text-xs">
                           {s.events.map((ev: any, idx: number) => (
                             <div key={ev.id || idx} className="space-y-0.5">
                               <div className="flex items-center justify-between">
-                                <span className="font-medium text-[var(--color-text-primary)]">
+                                <span className="font-medium text-[#1A1614]">
                                   {ev.description || ev.status}
                                 </span>
-                                <span className="text-[10px] text-[var(--color-text-muted)]">
-                                  {new Date(ev.occurredAt).toLocaleTimeString()}
+                                <span className="text-[10px] text-[#8A7E74]">
+                                  {new Date(ev.occurredAt).toLocaleTimeString("en-IN", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })}
                                 </span>
                               </div>
                               {ev.location && (
-                                <span className="text-[10px] text-[var(--color-text-muted)] block">
+                                <span className="text-[11px] text-[#635850] block">
                                   {ev.location}
                                 </span>
                               )}
@@ -765,122 +1027,204 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
               </div>
             )}
           </div>
-
         </div>
 
-        {/* Right Column (Customer, Address, Notes & Audit) */}
-        <div className="space-y-6">
-          {/* Customer Profile Card */}
-          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-5 text-xs">
-            <h2 className="font-[family-name:var(--font-heading)] text-sm font-bold text-[var(--color-text-primary)] mb-3">
-              Customer Information
-            </h2>
+        {/* ── Right Column (Approx. 35% width) ──────────────────────────────── */}
+        <div className="lg:col-span-5 xl:col-span-4 space-y-6">
+          {/* 1. Order Status Card */}
+          <div className="bg-white border border-[#E8DFD4] rounded-[10px] p-5 sm:p-6 shadow-xs">
+            <div className="flex items-center gap-2.5 mb-3.5">
+              <div className="w-8 h-8 rounded-lg bg-[#FAF5EF] flex items-center justify-center text-[#BF5330]">
+                <Clock className="w-4 h-4" />
+              </div>
+              <h2 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#1A1614]">
+                Order Status
+              </h2>
+            </div>
+
             <div className="space-y-2">
               <div>
-                <span className="block text-[11px] text-[var(--color-text-muted)]">Name</span>
-                <span className="font-medium text-[var(--color-text-primary)]">
+                <span
+                  className={cn(
+                    "inline-block px-3 py-1 rounded-[6px] text-xs font-semibold border",
+                    statusCfg.badgeClass
+                  )}
+                >
+                  {statusCfg.label}
+                </span>
+              </div>
+              <p className="text-xs text-[#635850] leading-relaxed">
+                {statusCfg.description}
+              </p>
+            </div>
+          </div>
+
+          {/* 2. Customer Information Card */}
+          <div className="bg-white border border-[#E8DFD4] rounded-[10px] p-5 sm:p-6 shadow-xs text-xs">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-[#FAF5EF] flex items-center justify-center text-[#BF5330]">
+                <User className="w-4 h-4" />
+              </div>
+              <h2 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#1A1614]">
+                Customer Information
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              <div className="grid grid-cols-[70px_1fr] gap-2 items-center">
+                <span className="text-[#635850]">Name</span>
+                <span className="font-semibold text-[#1A1614]">
                   {order.customer.name || "Customer"}
                 </span>
               </div>
-              <div>
-                <span className="block text-[11px] text-[var(--color-text-muted)]">Email</span>
-                <a href={`mailto:${order.customer.email}`} className="text-[var(--color-brand-primary)] hover:underline truncate block">
+              <div className="grid grid-cols-[70px_1fr] gap-2 items-center">
+                <span className="text-[#635850]">Email</span>
+                <a
+                  href={`mailto:${order.customer.email}`}
+                  className="text-[#BF5330] hover:underline font-medium break-all"
+                >
                   {order.customer.email}
                 </a>
               </div>
-              {order.customer.phone && (
-                <div>
-                  <span className="block text-[11px] text-[var(--color-text-muted)]">Profile Phone</span>
-                  <span className="font-mono text-[var(--color-text-primary)]">
-                    {order.customer.phone}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Delivery Address Snapshot */}
-          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-5 text-xs">
-            <h2 className="font-[family-name:var(--font-heading)] text-sm font-bold text-[var(--color-text-primary)] mb-3">
-              Delivery Address Snapshot
-            </h2>
-            <div className="space-y-1 text-[var(--color-text-secondary)]">
-              <span className="font-bold text-[var(--color-text-primary)] block">
-                {order.shippingAddress.fullName}
-              </span>
-              <p>{order.shippingAddress.line1}</p>
-              {order.shippingAddress.line2 && <p>{order.shippingAddress.line2}</p>}
-              <p>
-                {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.postalCode}
-              </p>
-              <p>{order.shippingAddress.country}</p>
-              <div className="pt-2 text-[var(--color-text-primary)] font-mono font-medium">
-                Phone: {order.shippingAddress.phone}
+              <div className="grid grid-cols-[70px_1fr] gap-2 items-center">
+                <span className="text-[#635850]">Phone</span>
+                <span className="font-mono text-[#1A1614]">
+                  {order.customer.phone || order.shippingAddress?.phone || "Not provided"}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Internal Admin Note */}
-          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-5 text-xs">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="font-[family-name:var(--font-heading)] text-sm font-bold text-[var(--color-text-primary)]">
-                Internal Staff Note
+          {/* 3. Delivery Address Snapshot Card */}
+          <div className="bg-white border border-[#E8DFD4] rounded-[10px] p-5 sm:p-6 shadow-xs text-xs">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-[#FAF5EF] flex items-center justify-center text-[#BF5330]">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <h2 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#1A1614]">
+                Delivery Address Snapshot
               </h2>
+            </div>
+
+            <div className="space-y-1.5 text-[#635850] leading-relaxed">
+              <span className="font-bold text-sm text-[#1A1614] block">
+                {order.shippingAddress?.fullName || order.customer.name || "Customer"}
+              </span>
+              {order.shippingAddress?.line1 && <p>{order.shippingAddress.line1}</p>}
+              {order.shippingAddress?.line2 && <p>{order.shippingAddress.line2}</p>}
+              <p>
+                {[order.shippingAddress?.city, order.shippingAddress?.state]
+                  .filter(Boolean)
+                  .join(", ")}
+                {pincode ? ` - ${pincode}` : ""}
+              </p>
+              {order.shippingAddress?.country && order.shippingAddress.country !== "India" && (
+                <p>{order.shippingAddress.country}</p>
+              )}
+              <div className="pt-2 text-xs text-[#1A1614] font-medium font-mono">
+                Phone: {order.shippingAddress?.phone || order.customer.phone || "Not provided"}
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Internal Staff Note Card */}
+          <div className="bg-white border border-[#E8DFD4] rounded-[10px] p-5 sm:p-6 shadow-xs text-xs">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#FAF5EF] flex items-center justify-center text-[#BF5330]">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <h2 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#1A1614]">
+                  Internal Staff Note
+                </h2>
+              </div>
               <button
                 type="button"
                 onClick={() => setEditingNote(!editingNote)}
-                className="text-[11px] font-semibold text-[var(--color-brand-primary)] hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[#BF5330] hover:underline"
               >
-                {editingNote ? "Cancel" : "Edit"}
+                <span>{editingNote ? "Cancel" : "Edit"}</span>
+                <Pencil className="w-3 h-3" />
               </button>
             </div>
 
             {editingNote ? (
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <textarea
                   rows={3}
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
                   placeholder="Private notes (not visible to customer)..."
-                  className="w-full px-3 py-2 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)] text-xs"
+                  className="w-full px-3 py-2 rounded-[8px] border border-[#E8DFD4] bg-[#FAF5EF]/60 focus:outline-none focus:border-[#BF5330] text-xs text-[#1A1614]"
                 />
-                <button
-                  type="button"
-                  onClick={handleSaveNote}
-                  disabled={savingNote}
-                  className="px-3 py-1.5 rounded bg-[var(--color-brand-primary)] text-white font-semibold disabled:opacity-50"
-                >
-                  {savingNote ? "Saving..." : "Save Note"}
-                </button>
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingNote(false)}
+                    className="px-3 py-1.5 text-xs rounded-[6px] border border-[#E8DFD4] text-[#635850] hover:bg-[#FAF5EF]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveNote}
+                    disabled={savingNote}
+                    className="px-3.5 py-1.5 text-xs rounded-[6px] bg-[#BF5330] text-white font-semibold hover:bg-[#8F3E20] disabled:opacity-50"
+                  >
+                    {savingNote ? "Saving..." : "Save Note"}
+                  </button>
+                </div>
               </div>
             ) : (
-              <p className="text-[var(--color-text-secondary)] italic">
-                {order.notes || "No internal notes for this order."}
-              </p>
+              <div className="p-3.5 rounded-[8px] bg-[#FAF5EF]/60 border border-[#E8DFD4]/70">
+                <p
+                  className={cn(
+                    "text-xs leading-relaxed",
+                    orderNote ? "text-[#1A1614]" : "text-[#8A7E74] italic"
+                  )}
+                >
+                  {orderNote || "No internal notes for this order."}
+                </p>
+              </div>
             )}
           </div>
 
-          {/* Audit Activity Trail */}
-          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-5 text-xs">
-            <h2 className="font-[family-name:var(--font-heading)] text-sm font-bold text-[var(--color-text-primary)] mb-3">
-              Order Audit Activity
-            </h2>
+          {/* 5. Order Audit Activity Card */}
+          <div className="bg-white border border-[#E8DFD4] rounded-[10px] p-5 sm:p-6 shadow-xs text-xs">
+            <div className="flex items-center gap-2.5 mb-3.5">
+              <div className="w-8 h-8 rounded-lg bg-[#FAF5EF] flex items-center justify-center text-[#BF5330]">
+                <History className="w-4 h-4" />
+              </div>
+              <h2 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#1A1614]">
+                Order Audit Activity
+              </h2>
+            </div>
+
             {order.activity.length === 0 ? (
-              <p className="text-[11px] text-[var(--color-text-muted)]">No recorded admin mutations yet.</p>
+              <p className="text-xs text-[#8A7E74] italic">
+                No recorded admin mutations yet.
+              </p>
             ) : (
               <div className="space-y-3">
                 {order.activity.map((act) => (
-                  <div key={act.id} className="pb-2 border-b border-[var(--color-border-subtle)] last:border-0">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-[var(--color-text-primary)]">
-                        {act.action}
+                  <div
+                    key={act.id}
+                    className="pb-2.5 border-b border-[#E8DFD4]/60 last:border-0 last:pb-0"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-[#1A1614] capitalize">
+                        {act.action.replace(/_/g, " ")}
                       </span>
-                      <span className="text-[10px] text-[var(--color-text-muted)]">
-                        {new Date(act.createdAt).toLocaleDateString()}
+                      <span className="text-[11px] text-[#8A7E74]">
+                        {new Date(act.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
                       </span>
                     </div>
                     {act.actor?.email && (
-                      <span className="text-[10px] text-[var(--color-text-muted)]">
+                      <span className="text-[11px] text-[#635850] block mt-0.5">
                         by {act.actor.email}
                       </span>
                     )}
@@ -892,25 +1236,27 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
         </div>
       </div>
 
-      {/* Status Transition Modal */}
+      {/* ── Status Transition Modal ─────────────────────────────────────────── */}
       {statusModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border-subtle)] rounded-lg max-w-md w-full p-6 shadow-lg text-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border-subtle)] mb-4">
-              <h3 className="font-[family-name:var(--font-heading)] text-base font-bold text-[var(--color-text-primary)]">
-                {targetStatus === "cancelled" ? "Cancel Order" : `Update Status to "${STATUS_CONFIG[targetStatus]?.label || targetStatus}"`}
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-[#E8DFD4] rounded-[12px] max-w-md w-full p-6 shadow-lg text-xs font-[family-name:var(--font-body)]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E8DFD4] mb-4">
+              <h3 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#1A1614]">
+                {targetStatus === "cancelled"
+                  ? "Cancel Order"
+                  : `Update Status to "${STATUS_CONFIG[targetStatus]?.label || targetStatus}"`}
               </h3>
               <button
                 type="button"
                 onClick={() => setStatusModalOpen(false)}
-                className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] text-lg leading-none"
+                className="text-[#635850] hover:text-[#1A1614] text-lg leading-none"
               >
                 &times;
               </button>
             </div>
 
             {transitionError && (
-              <div className="mb-4 p-3 rounded bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium">
+              <div className="mb-4 p-3 rounded-[8px] bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] text-xs font-medium">
                 {transitionError}
               </div>
             )}
@@ -918,10 +1264,14 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
             <form onSubmit={handleTransitionSubmit} className="space-y-4">
               {targetStatus === "cancelled" ? (
                 <div>
-                  <p className="text-rose-700 font-medium mb-3">
-                    Cancelling this order will release held variant inventory back to available stock.
+                  <p className="text-[#B42318] font-medium mb-3 leading-relaxed">
+                    Cancelling this order will release held variant inventory back to available
+                    stock.
                   </p>
-                  <label htmlFor="cancel-reason" className="block font-medium text-[var(--color-text-primary)] mb-1">
+                  <label
+                    htmlFor="cancel-reason"
+                    className="block font-medium text-[#1A1614] mb-1"
+                  >
                     Cancellation Reason (Required) *
                   </label>
                   <textarea
@@ -931,16 +1281,19 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                     value={cancelReason}
                     onChange={(e) => setCancelReason(e.target.value)}
                     placeholder="e.g. Customer requested cancellation before dispatch..."
-                    className="w-full px-3 py-2 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-rose-500 text-xs"
+                    className="w-full px-3 py-2 rounded-[8px] border border-[#E8DFD4] bg-[#FAF5EF]/60 focus:outline-none focus:border-[#BF5330] text-xs text-[#1A1614]"
                   />
                 </div>
               ) : targetStatus === "shipped" ? (
                 <div className="space-y-3">
-                  <p className="text-[var(--color-text-secondary)]">
+                  <p className="text-[#635850]">
                     Provide dispatch courier details to complete shipping transition.
                   </p>
                   <div>
-                    <label htmlFor="ship-courier" className="block font-medium text-[var(--color-text-primary)] mb-1">
+                    <label
+                      htmlFor="ship-courier"
+                      className="block font-medium text-[#1A1614] mb-1"
+                    >
                       Courier Partner *
                     </label>
                     <input
@@ -950,11 +1303,11 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                       value={courierName}
                       onChange={(e) => setCourierName(e.target.value)}
                       placeholder="e.g. Delhivery, India Post"
-                      className="w-full px-3 py-2 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)] text-xs"
+                      className="w-full px-3 py-2 rounded-[6px] border border-[#E8DFD4] bg-[#FAF5EF]/60 focus:outline-none focus:border-[#BF5330] text-xs text-[#1A1614]"
                     />
                   </div>
                   <div>
-                    <label htmlFor="ship-awb" className="block font-medium text-[var(--color-text-primary)] mb-1">
+                    <label htmlFor="ship-awb" className="block font-medium text-[#1A1614] mb-1">
                       AWB / Tracking Number *
                     </label>
                     <input
@@ -964,11 +1317,14 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                       value={awb}
                       onChange={(e) => setAwb(e.target.value)}
                       placeholder="e.g. 1234567890"
-                      className="w-full px-3 py-2 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)] font-mono text-xs"
+                      className="w-full px-3 py-2 rounded-[6px] border border-[#E8DFD4] bg-[#FAF5EF]/60 focus:outline-none focus:border-[#BF5330] font-mono text-xs text-[#1A1614]"
                     />
                   </div>
                   <div>
-                    <label htmlFor="ship-track-url" className="block font-medium text-[var(--color-text-primary)] mb-1">
+                    <label
+                      htmlFor="ship-track-url"
+                      className="block font-medium text-[#1A1614] mb-1"
+                    >
                       Tracking Link (Optional)
                     </label>
                     <input
@@ -977,35 +1333,42 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                       value={trackingUrl}
                       onChange={(e) => setTrackingUrl(e.target.value)}
                       placeholder="https://track.courier.in/..."
-                      className="w-full px-3 py-2 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-warm)]/40 focus:outline-none focus:border-[var(--color-brand-primary)] font-mono text-xs"
+                      className="w-full px-3 py-2 rounded-[6px] border border-[#E8DFD4] bg-[#FAF5EF]/60 focus:outline-none focus:border-[#BF5330] font-mono text-xs text-[#1A1614]"
                     />
                   </div>
                 </div>
               ) : (
-                <p className="text-[var(--color-text-secondary)]">
+                <p className="text-[#635850] leading-relaxed">
                   Confirm transition of this order from{" "}
                   <strong>{statusCfg.label}</strong> to{" "}
                   <strong>{STATUS_CONFIG[targetStatus]?.label || targetStatus}</strong>.
                 </p>
               )}
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-[var(--color-border-subtle)]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#E8DFD4]">
                 <button
                   type="button"
                   onClick={() => setStatusModalOpen(false)}
                   disabled={transitioning}
-                  className="px-3 py-1.5 rounded border border-[var(--color-border-subtle)]"
+                  className="px-3.5 py-1.5 rounded-[6px] border border-[#E8DFD4] text-[#635850] hover:bg-[#FAF5EF]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={transitioning}
-                  className={`px-4 py-1.5 rounded font-semibold text-white transition-colors disabled:opacity-50 ${
-                    targetStatus === "cancelled" ? "bg-rose-600 hover:bg-rose-700" : "bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-secondary)]"
-                  }`}
+                  className={cn(
+                    "px-4 py-1.5 rounded-[6px] font-semibold text-white transition-colors disabled:opacity-50",
+                    targetStatus === "cancelled"
+                      ? "bg-[#B42318] hover:bg-[#912018]"
+                      : "bg-[#BF5330] hover:bg-[#8F3E20]"
+                  )}
                 >
-                  {transitioning ? "Updating..." : targetStatus === "cancelled" ? "Confirm Cancellation" : "Update Status"}
+                  {transitioning
+                    ? "Updating..."
+                    : targetStatus === "cancelled"
+                    ? "Confirm Cancellation"
+                    : "Update Status"}
                 </button>
               </div>
             </form>

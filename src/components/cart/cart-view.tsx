@@ -11,6 +11,12 @@ import type { CartLineView } from "@/lib/cart/cart";
 export function CartView() {
   const { cart, isLoading, isMutating, updateQuantity, removeItem, clearCart } = useCart();
   const [clearing, setClearing] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
+  const [couponDiscountPaise, setCouponDiscountPaise] = useState<number>(0);
+  const [offerDiscountPaise, setOfferDiscountPaise] = useState<number>(0);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   if (isLoading && !cart) {
     return (
@@ -28,13 +34,6 @@ export function CartView() {
   }
 
   const { items, summary } = cart;
-
-  const [couponInput, setCouponInput] = useState("");
-  const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
-  const [couponDiscountPaise, setCouponDiscountPaise] = useState<number>(0);
-  const [offerDiscountPaise, setOfferDiscountPaise] = useState<number>(0);
-  const [couponLoading, setCouponLoading] = useState(false);
-  const [couponError, setCouponError] = useState<string | null>(null);
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();

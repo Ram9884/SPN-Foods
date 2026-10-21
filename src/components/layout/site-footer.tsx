@@ -62,14 +62,14 @@ export function SiteFooter({ categories, settings }: SiteFooterProps) {
           <div className="sm:col-span-2 lg:col-span-5 space-y-3.5">
             <Link
               href="/"
-              className="inline-flex items-center gap-2.5 font-[family-name:var(--font-logo)] text-2xl lg:text-[26px] text-[var(--color-brand-primary)] tracking-tight font-normal leading-none group"
+              className="inline-flex items-center gap-2.5 font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] text-[var(--color-brand-primary)] tracking-tight font-normal leading-none group"
             >
               <Image
                 src="/logo.png"
                 alt="SPN Foods Emblem"
-                width={38}
-                height={38}
-                className="w-9 h-9 rounded-full object-contain drop-shadow-2xs transition-transform duration-200 group-hover:scale-105"
+                width={36}
+                height={36}
+                className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain drop-shadow-2xs transition-transform duration-200 group-hover:scale-105"
               />
               <span>{brandName}</span>
             </Link>

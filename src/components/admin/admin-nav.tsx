@@ -82,11 +82,11 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
             <Image
               src="/logo.png"
               alt="SPN Foods"
-              width={28}
-              height={28}
-              className="w-7 h-7 rounded-full object-contain"
+              width={36}
+              height={36}
+              className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain"
             />
-            <span className="font-[family-name:var(--font-logo)] text-xl text-[#BF5330] leading-none font-normal tracking-tight">
+            <span className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] text-[#BF5330] leading-none font-normal tracking-tight">
               SPN Foods
             </span>
             <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-[#BF5330] text-[#BF5330]">
@@ -121,13 +121,13 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
             <Image
               src="/logo.png"
               alt="SPN Foods Emblem"
-              width={38}
-              height={38}
+              width={36}
+              height={36}
               priority
-              className="w-9 h-9 rounded-full object-contain drop-shadow-2xs shrink-0 transition-transform duration-200 group-hover:scale-105"
+              className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain drop-shadow-2xs shrink-0 transition-transform duration-200 group-hover:scale-105"
             />
             <div className="min-w-0">
-              <span className="font-[family-name:var(--font-logo)] block text-[22px] text-[#BF5330] leading-none font-normal tracking-tight">
+              <span className="font-[family-name:var(--font-logo)] block text-xl sm:text-[21px] lg:text-[22px] text-[#BF5330] leading-none font-normal tracking-tight">
                 SPN Foods
               </span>
               <span className="block text-[9.5px] font-medium text-[#635850] tracking-[0.08em] uppercase mt-1">

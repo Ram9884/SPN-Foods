@@ -205,69 +205,73 @@ export function SiteNav({ categories }: SiteNavProps) {
             </Link>
 
             {/* Categories dropdown */}
-            <div
-              className="relative"
-              onMouseEnter={() => setCatOpen(true)}
-              onMouseLeave={() => setCatOpen(false)}
-            >
+            <div className="relative">
               <button
                 ref={catButtonRef}
                 className={cn(
                   "inline-flex items-center gap-1 font-[family-name:var(--font-body)] text-[14.5px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] py-2 px-1 rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
-                  isCategoriesActive
+                  isCategoriesActive || catOpen
                     ? "text-[var(--color-brand-primary)] font-semibold"
                     : "text-[var(--color-text-primary)]"
                 )}
                 aria-haspopup="menu"
                 aria-expanded={catOpen}
                 aria-controls="cat-dropdown"
-                onClick={() => setCatOpen((o) => !o)}
+                onClick={() => {
+                  setCatOpen((o) => !o);
+                  setMoreOpen(false);
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     setCatOpen((o) => !o);
+                    setMoreOpen(false);
                   }
                 }}
               >
                 <span>Categories</span>
-                <ChevronDown className="h-3.5 w-3.5 text-[var(--color-text-muted)] transition-transform duration-150" aria-hidden />
+                <ChevronDown
+                  className={cn(
+                    "h-3.5 w-3.5 text-[var(--color-text-muted)] transition-transform duration-200",
+                    catOpen && "rotate-180 text-[var(--color-brand-primary)]"
+                  )}
+                  aria-hidden
+                />
               </button>
 
-              {/* Horizontal dropdown menu */}
+              {/* Vertical dropdown menu (top to bottom) */}
               <div
                 id="cat-dropdown"
                 ref={catMenuRef}
                 className={cn(
-                  "absolute top-full left-1/2 -translate-x-1/2 pt-1.5 z-50 transition-all duration-150 origin-top pointer-events-auto",
+                  "absolute top-full left-0 mt-1 w-60 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-md)] transition-all duration-200 origin-top-left z-50",
                   catOpen
                     ? "opacity-100 visible translate-y-0"
-                    : "opacity-0 invisible -translate-y-1 pointer-events-none"
+                    : "opacity-0 invisible -translate-y-2 pointer-events-none"
                 )}
                 role="menu"
               >
-                <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[12px] shadow-[var(--shadow-md)] p-2 whitespace-nowrap">
-                  <div className="flex items-center gap-1.5 lg:gap-2">
-                    {NAV_CATEGORIES.map((cat) => {
-                      const isItemActive = pathname === `/shop/${cat.slug}`;
-                      return (
-                        <Link
-                          key={cat.slug}
-                          href={`/shop/${cat.slug}`}
-                          prefetch={false}
-                          className={cn(
-                            "flex items-center px-3.5 py-2 rounded-[8px] text-sm font-[family-name:var(--font-body)] transition-all",
-                            isItemActive
-                              ? "bg-[var(--color-brand-primary)] text-white font-medium shadow-xs"
-                              : "text-[var(--color-text-primary)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-brand-primary)]"
-                          )}
-                          role="menuitem"
-                          onClick={() => setCatOpen(false)}
-                        >
-                          <span className="whitespace-nowrap font-medium">{cat.name}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
+                <div className="py-2 flex flex-col">
+                  {NAV_CATEGORIES.map((cat) => {
+                    const isItemActive = pathname === `/shop/${cat.slug}`;
+                    return (
+                      <Link
+                        key={cat.slug}
+                        href={`/shop/${cat.slug}`}
+                        prefetch={false}
+                        className={cn(
+                          "flex items-center px-4 py-2.5 mx-1.5 rounded-[8px] text-sm font-[family-name:var(--font-body)] transition-colors",
+                          isItemActive
+                            ? "bg-[var(--color-surface-sunken)] text-[var(--color-brand-primary)] font-semibold"
+                            : "text-[var(--color-text-primary)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-brand-primary)]"
+                        )}
+                        role="menuitem"
+                        onClick={() => setCatOpen(false)}
+                      >
+                        <span className="font-medium">{cat.name}</span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -286,32 +290,38 @@ export function SiteNav({ categories }: SiteNavProps) {
             </Link>
 
             {/* More dropdown */}
-            <div
-              className="relative"
-              onMouseEnter={() => setMoreOpen(true)}
-              onMouseLeave={() => setMoreOpen(false)}
-            >
+            <div className="relative">
               <button
                 ref={moreButtonRef}
                 className={cn(
                   "inline-flex items-center gap-1 font-[family-name:var(--font-body)] text-[14.5px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] py-2 px-1 rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
-                  isMoreActive
+                  isMoreActive || moreOpen
                     ? "text-[var(--color-brand-primary)] font-semibold"
                     : "text-[var(--color-text-primary)]"
                 )}
                 aria-haspopup="menu"
                 aria-expanded={moreOpen}
                 aria-controls="more-dropdown"
-                onClick={() => setMoreOpen((o) => !o)}
+                onClick={() => {
+                  setMoreOpen((o) => !o);
+                  setCatOpen(false);
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     setMoreOpen((o) => !o);
+                    setCatOpen(false);
                   }
                 }}
               >
                 <span>More</span>
-                <ChevronDown className="h-3.5 w-3.5 text-[var(--color-text-muted)] transition-transform duration-150" aria-hidden />
+                <ChevronDown
+                  className={cn(
+                    "h-3.5 w-3.5 text-[var(--color-text-muted)] transition-transform duration-200",
+                    moreOpen && "rotate-180 text-[var(--color-brand-primary)]"
+                  )}
+                  aria-hidden
+                />
               </button>
 
               {/* Dropdown menu */}
@@ -446,12 +456,12 @@ export function SiteNav({ categories }: SiteNavProps) {
             <Image
               src="/logo.png"
               alt="SPN Foods Emblem"
-              width={30}
-              height={30}
-              className="w-7 h-7 rounded-full object-contain"
+              width={36}
+              height={36}
+              className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain"
             />
             <span
-              className="font-[family-name:var(--font-logo)] text-xl text-[var(--color-brand-primary)] tracking-tight font-normal leading-none"
+              className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] text-[var(--color-brand-primary)] tracking-tight font-normal leading-none"
             >
               SPN Foods
             </span>
