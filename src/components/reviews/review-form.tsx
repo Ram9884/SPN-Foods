@@ -87,7 +87,7 @@ export function ReviewForm({
       className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm space-y-5"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-heading)]">
+        <h3 className="text-xl font-normal text-[var(--color-text-primary)] font-heading">
           {isEditing ? "Edit Your Review" : "Write a Customer Review"}
         </h3>
         {onCancel && (

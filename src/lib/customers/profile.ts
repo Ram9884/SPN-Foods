@@ -111,7 +111,7 @@ export async function ensureProfile(
   const [row] = await db
     .insert(profiles)
     .values({
-      clerkUserId: userIdentifier.startsWith("user_") ? userIdentifier : null,
+      clerkUserId: userIdentifier,
       email: normalizedEmail,
       name: info.name,
       phone: info.phone ?? null,

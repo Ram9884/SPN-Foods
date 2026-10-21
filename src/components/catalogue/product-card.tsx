@@ -188,7 +188,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
               className="w-full h-full flex items-center justify-center bg-[#FAF5EE]"
               aria-hidden="true"
             >
-              <span className="font-[family-name:var(--font-heading)] text-3xl font-bold text-[#D4C5B5] select-none">
+              <span className="font-heading text-4xl font-normal text-[#D4C5B5] select-none">
                 {name.charAt(0).toUpperCase()}
               </span>
             </div>

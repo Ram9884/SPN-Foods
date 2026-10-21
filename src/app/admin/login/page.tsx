@@ -16,7 +16,11 @@ function AdminLoginContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const redirectUrl = searchParams.get("redirect_url") || "/admin";
+  const rawRedirect = searchParams.get("redirect_url") || "/admin";
+  const redirectUrl =
+    rawRedirect.startsWith("/admin") && !rawRedirect.startsWith("//") && !rawRedirect.startsWith("/\\")
+      ? rawRedirect
+      : "/admin";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

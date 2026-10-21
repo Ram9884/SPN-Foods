@@ -67,7 +67,7 @@ export default function RootLayout({
             "--font-product": `var(--font-manrope), "Manrope", system-ui, sans-serif`,
             "--font-body": `var(--font-manrope), "Manrope", system-ui, sans-serif`,
             "--font-price": `var(--font-manrope), "Manrope", system-ui, sans-serif`,
-            "--font-tamil": `"Noto Serif Tamil", serif`,
+            "--font-tamil": `"Noto Serif Tamil", "Latha", serif`,
           } as React.CSSProperties
         }
       >

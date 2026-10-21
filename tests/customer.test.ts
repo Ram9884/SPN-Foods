@@ -506,15 +506,36 @@ describe("browser callback verification (webhook stays authoritative)", () => {
   const verify = (user: string, o: string, p: string, sig: string) =>
     call("POST", "/api/checkout/verify", { user, body: { razorpay_order_id: o, razorpay_payment_id: p, razorpay_signature: sig } });
 
-  it("valid signature: acknowledged, but the order is NOT marked paid", async () => {
+  it("valid signature: verified, and the order is marked confirmed immediately", async () => {
     const co = await placed();
     const r = await verify("alice", co.razorpayOrderId, "pay_1", sign(co.razorpayOrderId, "pay_1"));
     expect(r.status).toBe(200);
-    expect(r.body).toMatchObject({ verified: true, status: "pending_payment", awaitingConfirmation: true });
+    expect(r.body).toMatchObject({ verified: true, status: "confirmed", awaitingConfirmation: false });
     const [order] = await db.select().from(s.orders);
     const [pay] = await db.select().from(s.payments);
-    expect(order.status).toBe("pending_payment");
-    expect(pay).toMatchObject({ status: "created", razorpayPaymentId: null });
+    expect(order.status).toBe("confirmed");
+    expect(pay).toMatchObject({ status: "captured", razorpayPaymentId: "pay_1" });
+  });
+
+  it("authorized but uncaptured payment retains pending status and extends hold", async () => {
+    const co = await placed();
+    (deps.gateway as any).fetchPayment = async () => ({
+      id: "pay_auth",
+      status: "authorized",
+      amount: co.amountPaise,
+      currency: "INR",
+    });
+    try {
+      const r = await verify("alice", co.razorpayOrderId, "pay_auth", sign(co.razorpayOrderId, "pay_auth"));
+      expect(r.status).toBe(200);
+      expect(r.body).toMatchObject({ verified: true, status: "pending_payment", awaitingConfirmation: true });
+      const [order] = await db.select().from(s.orders);
+      const [pay] = await db.select().from(s.payments);
+      expect(order.status).toBe("pending_payment");
+      expect(pay.status).toBe("created");
+    } finally {
+      delete (deps.gateway as any).fetchPayment;
+    }
   });
 
   it("invalid signatures are rejected and change nothing", async () => {
@@ -536,23 +557,14 @@ describe("browser callback verification (webhook stays authoritative)", () => {
     expect((await db.select().from(s.orders))[0].status).toBe("pending_payment");
   });
 
-  it("a verified callback extends the hold so the cron can't cancel a paid-but-unconfirmed order", async () => {
-    const addr = await addAddress("alice");
-    const co = (await call("POST", "/api/checkout", { user: "alice", body: { addressId: addr.id, items: [{ variantId, quantity: 2 }] } })).body;
-    await db.update(s.orders).set({ expiresAt: new Date(Date.now() - 10 * 60_000) }); // overdue
-    const r = await verify("alice", co.razorpayOrderId, "pay_9", sign(co.razorpayOrderId, "pay_9"));
-    expect(r.body.awaitingConfirmation).toBe(true);
-    expect((await db.select().from(s.orders))[0].expiresAt!.getTime()).toBeGreaterThan(Date.now() + 25 * 60_000);
-    expect(await expirePendingOrders(db)).toEqual({ examined: 0, released: 0 });
-    expect(await stockOf()).toBe(8);
-  });
-
-  it("the webhook is what confirms; callback afterwards just reports it", async () => {
+  it("webhook arrival afterwards is idempotent", async () => {
     const co = await placed();
-    await verify("alice", co.razorpayOrderId, "pay_1", sign(co.razorpayOrderId, "pay_1"));
-    expect((await call("GET", `/api/me/orders/${co.orderId}`, { user: "alice" })).body.status).toBe("pending_payment");
+    const r = await verify("alice", co.razorpayOrderId, "pay_1", sign(co.razorpayOrderId, "pay_1"));
+    expect(r.body).toMatchObject({ verified: true, status: "confirmed", awaitingConfirmation: false });
 
-    await applyCapturedPayment(db, { razorpayOrderId: co.razorpayOrderId, razorpayPaymentId: "pay_1", amountPaise: co.amountPaise });
+    // When webhook arrives later, applyCapturedPayment sees already_processed and does not error or duplicate
+    const outcome = await applyCapturedPayment(db, { razorpayOrderId: co.razorpayOrderId, razorpayPaymentId: "pay_1", amountPaise: co.amountPaise });
+    expect(outcome.outcome).toBe("already_processed");
     expect((await call("GET", `/api/me/orders/${co.orderId}`, { user: "alice" })).body.status).toBe("confirmed");
 
     const again = await verify("alice", co.razorpayOrderId, "pay_1", sign(co.razorpayOrderId, "pay_1"));

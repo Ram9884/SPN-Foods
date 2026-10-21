@@ -39,7 +39,7 @@ export default async function CheckoutPage() {
       </nav>
 
       <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-heading)] text-3xl font-bold text-[var(--color-text-primary)]">
+        <h1 className="font-heading text-3xl font-normal text-[var(--color-text-primary)]">
           Checkout
         </h1>
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">

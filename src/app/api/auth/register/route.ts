@@ -16,7 +16,11 @@ export async function POST(req: Request) {
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return Response.json({ error: "Please enter your name." }, { status: 400 });
     }
-    if (name.trim().length > 100) {
+    const cleanedName = name.replace(/[\r\n\t\0]/g, " ").trim();
+    if (cleanedName.length === 0) {
+      return Response.json({ error: "Please enter a valid name." }, { status: 400 });
+    }
+    if (cleanedName.length > 100) {
       return Response.json({ error: "Name cannot exceed 100 characters." }, { status: 400 });
     }
 
@@ -90,7 +94,7 @@ export async function POST(req: Request) {
         .insert(profiles)
         .values({
           email: normalizedEmail,
-          name: name.trim(),
+          name: cleanedName,
           passwordHash,
           role: "customer", // Enforce customer role unconditionally
         })

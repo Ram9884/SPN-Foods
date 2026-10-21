@@ -246,10 +246,10 @@ export function AddressSelector({
       {(showAddForm || addresses.length === 0) && (
         <form
           onSubmit={handleSaveAddress}
-          className="p-5 rounded-[8px] bg-[var(--color-surface-raised)] border border-[var(--color-border)] space-y-4"
+          className="p-4 sm:p-5 rounded-[8px] bg-[var(--color-surface-raised)] border border-[var(--color-border)] space-y-4"
         >
           <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border-subtle)]">
-            <h3 className="font-[family-name:var(--font-heading)] text-base text-[var(--color-text-primary)] font-semibold flex items-center gap-2">
+            <h3 className="font-heading text-lg text-[var(--color-text-primary)] font-normal flex items-center gap-2">
               <MapPin className="h-4 w-4 text-[var(--color-brand-primary)]" />
               New Delivery Address
             </h3>
@@ -257,7 +257,7 @@ export function AddressSelector({
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="font-[family-name:var(--font-body)] text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+                className="font-body text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
               >
                 Cancel
               </button>
@@ -275,8 +275,9 @@ export function AddressSelector({
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+          {/* 1. Full Name & 2. 10-Digit Mobile Number */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="min-w-0">
               <label
                 htmlFor="addr-fullName"
                 className="block font-[family-name:var(--font-body)] text-xs font-semibold text-[var(--color-text-body)] mb-1"
@@ -294,15 +295,15 @@ export function AddressSelector({
               />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label
                 htmlFor="addr-phone"
                 className="block font-[family-name:var(--font-body)] text-xs font-semibold text-[var(--color-text-body)] mb-1"
               >
                 10-Digit Mobile Number *
               </label>
-              <div className="flex items-center">
-                <span className="h-10 px-2.5 flex items-center bg-[var(--color-surface-sunken)] border border-r-0 border-[var(--color-border)] rounded-l-[6px] text-xs text-[var(--color-text-muted)] font-mono">
+              <div className="flex items-center w-full">
+                <span className="shrink-0 h-10 px-2.5 flex items-center bg-[var(--color-surface-sunken)] border border-r-0 border-[var(--color-border)] rounded-l-[6px] text-xs text-[var(--color-text-muted)] font-mono">
                   +91
                 </span>
                 <input
@@ -313,13 +314,14 @@ export function AddressSelector({
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                   placeholder="9876543210"
-                  className="w-full h-10 px-3 rounded-r-[6px] border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-[family-name:var(--font-body)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-brand-primary)]"
+                  className="w-full min-w-0 flex-1 h-10 px-3 rounded-r-[6px] border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-[family-name:var(--font-body)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-brand-primary)]"
                 />
               </div>
             </div>
           </div>
 
-          <div>
+          {/* 3. Flat, House No., Building, Street */}
+          <div className="min-w-0">
             <label
               htmlFor="addr-line1"
               className="block font-[family-name:var(--font-body)] text-xs font-semibold text-[var(--color-text-body)] mb-1"
@@ -337,8 +339,9 @@ export function AddressSelector({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+          {/* 4. Area, Colony (Optional) & 5. Landmark (Optional) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="min-w-0">
               <label
                 htmlFor="addr-line2"
                 className="block font-[family-name:var(--font-body)] text-xs font-semibold text-[var(--color-text-body)] mb-1"
@@ -355,7 +358,7 @@ export function AddressSelector({
               />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label
                 htmlFor="addr-landmark"
                 className="block font-[family-name:var(--font-body)] text-xs font-semibold text-[var(--color-text-body)] mb-1"
@@ -373,8 +376,9 @@ export function AddressSelector({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
+          {/* 6. City / Town, 7. State / UT, 8. 6-Digit PIN Code */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="min-w-0">
               <label
                 htmlFor="addr-city"
                 className="block font-[family-name:var(--font-body)] text-xs font-semibold text-[var(--color-text-body)] mb-1"
@@ -392,7 +396,7 @@ export function AddressSelector({
               />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label
                 htmlFor="addr-state"
                 className="block font-[family-name:var(--font-body)] text-xs font-semibold text-[var(--color-text-body)] mb-1"
@@ -414,7 +418,7 @@ export function AddressSelector({
               </select>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label
                 htmlFor="addr-pincode"
                 className="block font-[family-name:var(--font-body)] text-xs font-semibold text-[var(--color-text-body)] mb-1"
@@ -450,7 +454,7 @@ export function AddressSelector({
             </label>
           </div>
 
-          <div className="flex items-center gap-3 pt-3 border-t border-[var(--color-border-subtle)]">
+          <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-[var(--color-border-subtle)]">
             <button
               type="submit"
               disabled={saving}
@@ -480,3 +484,4 @@ export function AddressSelector({
     </div>
   );
 }
+

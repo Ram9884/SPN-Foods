@@ -134,7 +134,7 @@ export function ProductReviewsSection({
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-2xl lg:text-3xl font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-heading)]">
+            <h2 className="text-2xl lg:text-3xl font-normal text-[var(--color-text-primary)] font-heading">
               Customer Reviews & Ratings
             </h2>
             <p className="text-sm text-[var(--color-text-muted)] mt-1">

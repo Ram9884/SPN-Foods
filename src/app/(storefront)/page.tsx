@@ -76,7 +76,7 @@ export default async function HomePage() {
               {/* Editorial Headline: Strictly 2-line natural wrap on desktop */}
               <h1
                 id="hero-heading"
-                className="font-[family-name:var(--font-heading)] font-medium text-[34px] xs:text-[36px] sm:text-[44px] lg:text-[46px] xl:text-[48px] leading-[1.06] tracking-[-0.03em] text-[#1A1614] mb-3.5 sm:mb-4 whitespace-normal"
+                className="font-heading font-normal text-[34px] xs:text-[36px] sm:text-[44px] lg:text-[46px] xl:text-[48px] leading-[1.06] tracking-[-0.03em] text-[#1A1614] mb-3 sm:mb-3.5 whitespace-normal"
               >
                 The honest taste of a{" "}
                 <span className="text-[#BF5330]">
@@ -84,6 +84,14 @@ export default async function HomePage() {
                 </span>{" "}
                 kitchen
               </h1>
+
+              {/* Tamil Heritage Tagline */}
+              <p
+                lang="ta"
+                className="font-tamil text-[16px] xs:text-[17px] sm:text-[18px] lg:text-[19px] text-[#8F3E20] font-semibold tracking-wide mb-3 sm:mb-3.5 leading-snug"
+              >
+                அன்பும் அக்கறையும் நிறைந்த ஆரோக்கியம்
+              </p>
 
               {/* Supporting Description: compact 2-line block */}
               <p className="font-[family-name:var(--font-body)] text-[15px] sm:text-[16px] lg:text-[16.5px] text-[#635850] leading-[1.55] mb-5 sm:mb-6 max-w-[460px] mx-auto lg:mx-0 font-normal">

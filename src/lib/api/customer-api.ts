@@ -306,7 +306,7 @@ export const postCheckoutVerify = (req: Request, deps: ApiDeps) =>
       user.profileId,
       { razorpayOrderId: b.razorpay_order_id, razorpayPaymentId: b.razorpay_payment_id, signature: b.razorpay_signature },
       deps.razorpayKeySecret,
-      { now: (deps.now ?? (() => new Date()))() },
+      { now: (deps.now ?? (() => new Date()))(), gateway: deps.gateway },
     );
     return json(200, { verified: true, ...out });
   });

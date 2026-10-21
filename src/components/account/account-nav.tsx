@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { User, Package, MapPin, Star, LogOut, Loader2 } from "lucide-react";
+import { User, ShoppingBag, MapPin, Star, LogOut, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -16,7 +16,7 @@ const NAV_ITEMS = [
   {
     label: "My Orders",
     href: "/account/orders",
-    icon: Package,
+    icon: ShoppingBag,
     exact: false,
   },
   {
@@ -50,13 +50,10 @@ export function AccountNav() {
     }
   };
 
-  const signOutBtnClass =
-    "flex items-center gap-3 px-3.5 py-2.5 rounded-[6px] font-[family-name:var(--font-body)] text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-error)] hover:bg-[var(--color-surface-raised)]/70 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] text-left disabled:opacity-60 cursor-pointer";
-
   return (
     <nav
       aria-label="Account navigation"
-      className="flex flex-col sm:flex-row lg:flex-col gap-1.5 p-1 rounded-[8px] bg-[var(--color-surface-sunken)]/60 border border-[var(--color-border)]"
+      className="rounded-2xl border border-[#E8DFD4] bg-white p-2 sm:p-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col gap-1"
     >
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
@@ -70,18 +67,18 @@ export function AccountNav() {
             href={item.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "flex items-center gap-3 px-3.5 py-2.5 rounded-[6px] font-[family-name:var(--font-body)] text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
+              "relative flex items-center gap-3.5 px-4 py-3 rounded-xl font-[family-name:var(--font-body)] text-sm font-medium transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330]",
               isActive
-                ? "bg-[var(--color-surface-raised)] text-[var(--color-brand-primary)] font-semibold shadow-xs"
-                : "text-[var(--color-text-body)] hover:bg-[var(--color-surface-raised)]/70 hover:text-[var(--color-text-primary)]"
+                ? "bg-[#FDF4ED] text-[#B4491F] font-semibold before:absolute before:left-0 before:top-2.5 before:bottom-2.5 before:w-1 before:bg-[#B4491F] before:rounded-r-full shadow-2xs"
+                : "text-[#4A3B32] hover:bg-[#FAF6F1] hover:text-[#1A1614]"
             )}
           >
             <Icon
               className={cn(
-                "h-4 w-4 shrink-0",
+                "h-4 w-4 shrink-0 transition-colors",
                 isActive
-                  ? "text-[var(--color-brand-primary)]"
-                  : "text-[var(--color-text-muted)]"
+                  ? "text-[#B4491F]"
+                  : "text-[#786B62]"
               )}
               aria-hidden="true"
             />
@@ -90,18 +87,18 @@ export function AccountNav() {
         );
       })}
 
-      <div className="hidden lg:block border-t border-[var(--color-border)] my-1" />
+      <div className="border-t border-[#E8DFD4]/70 my-1.5" />
 
       <button
         type="button"
         onClick={handleSignOut}
         disabled={isSigningOut}
-        className={signOutBtnClass}
+        className="flex items-center gap-3.5 px-4 py-3 rounded-xl font-[family-name:var(--font-body)] text-sm font-medium text-[#4A3B32] hover:text-[#B4491F] hover:bg-[#FAF6F1] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] text-left disabled:opacity-60 cursor-pointer"
       >
         {isSigningOut ? (
-          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden="true" />
+          <Loader2 className="h-4 w-4 shrink-0 animate-spin text-[#786B62]" aria-hidden="true" />
         ) : (
-          <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <LogOut className="h-4 w-4 shrink-0 text-[#786B62]" aria-hidden="true" />
         )}
         <span>{isSigningOut ? "Signing Out..." : "Sign Out"}</span>
       </button>

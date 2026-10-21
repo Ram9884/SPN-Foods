@@ -45,11 +45,11 @@ export default async function AccountLayout({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Sidebar Navigation (lg:col-span-3) */}
         <aside className="lg:col-span-3 lg:sticky lg:top-8">
-          <div className="mb-4">
-            <h1 className="font-[family-name:var(--font-heading)] text-2xl text-[var(--color-text-primary)] font-bold">
+          <div className="mb-5">
+            <h1 className="font-heading text-2xl sm:text-[28px] text-[#1A1614] font-normal tracking-tight">
               My Account
             </h1>
-            <p className="text-xs text-[var(--color-text-muted)] mt-1">
+            <p className="text-sm text-[#786B62] mt-1">
               Welcome back, {user.name || user.email}
             </p>
           </div>

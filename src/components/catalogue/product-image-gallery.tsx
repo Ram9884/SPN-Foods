@@ -20,7 +20,7 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
         aria-label={`${productName} — no image available`}
       >
         <span
-          className="font-[family-name:var(--font-heading)] text-6xl font-bold text-[var(--color-border-strong)] select-none"
+          className="font-heading text-6xl font-normal text-[var(--color-border-strong)] select-none"
           aria-hidden
         >
           {productName.charAt(0)}

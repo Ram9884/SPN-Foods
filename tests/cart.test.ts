@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import { computeCartSummary, toLineView } from "../src/lib/cart/cart";
@@ -5,7 +6,7 @@ import * as s from "../src/lib/db/schema";
 import { applyCapturedPayment } from "../src/lib/orders/capture-payment";
 import { expirePendingOrders } from "../src/lib/orders/expiry";
 import {
-  addAddress, call, checkout, db, fillCart, gatewayCalls, productId, rawCheckout, stockOf, useHarness, variant2Id, variantId,
+  addAddress, call, checkout, db, fillCart, gatewayCalls, KEY_SECRET, productId, rawCheckout, stockOf, useHarness, variant2Id, variantId,
 } from "./harness";
 
 useHarness();
@@ -532,4 +533,99 @@ describe("checkout from the cart", () => {
     await applyCapturedPayment(db, { razorpayOrderId: co.razorpayOrderId, razorpayPaymentId: "pay_1", amountPaise: co.amountPaise });
     expect((await view("bob")).body.items[0].quantity).toBe(4);
   });
+
+  it("successful verified checkout callback clears the server-side cart immediately", async () => {
+    const addr = await addAddress("alice");
+    await fillCart("alice", [{ variantId, quantity: 2 }, { variantId: variant2Id, quantity: 1 }]);
+    expect((await view("alice")).body.items).toHaveLength(2);
+
+    const co = (await rawCheckout("alice", addr.id)).body;
+    expect((await view("alice")).body.items).toHaveLength(2); // still there while pending
+
+    const sig = createHmac("sha256", KEY_SECRET).update(`${co.razorpayOrderId}|pay_test_cb_1`).digest("hex");
+    const verifyRes = await call("POST", "/api/checkout/verify", {
+      user: "alice",
+      body: {
+        razorpay_order_id: co.razorpayOrderId,
+        razorpay_payment_id: "pay_test_cb_1",
+        razorpay_signature: sig,
+      },
+    });
+    expect(verifyRes.status).toBe(200);
+    expect(verifyRes.body.verified).toBe(true);
+
+    const cartAfter = await view("alice");
+    expect(cartAfter.body.items).toEqual([]);
+    expect(cartAfter.body.summary.totalQuantity).toBe(0);
+  });
+
+  it("failed or cancelled checkout verification leaves the cart intact", async () => {
+    const addr = await addAddress("alice");
+    await fillCart("alice", [{ variantId, quantity: 2 }]);
+    const co = (await rawCheckout("alice", addr.id)).body;
+
+    const verifyRes = await call("POST", "/api/checkout/verify", {
+      user: "alice",
+      body: {
+        razorpay_order_id: co.razorpayOrderId,
+        razorpay_payment_id: "pay_bad",
+        razorpay_signature: "invalid_signature",
+      },
+    });
+    expect(verifyRes.status).toBe(400);
+
+    const cartAfter = await view("alice");
+    expect(cartAfter.body.items).toHaveLength(1);
+    expect(cartAfter.body.items[0].quantity).toBe(2);
+  });
+
+  it("verifying checkout only consumes purchased items, preserving unrelated items in the cart", async () => {
+    const addr = await addAddress("alice");
+    await fillCart("alice", [{ variantId, quantity: 2 }, { variantId: variant2Id, quantity: 1 }]);
+
+    // Checkout only variantId
+    const co = (await rawCheckout("alice", addr.id, { items: [{ variantId, quantity: 2 }] })).body;
+
+    const sig = createHmac("sha256", KEY_SECRET).update(`${co.razorpayOrderId}|pay_unrelated_1`).digest("hex");
+    const verifyRes = await call("POST", "/api/checkout/verify", {
+      user: "alice",
+      body: {
+        razorpay_order_id: co.razorpayOrderId,
+        razorpay_payment_id: "pay_unrelated_1",
+        razorpay_signature: sig,
+      },
+    });
+    expect(verifyRes.status).toBe(200);
+
+    // Only variantId was consumed; variant2Id remains in cart
+    const cartAfter = await view("alice");
+    expect(cartAfter.body.items).toHaveLength(1);
+    expect(cartAfter.body.items[0].variantId).toBe(variant2Id);
+    expect(cartAfter.body.items[0].quantity).toBe(1);
+  });
+
+  it("retrying verified callback is idempotent and does not corrupt cart or order", async () => {
+    const addr = await addAddress("alice");
+    await fillCart("alice", [{ variantId, quantity: 1 }]);
+    const co = (await rawCheckout("alice", addr.id)).body;
+
+    const sig = createHmac("sha256", KEY_SECRET).update(`${co.razorpayOrderId}|pay_retry_1`).digest("hex");
+    const payload = {
+      razorpay_order_id: co.razorpayOrderId,
+      razorpay_payment_id: "pay_retry_1",
+      razorpay_signature: sig,
+    };
+
+    const first = await call("POST", "/api/checkout/verify", { user: "alice", body: payload });
+    expect(first.status).toBe(200);
+    expect(first.body.verified).toBe(true);
+    expect((await view("alice")).body.items).toEqual([]);
+
+    // Replay / retry
+    const second = await call("POST", "/api/checkout/verify", { user: "alice", body: payload });
+    expect(second.status).toBe(200);
+    expect(second.body.verified).toBe(true);
+    expect((await view("alice")).body.items).toEqual([]);
+  });
 });
+

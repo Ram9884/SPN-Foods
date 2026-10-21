@@ -28,9 +28,9 @@ function getDeps(req: Request): ApiDeps {
       }
     },
     authenticate: async (_req, db) => {
-      // In dev or test environments, allow x-test-user header
+      // Strictly allow x-test-user header ONLY in automated test execution (Vitest)
       const testUser = _req.headers.get("x-test-user");
-      if (testUser && process.env.NODE_ENV !== "production") {
+      if (testUser && process.env.NODE_ENV === "test") {
         const { ensureProfile } = await import("@/lib/customers/profile");
         const p = await ensureProfile(db, testUser, async () => ({
           email: `${testUser}@example.com`,

@@ -11,20 +11,26 @@ export interface SmtpConfig {
   relayUrl?: string;
 }
 
+function cleanHeader(val: string): string {
+  return val.replace(/[\r\n]/g, "").replace(/"/g, "");
+}
+
 /**
  * Builds standard RFC 2822 multipart/alternative MIME email payload.
  */
 function buildMimeMessage(message: EmailMessage, from: string, replyTo?: string): string {
   const boundary = `----=_Part_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-  const toHeader = message.to.name
-    ? `"${message.to.name.replace(/"/g, "")}" <${message.to.email}>`
-    : message.to.email;
-  const fromHeader = `"${"SPN Foods".replace(/"/g, "")}" <${from}>`;
+  const cleanToName = message.to.name ? cleanHeader(message.to.name) : undefined;
+  const cleanToEmail = cleanHeader(message.to.email);
+  const toHeader = cleanToName
+    ? `"${cleanToName}" <${cleanToEmail}>`
+    : cleanToEmail;
+  const fromHeader = `"SPN Foods" <${cleanHeader(from)}>`;
 
   const headers = [
     `From: ${fromHeader}`,
     `To: ${toHeader}`,
-    `Subject: =?UTF-8?B?${Buffer.from(message.subject).toString("base64")}?=`,
+    `Subject: =?UTF-8?B?${Buffer.from(cleanHeader(message.subject)).toString("base64")}?=`,
     `Date: ${new Date().toUTCString()}`,
     `Message-ID: <${Date.now()}.${Math.random().toString(36).slice(2, 10)}@spnfoods.in>`,
     `MIME-Version: 1.0`,
@@ -32,12 +38,12 @@ function buildMimeMessage(message: EmailMessage, from: string, replyTo?: string)
   ];
 
   if (replyTo) {
-    headers.push(`Reply-To: ${replyTo}`);
+    headers.push(`Reply-To: ${cleanHeader(replyTo)}`);
   }
 
   if (message.headers) {
     for (const [k, v] of Object.entries(message.headers)) {
-      headers.push(`${k}: ${v}`);
+      headers.push(`${cleanHeader(k)}: ${cleanHeader(v)}`);
     }
   }
 

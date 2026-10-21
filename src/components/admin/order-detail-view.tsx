@@ -344,33 +344,49 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
     }
   };
 
-  // Update Shipment Tracking Details
+  // Update or Create Shipment Tracking Details
   const handleSaveShipment = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingShipment(true);
+    setShipmentError(null);
     try {
-      const res = await fetch(`/api/admin/orders/${orderId}/shipment`, {
-        method: "PATCH",
+      const isExisting = Boolean(order?.shipments && order.shipments.length > 0);
+      const endpoint = isExisting
+        ? `/api/admin/orders/${orderId}/shipment`
+        : `/api/admin/orders/${orderId}/shipment/create`;
+      const method = isExisting ? "PATCH" : "POST";
+
+      const payload = isExisting
+        ? {
+            courierName: shipCourier.trim(),
+            awb: shipAwb.trim(),
+            trackingUrl: shipUrl.trim() || null,
+          }
+        : {
+            providerId: "manual",
+            courierName: shipCourier.trim(),
+            awb: shipAwb.trim(),
+            trackingUrl: shipUrl.trim() || undefined,
+          };
+
+      const res = await fetch(endpoint, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Origin: window.location.origin,
         },
-        body: JSON.stringify({
-          courierName: shipCourier.trim(),
-          awb: shipAwb.trim(),
-          trackingUrl: shipUrl.trim() || null,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const resData = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(resData?.error?.message || "Failed to update shipment.");
+      if (!res.ok) throw new Error(resData?.error?.message || "Failed to save shipment.");
 
-      setActionSuccess("Shipment tracking updated.");
+      setActionSuccess(isExisting ? "Shipment tracking updated." : "Shipment created successfully.");
       setTimeout(() => setActionSuccess(null), 4000);
       setEditingShipment(false);
       await fetchOrder();
     } catch (err: any) {
-      alert(err.message || "Failed to update shipment");
+      setShipmentError(err.message || "Failed to save shipment");
     } finally {
       setSavingShipment(false);
     }
@@ -511,7 +527,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-2">
         <div>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-[family-name:var(--font-heading)] text-2xl sm:text-3xl font-bold tracking-tight text-[#1A1614] font-mono">
+            <h1 className="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-[#1A1614]">
               {order.orderNumber}
             </h1>
             <span

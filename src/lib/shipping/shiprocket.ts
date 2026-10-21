@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import type { ShippingProvider } from "./provider";
 import type {
   CancelShipmentResult,
@@ -350,16 +350,23 @@ export class ShiprocketShippingProvider implements ShippingProvider {
       return false;
     }
 
+    const safeCompare = (a: string, b: string): boolean => {
+      const bufA = Buffer.from(a, "utf-8");
+      const bufB = Buffer.from(b, "utf-8");
+      if (bufA.length !== bufB.length) return false;
+      return timingSafeEqual(bufA, bufB);
+    };
+
     // Shiprocket supports x-api-key token header or HMAC sha256 signature
     const apiKey = req.headers.get("x-api-key");
-    if (apiKey && apiKey === this.config.webhookSecret) {
+    if (apiKey && safeCompare(apiKey, this.config.webhookSecret)) {
       return true;
     }
 
     const signature = req.headers.get("x-shiprocket-signature") || req.headers.get("x-webhook-signature");
     if (signature) {
       const computed = createHmac("sha256", this.config.webhookSecret).update(rawBody).digest("hex");
-      return computed === signature;
+      return safeCompare(computed, signature);
     }
 
     return false;

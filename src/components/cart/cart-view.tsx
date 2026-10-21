@@ -209,7 +209,7 @@ export function CartView() {
             </div>
           )}
           <div className="flex items-baseline justify-between pt-2 border-t border-[var(--color-border-subtle)]">
-            <span className="font-[family-name:var(--font-heading)] text-base text-[var(--color-text-primary)] font-semibold">
+            <span className="font-body text-base text-[var(--color-text-primary)] font-semibold">
               Total
             </span>
             <span className="font-[family-name:var(--font-price)] text-2xl font-bold text-[var(--color-brand-primary)]">
@@ -317,7 +317,7 @@ function CartItemRow({
               className="object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center font-[family-name:var(--font-heading)] font-bold text-xl text-[var(--color-text-muted)] select-none">
+            <div className="w-full h-full flex items-center justify-center font-heading font-normal text-2xl text-[var(--color-text-muted)] select-none">
               {item.productName.charAt(0)}
             </div>
           )}

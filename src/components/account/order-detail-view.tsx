@@ -2,9 +2,22 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, MapPin, AlertCircle, Truck, Package, CheckCircle2, ExternalLink, Clock } from "lucide-react";
+import Image from "next/image";
+import {
+  ArrowLeft,
+  MapPin,
+  AlertCircle,
+  Truck,
+  Package,
+  Check,
+  CheckCircle2,
+  ExternalLink,
+  Clock,
+  Home,
+  Headphones,
+  MessageSquare,
+} from "lucide-react";
 import { formatPrice } from "@/lib/utils";
-import { OrderStatusBadge } from "./orders-list";
 import type { AddressSnapshot } from "@/lib/db/schema";
 
 interface TrackingEventData {
@@ -45,10 +58,59 @@ interface OrderDetailData {
     unitPricePaise: number;
     quantity: number;
     lineTotalPaise: number;
+    imageUrl?: string | null;
   }[];
   shipments?: ShipmentData[];
 }
 
+function StatusBadge({ status }: { status: string }) {
+  switch (status) {
+    case "confirmed":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#EBF5ED] text-[#2E7D32] border border-[#C8E6C9]">
+          <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+          <span>Confirmed</span>
+        </span>
+      );
+    case "processing":
+    case "packed":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#FDF4ED] text-[#BF5330] border border-[#F4DFD7]">
+          <Package className="w-3.5 h-3.5" />
+          <span>Processing</span>
+        </span>
+      );
+    case "shipped":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#EFF8FF] text-[#175CD3] border border-[#B2DDFF]">
+          <Truck className="w-3.5 h-3.5" />
+          <span>Shipped</span>
+        </span>
+      );
+    case "delivered":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#EBF5ED] text-[#2E7D32] border border-[#C8E6C9]">
+          <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+          <span>Delivered</span>
+        </span>
+      );
+    case "cancelled":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA]">
+          <AlertCircle className="w-3.5 h-3.5" />
+          <span>Cancelled</span>
+        </span>
+      );
+    case "pending_payment":
+    default:
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#FFF4D6] text-[#D49434] border border-[#FCE19B]">
+          <Clock className="w-3.5 h-3.5" />
+          <span>Pending Confirmation</span>
+        </span>
+      );
+  }
+}
 
 export function OrderDetailView({ orderId }: { orderId: string }) {
   const [order, setOrder] = useState<OrderDetailData | null>(null);
@@ -87,26 +149,28 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-[var(--color-text-muted)] font-[family-name:var(--font-body)]">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-brand-primary)] border-t-transparent" />
-        <p className="mt-3 text-sm">Loading order details...</p>
+      <div className="p-12 text-center text-[#786B62] font-[family-name:var(--font-body)]">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-[#BF5330] border-t-transparent" />
+        <p className="mt-3 text-sm font-medium">Loading order details...</p>
       </div>
     );
   }
 
   if (error || !order) {
     return (
-      <div className="p-8 sm:p-12 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] text-center font-[family-name:var(--font-body)] max-w-lg mx-auto">
-        <AlertCircle className="h-10 w-10 text-[var(--color-text-muted)] mx-auto mb-3" />
-        <h2 className="font-[family-name:var(--font-heading)] text-xl text-[var(--color-text-primary)] mb-2">
+      <div className="p-8 sm:p-12 rounded-2xl border border-[#E8DFD4] bg-white text-center font-body max-w-lg mx-auto shadow-[0_2px_8px_rgba(0,0,0,0.03)]">
+        <div className="w-12 h-12 rounded-full bg-orange-50 text-[#BF5330] flex items-center justify-center mx-auto mb-4">
+          <AlertCircle className="h-6 w-6" />
+        </div>
+        <h2 className="font-heading text-xl font-normal text-[#1A1614] mb-2">
           Order Not Found
         </h2>
-        <p className="text-xs text-[var(--color-text-muted)] mb-6 leading-relaxed">
+        <p className="text-xs sm:text-sm text-[#786B62] mb-6 leading-relaxed">
           The requested order could not be found or is not associated with your account.
         </p>
         <Link
           href="/account/orders"
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[8px] bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#BF5330] hover:bg-[#8F3E20] text-white text-xs sm:text-sm font-semibold transition-colors shadow-2xs"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Back to My Orders</span>
@@ -115,188 +179,315 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
     );
   }
 
-  const dateStr = new Date(order.createdAt).toLocaleDateString("en-IN", {
+  const placedDate = new Date(order.createdAt);
+  const datePart = placedDate.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
+  const timePart = placedDate.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).toLowerCase();
+  const dateStr = `Placed on ${datePart} at ${timePart}`;
 
   const addr = order.shippingAddress;
+  const isCancelled = order.status === "cancelled";
+  const isPending = order.status === "pending_payment";
+  const isConfirmed = !isCancelled && !isPending;
+  const isShipped = order.status === "shipped" || order.status === "delivered";
+  const isDelivered = order.status === "delivered";
+
+  const primaryShipment = order.shipments && order.shipments.length > 0 ? order.shipments[0] : null;
 
   return (
-    <div className="space-y-8 font-[family-name:var(--font-body)]">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--color-border)] pb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Link
-              href="/account/orders"
-              className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-brand-primary)] flex items-center gap-1 transition-colors"
-            >
-              <ArrowLeft className="h-3 w-3" />
-              <span>Back to Orders</span>
-            </Link>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-[family-name:var(--font-heading)] text-2xl text-[var(--color-text-primary)] font-bold">
-              Order #{order.orderNumber}
-            </h1>
-            <OrderStatusBadge status={order.status} />
-          </div>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            Placed on {dateStr}
-          </p>
-        </div>
+    <div className="space-y-6 sm:space-y-7 font-body">
+      {/* Top Header Row */}
+      <div>
+        <Link
+          href="/account/orders"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#BF5330] hover:text-[#8F3E20] transition-colors mb-3"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Back to Orders</span>
+        </Link>
 
-        <div className="text-left sm:text-right">
-          <span className="text-xs text-[var(--color-text-muted)] block">Total Paid</span>
-          <span className="font-[family-name:var(--font-price)] text-xl font-bold text-[var(--color-brand-primary)]">
-            {formatPrice(order.totalPaise)}
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="font-heading text-2xl sm:text-[30px] font-normal text-[#1A1614] tracking-tight leading-tight">
+                Order #{order.orderNumber}
+              </h1>
+              <StatusBadge status={order.status} />
+            </div>
+            <p className="text-xs sm:text-sm text-[#786B62]">
+              {dateStr}
+            </p>
+          </div>
+
+          <div className="text-left sm:text-right pt-1 sm:pt-0">
+            <span className="text-xs font-medium text-[#786B62] block">Total Paid</span>
+            <span className="font-price text-2xl sm:text-[30px] font-extrabold text-[#BF5330] leading-tight block mt-0.5">
+              {formatPrice(order.totalPaise)}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Tracking & Historical Items (lg:col-span-7) */}
-        <div className="space-y-6 lg:col-span-7">
-          {/* Shipment & Courier Tracking Section */}
+      {/* 2-Column Responsive Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column (lg:col-span-7) */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Card 1: Delivery & Tracking */}
           <section
             aria-labelledby="tracking-heading"
-            className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-6 shadow-[var(--shadow-xs)]"
+            className="rounded-2xl border border-[#E8DFD4] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.03)]"
           >
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3 mb-4">
-              <h2
-                id="tracking-heading"
-                className="font-[family-name:var(--font-heading)] text-lg text-[var(--color-text-primary)] flex items-center gap-2"
-              >
-                <Truck className="h-5 w-5 text-[var(--color-brand-primary)]" aria-hidden="true" />
-                <span>Delivery &amp; Tracking</span>
-              </h2>
-              {order.shipments && order.shipments.length > 0 && order.shipments[0].awb && (
-                <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-primary)]">
-                  AWB: {order.shipments[0].awb}
+            <div className="flex items-center justify-between gap-2 mb-6">
+              <div className="flex items-center gap-2.5">
+                <Truck className="h-5 w-5 text-[#BF5330]" aria-hidden="true" />
+                <h2
+                  id="tracking-heading"
+                  className="font-heading text-lg font-normal text-[#1A1614]"
+                >
+                  Delivery &amp; Tracking
+                </h2>
+              </div>
+              {primaryShipment?.awb && (
+                <span className="font-mono text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#FAF5EF] border border-[#E8DFD4] text-[#635850]">
+                  AWB: {primaryShipment.awb}
                 </span>
               )}
             </div>
 
-            {/* Courier Meta */}
-            {order.shipments && order.shipments.length > 0 && order.shipments[0].awb ? (
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] text-xs">
-                  <div>
-                    <span className="text-[var(--color-text-muted)] block text-[11px]">Courier Partner</span>
-                    <span className="font-semibold text-[var(--color-text-primary)]">
-                      {order.shipments[0].courierName || "Standard Courier"}
-                    </span>
+            {/* 4-Step Progress Timeline */}
+            <div className="relative pt-2 pb-2">
+              <div className="grid grid-cols-4 relative">
+                {/* Connecting Lines */}
+                {/* Line 1 -> 2 */}
+                <div
+                  className={`absolute top-4 left-[12.5%] right-[62.5%] h-0.5 ${
+                    isConfirmed ? "bg-[#BF5330]" : "border-t-2 border-dashed border-[#E8DFD4]"
+                  }`}
+                />
+                {/* Line 2 -> 3 */}
+                <div
+                  className={`absolute top-4 left-[37.5%] right-[37.5%] h-0.5 ${
+                    isShipped ? "bg-[#BF5330]" : "border-t-2 border-dashed border-[#E8DFD4]"
+                  }`}
+                />
+                {/* Line 3 -> 4 */}
+                <div
+                  className={`absolute top-4 left-[62.5%] right-[12.5%] h-0.5 ${
+                    isDelivered ? "bg-[#BF5330]" : "border-t-2 border-dashed border-[#E8DFD4]"
+                  }`}
+                />
+
+                {/* Step 1: Order Confirmed */}
+                <div className="flex flex-col items-center text-center relative z-10 px-1">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      isConfirmed
+                        ? "bg-[#BF5330] text-white shadow-2xs"
+                        : "bg-white border-2 border-[#E8DFD4] text-[#A89D95]"
+                    }`}
+                  >
+                    <Check className="w-4 h-4 stroke-[2.5]" />
                   </div>
-                  {order.shipments[0].trackingUrl && (
-                    <a
-                      href={order.shipments[0].trackingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 font-semibold text-[var(--color-brand-primary)] hover:underline"
-                    >
-                      <span>Track on Courier Site</span>
-                      <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                    </a>
-                  )}
+                  <span
+                    className={`mt-2.5 text-xs font-semibold leading-tight ${
+                      isConfirmed ? "text-[#1A1614]" : "text-[#786B62]"
+                    }`}
+                  >
+                    Order Confirmed
+                  </span>
                 </div>
 
-                {/* Tracking Events Timeline */}
-                {order.shipments[0].events && order.shipments[0].events.length > 0 ? (
-                  <div className="pt-2">
-                    <h3 className="text-xs font-semibold text-[var(--color-text-primary)] mb-3">
-                      Shipment Activity
-                    </h3>
-                    <div className="space-y-3 relative pl-4 border-l-2 border-[var(--color-border)] text-xs">
-                      {order.shipments[0].events.map((ev, idx) => (
-                        <div key={ev.id || idx} className="relative">
-                          <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-[var(--color-brand-primary)] ring-4 ring-[var(--color-surface-raised)]" />
-                          <div className="space-y-0.5">
-                            <p className="font-semibold text-[var(--color-text-primary)]">
-                              {ev.description || ev.status.replace("_", " ").toUpperCase()}
-                            </p>
-                            {ev.location && (
-                              <p className="text-[11px] text-[var(--color-text-muted)] flex items-center gap-1">
-                                <MapPin className="h-3 w-3" />
-                                <span>{ev.location}</span>
-                              </p>
-                            )}
-                            <p className="text-[10px] text-[var(--color-text-muted)] flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              <span>
-                                {new Date(ev.occurredAt).toLocaleDateString("en-IN", {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </span>
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                {/* Step 2: Processing */}
+                <div className="flex flex-col items-center text-center relative z-10 px-1">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      isShipped
+                        ? "bg-[#BF5330] text-white shadow-2xs"
+                        : isConfirmed
+                        ? "bg-white border-2 border-[#BF5330] text-[#BF5330] shadow-2xs"
+                        : "bg-white border-2 border-[#E8DFD4] text-[#A89D95]"
+                    }`}
+                  >
+                    {isShipped ? (
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                    ) : (
+                      <Package className="w-4 h-4" />
+                    )}
                   </div>
+                  <span
+                    className={`mt-2.5 text-xs font-semibold leading-tight ${
+                      isConfirmed ? "text-[#1A1614]" : "text-[#786B62]"
+                    }`}
+                  >
+                    Processing
+                  </span>
+                </div>
+
+                {/* Step 3: Shipped */}
+                <div className="flex flex-col items-center text-center relative z-10 px-1">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      isDelivered
+                        ? "bg-[#BF5330] text-white shadow-2xs"
+                        : isShipped
+                        ? "bg-white border-2 border-[#BF5330] text-[#BF5330] shadow-2xs"
+                        : "bg-white border-2 border-[#E8DFD4] text-[#A89D95]"
+                    }`}
+                  >
+                    {isDelivered ? (
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                    ) : (
+                      <Truck className="w-4 h-4" />
+                    )}
+                  </div>
+                  <span
+                    className={`mt-2.5 text-xs font-semibold leading-tight ${
+                      isShipped ? "text-[#1A1614]" : "text-[#786B62]"
+                    }`}
+                  >
+                    Shipped
+                  </span>
+                </div>
+
+                {/* Step 4: Delivered */}
+                <div className="flex flex-col items-center text-center relative z-10 px-1">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      isDelivered
+                        ? "bg-[#BF5330] text-white shadow-2xs"
+                        : "bg-white border-2 border-[#E8DFD4] text-[#A89D95]"
+                    }`}
+                  >
+                    {isDelivered ? (
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                    ) : (
+                      <Home className="w-4 h-4" />
+                    )}
+                  </div>
+                  <span
+                    className={`mt-2.5 text-xs font-semibold leading-tight ${
+                      isDelivered ? "text-[#1A1614]" : "text-[#786B62]"
+                    }`}
+                  >
+                    Delivered
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Status Callout Banner */}
+            <div className="mt-6 p-4 rounded-xl bg-[#FDF6F0] border border-[#F4EAE0] flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-full bg-white border border-[#E8DFD4] flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+                {isDelivered ? (
+                  <CheckCircle2 className="w-5 h-5 text-[#247B49]" />
+                ) : isShipped ? (
+                  <Truck className="w-5 h-5 text-[#BF5330]" />
+                ) : isCancelled ? (
+                  <AlertCircle className="w-5 h-5 text-[#B42318]" />
                 ) : (
-                  <p className="text-xs text-[var(--color-text-muted)]">
-                    Dispatched. Courier tracking updates will appear here as the package moves.
-                  </p>
+                  <Package className="w-5 h-5 text-[#BF5330]" />
                 )}
               </div>
-            ) : (
-              <div className="p-3 rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] text-xs space-y-1">
-                <p className="font-semibold text-[var(--color-text-primary)]">
-                  {order.status === "delivered"
-                    ? "Order has been delivered."
-                    : order.status === "shipped"
-                    ? "Order dispatched. Courier details will be updated shortly."
-                    : order.status === "packed"
-                    ? "Your order has been packed and is awaiting courier pickup."
+              <div className="space-y-0.5 min-w-0">
+                <p className="font-semibold text-sm text-[#1A1614] leading-snug">
+                  {isDelivered
+                    ? "Your order has been delivered successfully."
+                    : isShipped
+                    ? `Dispatched${primaryShipment?.courierName ? ` via ${primaryShipment.courierName}` : ""}${primaryShipment?.awb ? ` (AWB: ${primaryShipment.awb})` : ""}.`
+                    : isCancelled
+                    ? "This order was cancelled."
                     : "Your order is being processed for packing and dispatch."}
                 </p>
-                <p className="text-[11px] text-[var(--color-text-muted)]">
-                  We will notify you and provide a tracking link as soon as your shipment is dispatched.
+                <p className="text-xs text-[#786B62] leading-relaxed">
+                  {isDelivered ? (
+                    "Thank you for shopping with SPN Foods!"
+                  ) : isShipped ? (
+                    primaryShipment?.trackingUrl ? (
+                      <a
+                        href={primaryShipment.trackingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[#BF5330] hover:underline font-medium mt-0.5"
+                      >
+                        <span>Track package on courier website</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    ) : (
+                      "Your package is in transit with the courier."
+                    )
+                  ) : isCancelled ? (
+                    "If you have questions regarding a refund, please contact customer support."
+                  ) : (
+                    "We will notify you once your order is shipped and share tracking details."
+                  )}
                 </p>
               </div>
-            )}
+            </div>
           </section>
 
+          {/* Card 2: Items in This Order */}
           <section
             aria-labelledby="items-heading"
-            className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-6 shadow-[var(--shadow-xs)]"
+            className="rounded-2xl border border-[#E8DFD4] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.03)] overflow-hidden"
           >
-            <h2
-              id="items-heading"
-              className="font-[family-name:var(--font-heading)] text-lg text-[var(--color-text-primary)] border-b border-[var(--color-border)] pb-3"
-            >
-              Items in this Order
-            </h2>
+            <div className="flex items-center gap-2.5 mb-2">
+              <Package className="h-5 w-5 text-[#BF5330]" aria-hidden="true" />
+              <h2
+                id="items-heading"
+                className="font-heading text-lg font-normal text-[#1A1614]"
+              >
+                Items in This Order
+              </h2>
+            </div>
 
-
-            <div className="divide-y divide-[var(--color-border)]">
+            {/* List of items */}
+            <div className="divide-y divide-[#E8DFD4]/70">
               {order.items.map((item) => (
-                <div key={item.id} className="py-4 flex justify-between items-start gap-4">
-                  <div className="space-y-1">
-                    <h3 className="font-[family-name:var(--font-product)] text-sm font-medium text-[var(--color-text-primary)]">
-                      {item.productName}
-                    </h3>
-                    <p className="text-xs text-[var(--color-text-muted)]">
-                      {item.variantLabel} &times; {item.quantity}
-                    </p>
-                    <p className="text-xs font-mono text-[var(--color-text-muted)]">
-                      SKU: {item.sku}
-                    </p>
+                <div
+                  key={item.id}
+                  className="py-4.5 flex items-start justify-between gap-4 first:pt-4"
+                >
+                  <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-[#E8DFD4] bg-[#FFFBF7] shrink-0 overflow-hidden flex items-center justify-center p-1">
+                      {item.imageUrl ? (
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.productName}
+                          fill
+                          className="object-contain p-1"
+                          unoptimized
+                        />
+                      ) : (
+                        <Package className="w-7 h-7 text-[#D9C6AA]" />
+                      )}
+                    </div>
+
+                    <div className="min-w-0 space-y-0.5">
+                      <h3 className="font-bold text-sm sm:text-base text-[#1A1614] leading-snug line-clamp-2">
+                        {item.productName}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[#786B62]">
+                        {item.variantLabel} &times; {item.quantity}
+                      </p>
+                      <p className="text-xs font-mono text-[#8C7E74]">
+                        SKU: {item.sku}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="font-[family-name:var(--font-price)] text-sm font-semibold text-[var(--color-text-primary)]">
+
+                  <div className="text-right shrink-0">
+                    <span className="font-bold text-sm sm:text-base text-[#1A1614] font-price block">
                       {formatPrice(item.lineTotalPaise)}
                     </span>
-                    <span className="font-[family-name:var(--font-price)] text-xs text-[var(--color-text-muted)] block">
-                      {formatPrice(item.unitPricePaise)} each
+                    <span className="text-xs text-[#786B62] font-price block mt-0.5">
+                      ({formatPrice(item.unitPricePaise)} each)
                     </span>
                   </div>
                 </div>
@@ -304,104 +495,125 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
             </div>
 
             {/* Subtotal & Totals Breakdown */}
-            <div className="border-t border-[var(--color-border)] pt-4 space-y-2.5 text-xs">
-              <div className="flex justify-between text-[var(--color-text-body)]">
+            <div className="border-t border-[#E8DFD4] pt-4.5 space-y-2.5 text-xs sm:text-sm">
+              <div className="flex justify-between text-[#786B62]">
                 <span>Items Subtotal</span>
-                <span className="font-[family-name:var(--font-price)]">{formatPrice(order.subtotalPaise)}</span>
+                <span className="font-medium text-[#1A1614] font-price">
+                  {formatPrice(order.subtotalPaise)}
+                </span>
               </div>
+
               {order.discountPaise > 0 && (
-                <div className="flex justify-between text-[var(--color-success)]">
+                <div className="flex justify-between text-[#247B49]">
                   <span>Discount</span>
-                  <span className="font-[family-name:var(--font-price)]">−{formatPrice(order.discountPaise)}</span>
+                  <span className="font-medium font-price">
+                    −{formatPrice(order.discountPaise)}
+                  </span>
                 </div>
               )}
-              <div className="flex justify-between text-[var(--color-text-body)]">
+
+              <div className="flex justify-between text-[#786B62]">
                 <span>Shipping</span>
-                <span className="font-[family-name:var(--font-price)]">
+                <span className="font-medium text-[#1A1614] font-price">
                   {order.shippingPaise === 0 ? "Free" : formatPrice(order.shippingPaise)}
                 </span>
               </div>
-              <div className="flex justify-between border-t border-[var(--color-border)] pt-3 text-sm font-semibold text-[var(--color-text-primary)]">
-                <span>Total Amount</span>
-                <span className="font-[family-name:var(--font-price)] text-base font-bold text-[var(--color-brand-primary)]">
-                  {formatPrice(order.totalPaise)}
-                </span>
-              </div>
+            </div>
+
+            {/* Total Amount Bottom Banner */}
+            <div className="-mx-6 -mb-6 mt-5 px-6 py-4 bg-[#FDF6F0] border-t border-[#F4EAE0] flex items-center justify-between rounded-b-2xl">
+              <span className="font-bold text-sm sm:text-base text-[#1A1614]">
+                Total Amount
+              </span>
+              <span className="font-extrabold text-xl sm:text-2xl text-[#BF5330] font-price">
+                {formatPrice(order.totalPaise)}
+              </span>
             </div>
           </section>
 
-          {/* Customer Note if present */}
+          {/* Customer Delivery Note if present */}
           {order.customerNote && (
-            <section
-              aria-labelledby="note-heading"
-              className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-6 shadow-[var(--shadow-xs)]"
-            >
-              <h2
-                id="note-heading"
-                className="font-[family-name:var(--font-heading)] text-base text-[var(--color-text-primary)] mb-2"
-              >
-                Delivery Instructions
-              </h2>
-              <p className="text-xs text-[var(--color-text-body)] italic leading-relaxed">
-                &ldquo;{order.customerNote}&rdquo;
-              </p>
-            </section>
+            <div className="rounded-2xl border border-[#E8DFD4] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] text-xs text-[#4A3B32]">
+              <span className="font-bold text-[#1A1614] block mb-1">Customer Delivery Instructions:</span>
+              <p className="italic text-[#635850]">&ldquo;{order.customerNote}&rdquo;</p>
+            </div>
           )}
         </div>
 
-        {/* Right Column: Historical Address Snapshot (lg:col-span-5) */}
-        <div className="space-y-6 lg:col-span-5">
+        {/* Right Column (lg:col-span-5) */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Card 3: Delivery Address */}
           <section
             aria-labelledby="address-heading"
-            className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-6 shadow-[var(--shadow-xs)]"
+            className="rounded-2xl border border-[#E8DFD4] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.03)]"
           >
-            <h2
-              id="address-heading"
-              className="font-[family-name:var(--font-heading)] text-lg text-[var(--color-text-primary)] border-b border-[var(--color-border)] pb-3 mb-4 flex items-center gap-2"
-            >
-              <MapPin className="h-4 w-4 text-[var(--color-brand-primary)]" aria-hidden="true" />
-              <span>Delivery Address</span>
-            </h2>
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <div className="flex items-center gap-2.5">
+                <MapPin className="h-5 w-5 text-[#BF5330]" aria-hidden="true" />
+                <h2
+                  id="address-heading"
+                  className="font-heading text-lg font-normal text-[#1A1614]"
+                >
+                  Delivery Address
+                </h2>
+              </div>
+            </div>
 
             {addr ? (
-              <div className="text-xs space-y-1.5 text-[var(--color-text-body)] leading-relaxed">
-                <p className="font-semibold text-sm text-[var(--color-text-primary)]">
+              <div className="text-xs sm:text-sm space-y-1 text-[#4A3B32] leading-relaxed">
+                <p className="font-bold text-sm sm:text-base text-[#1A1614] mb-2">
                   {addr.fullName}
                 </p>
                 <p>{addr.line1}</p>
                 {addr.line2 && <p>{addr.line2}</p>}
                 {addr.landmark && (
-                  <p className="text-[var(--color-text-muted)]">
+                  <p className="text-[#786B62]">
                     Landmark: {addr.landmark}
                   </p>
                 )}
                 <p>
-                  {addr.city}, {addr.state} — {addr.pincode}
+                  {addr.city}, {addr.state} – {addr.pincode}
                 </p>
-                <p className="pt-2 text-[var(--color-text-muted)]">
+                <p className="pt-3 text-[#786B62] border-t border-[#E8DFD4]/60 mt-3 font-medium">
                   Phone: +91 {addr.phone}
                 </p>
               </div>
             ) : (
-              <p className="text-xs text-[var(--color-text-muted)]">
+              <p className="text-xs sm:text-sm text-[#786B62]">
                 Address details unavailable.
               </p>
             )}
           </section>
 
+          {/* Card 4: Need Assistance With This Order */}
           <section
             aria-labelledby="help-heading"
-            className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)]/60 p-5 text-xs text-[var(--color-text-body)]"
+            className="rounded-2xl border border-[#E8DFD4] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col justify-between"
           >
-            <h3
-              id="help-heading"
-              className="font-semibold text-[var(--color-text-primary)] mb-1"
+            <div>
+              <div className="flex items-center gap-2.5 mb-2.5">
+                <Headphones className="h-5 w-5 text-[#BF5330]" aria-hidden="true" />
+                <h2
+                  id="help-heading"
+                  className="font-heading text-base sm:text-lg font-normal text-[#1A1614]"
+                >
+                  Need assistance with this order?
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-[#786B62] leading-relaxed mt-2">
+                For questions regarding your order, please mention your order reference{" "}
+                <strong className="text-[#1A1614] font-semibold">#{order.orderNumber}</strong> when contacting our team.
+              </p>
+            </div>
+
+            <Link
+              href={`/contact?order=${encodeURIComponent(order.orderNumber)}`}
+              className="mt-6 w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#BF5330] hover:bg-[#8F3E20] text-white text-sm font-semibold shadow-xs transition-all active:scale-[0.99]"
             >
-              Need assistance with this order?
-            </h3>
-            <p className="text-[var(--color-text-muted)] leading-relaxed">
-              For queries regarding your order, please mention your order reference <strong className="text-[var(--color-text-primary)]">#{order.orderNumber}</strong> when contacting our team.
-            </p>
+              <MessageSquare className="w-4 h-4" />
+              <span>Contact Support</span>
+            </Link>
           </section>
         </div>
       </div>

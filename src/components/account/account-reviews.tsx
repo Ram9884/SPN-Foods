@@ -138,7 +138,7 @@ export function AccountReviews() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)] font-[family-name:var(--font-heading)]">
+        <h1 className="text-2xl font-normal tracking-tight text-[var(--color-text-primary)] font-heading">
           My Reviews & Ratings
         </h1>
         <p className="text-sm text-[var(--color-text-muted)] mt-1">
@@ -177,15 +177,15 @@ export function AccountReviews() {
           <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[var(--color-turmeric-gold)]/20 flex items-center justify-center text-[var(--color-brand-primary)]">
             <Star className="w-7 h-7" />
           </div>
-          <h3 className="text-lg font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-heading)]">
+          <h3 className="text-lg font-normal text-[var(--color-text-primary)] font-heading">
             No reviews yet
           </h3>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1 max-w-sm mx-auto font-[family-name:var(--font-body)]">
+          <p className="text-sm text-[var(--color-text-muted)] mt-1 max-w-sm mx-auto font-body">
             You haven’t reviewed any products yet. After receiving your orders, share your thoughts to help other shoppers!
           </p>
           <Link
             href="/shop"
-            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-[8px] text-sm font-semibold text-white bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] transition-colors shadow-xs font-[family-name:var(--font-body)]"
+            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-[8px] text-sm font-semibold text-white bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] transition-colors shadow-xs font-body"
           >
             <ShoppingBag className="w-4 h-4" />
             Explore Products
@@ -203,7 +203,7 @@ export function AccountReviews() {
             return (
               <div
                 key={r.id}
-                className="p-5 sm:p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-xs space-y-3 font-[family-name:var(--font-body)]"
+                className="p-5 sm:p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[12px] shadow-xs space-y-3 font-body"
               >
                 {/* Header: Product link, status, verified */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--color-border)]/60">
@@ -294,7 +294,7 @@ export function AccountReviews() {
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4">
             <div className="flex items-start justify-between gap-3 border-b border-[var(--color-border)] pb-3">
               <div>
-                <h3 className="text-lg font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-heading)]">
+                <h3 className="text-lg font-normal text-[var(--color-text-primary)] font-heading">
                   Edit Your Review
                 </h3>
                 <p className="text-xs text-[var(--color-text-muted)] mt-0.5">

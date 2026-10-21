@@ -23,7 +23,7 @@ function SignInContent() {
     if (rawRedirect.startsWith("http://") || rawRedirect.startsWith("https://")) {
       const parsed = new URL(rawRedirect);
       redirectUrl = parsed.pathname + parsed.search;
-    } else if (rawRedirect.startsWith("/")) {
+    } else if (rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") && !rawRedirect.startsWith("/\\")) {
       redirectUrl = rawRedirect;
     }
   } catch {
@@ -94,7 +94,7 @@ function SignInContent() {
               SPN Foods
             </span>
           </Link>
-          <h1 className="font-[family-name:var(--font-heading)] text-3xl font-bold text-[var(--color-text-primary)]">
+          <h1 className="font-heading text-3xl font-normal text-[var(--color-text-primary)]">
             Welcome Back
           </h1>
           <p className="font-[family-name:var(--font-body)] text-sm text-[var(--color-text-muted)] mt-1.5">

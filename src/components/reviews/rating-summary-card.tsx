@@ -26,7 +26,7 @@ export function RatingSummaryCard({
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
         {/* Left score column */}
         <div className="md:col-span-5 flex flex-col items-center justify-center text-center md:border-r border-[var(--color-border)] md:pr-8">
-          <div className="text-5xl lg:text-6xl font-extrabold text-[var(--color-text-primary)] font-[family-name:var(--font-heading)] tracking-tight">
+          <div className="text-5xl lg:text-6xl font-extrabold text-[var(--color-text-primary)] font-price tracking-tight">
             {totalReviews > 0 ? averageRating.toFixed(1) : "0.0"}
           </div>
 
