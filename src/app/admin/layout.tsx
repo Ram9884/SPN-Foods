@@ -59,7 +59,7 @@ export default async function AdminLayout({
               Return to Storefront
             </Link>
             <Link
-              href="/account"
+              href="/account/profile"
               className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-semibold border border-[#E8DFD4] bg-[#FAF5EF] text-[#1A1614] hover:bg-white transition-colors"
             >
               Customer Account

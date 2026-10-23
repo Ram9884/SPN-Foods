@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/server";
-import { AccountNav } from "@/components/account/account-nav";
+import { AccountHeader } from "@/components/account/account-header";
 
 export const dynamic = "force-dynamic";
 
@@ -18,46 +17,23 @@ export default async function AccountLayout({
 }) {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/sign-in?redirect_url=/account");
+    redirect("/sign-in?redirect_url=/account/profile");
   }
 
+  const displayName = user.name?.trim()
+    ? user.name.trim()
+    : user.email
+    ? user.email.split("@")[0]
+    : "Customer";
+
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 font-[family-name:var(--font-body)]">
-      {/* Breadcrumb Navigation */}
-      <nav aria-label="Breadcrumb" className="mb-6">
-        <ol className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
-          <li>
-            <Link href="/" className="hover:text-[var(--color-brand-primary)] transition-colors">
-              Home
-            </Link>
-          </li>
-          <li aria-hidden="true">&gt;</li>
-          <li
-            aria-current="page"
-            className="font-medium text-[var(--color-text-primary)]"
-          >
-            My Account
-          </li>
-        </ol>
-      </nav>
+    <div className="w-full bg-[#FAF6F1]/50 min-h-[calc(100vh-140px)]">
+      <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-9 font-[family-name:var(--font-body)]">
+        {/* Dynamic Account Header with Breadcrumbs, Heading, Subtitle & Botanical Art */}
+        <AccountHeader displayName={displayName} />
 
-      {/* Main Account Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Sidebar Navigation (lg:col-span-3) */}
-        <aside className="lg:col-span-3 lg:sticky lg:top-8">
-          <div className="mb-5">
-            <h1 className="font-heading text-2xl sm:text-[28px] text-[#1A1614] font-normal tracking-tight">
-              My Account
-            </h1>
-            <p className="text-sm text-[#786B62] mt-1">
-              Welcome back, {user.name || user.email}
-            </p>
-          </div>
-          <AccountNav />
-        </aside>
-
-        {/* Content Area (lg:col-span-9) */}
-        <main className="lg:col-span-9 min-w-0">
+        {/* Main Content Area: Full width single-column layout */}
+        <main className="w-full min-w-0">
           {children}
         </main>
       </div>

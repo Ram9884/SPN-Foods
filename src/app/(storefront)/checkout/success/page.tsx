@@ -453,7 +453,7 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
                   </Link>
                 ) : (
                   <Link
-                    href="/account"
+                    href="/account/profile"
                     className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-brand-primary,#B4491F)] px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:opacity-95 active:scale-[0.99] transition-all"
                   >
                     <span>View in My Account</span>

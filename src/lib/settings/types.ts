@@ -29,7 +29,7 @@ export interface BusinessSettings {
 export const DEFAULT_BUSINESS_SETTINGS: BusinessSettings = {
   businessName: "SPN Health Mix",
   supportEmail: "spnhealthmix@gmail.com",
-  phone: "+91 63826 74529",
+  phone: "+91 70949 38940",
   whatsapp: "+91 70949 38940",
   address: {
     line1: "No. 257, Vaguthupatti Village",

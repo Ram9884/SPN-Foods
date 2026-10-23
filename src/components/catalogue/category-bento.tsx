@@ -166,8 +166,8 @@ export function CategoryBento({ categories }: CategoryBentoProps) {
           </Link>
         </div>
 
-        {/* 4 Large Editorial Category Cards in a Single Row on Desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 items-stretch">
+        {/* Category Cards: Single column on mobile (<md), 2 columns on tablet (md), 4 columns on desktop (lg) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 items-stretch">
           {CATEGORY_ITEMS.map((item) => {
             const dbCategory = categoryMap.get(item.slug);
             const categoryName = dbCategory?.name || item.fallbackName;
@@ -185,7 +185,7 @@ export function CategoryBento({ categories }: CategoryBentoProps) {
                     src={item.image}
                     alt={item.alt}
                     fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
                   />
 
@@ -240,7 +240,7 @@ export function CategoryBentoSkeleton() {
     <div className="container-spn py-8" aria-hidden="true">
       <div className="skeleton h-4 w-32 rounded mb-2" />
       <div className="skeleton h-8 w-64 rounded mb-8" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}

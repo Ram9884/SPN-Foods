@@ -17,16 +17,20 @@ export default async function AboutPage() {
     settings.address &&
     (settings.address.line1 || settings.address.city || settings.address.state);
 
-  const addressFormatted = hasAddress
-    ? [
-        settings.address?.line1,
-        settings.address?.line2,
-        [settings.address?.city, settings.address?.state].filter(Boolean).join(", "),
-        settings.address?.pincode ? `PIN: ${settings.address.pincode}` : null,
-      ]
-        .filter(Boolean)
-        .join(", ")
-    : "No. 257, Vaguthupatti Village, Krishnapuram PT, Dharmapuri, Tamil Nadu, PIN: 635202";
+  const addressLine1 = [
+    settings.address?.line1 || "No. 257, Vaguthupatti Village",
+    settings.address?.line2 || "Krishnapuram PT",
+    settings.address?.city || "Dharmapuri",
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const stateAndPin = [
+    settings.address?.state || "Tamil Nadu",
+    settings.address?.pincode ? `PIN: ${settings.address.pincode}` : "PIN: 635202",
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <main className="w-full bg-[#FFFBF7] min-h-screen">
@@ -333,24 +337,24 @@ export default async function AboutPage() {
               </p>
 
               {/* Clean Information Card */}
-              <div className="mt-6 rounded-[16px] sm:rounded-[18px] bg-[#FAF4ED] border border-[#E8DFD4] p-6 sm:p-7 shadow-[0_2px_12px_rgba(42,24,16,0.02)] space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-5 border-b border-[#E8DFD4]/80">
-                  <div>
+              <div className="mt-6 rounded-[16px] sm:rounded-[18px] bg-[#FAF4ED] border border-[#E8DFD4] p-5 sm:p-7 shadow-[0_2px_12px_rgba(42,24,16,0.02)] space-y-4 sm:space-y-5">
+                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 pb-4 sm:pb-5 border-b border-[#E8DFD4]/80">
+                  <div className="w-full pb-4 border-b border-[#E8DFD4]/80 sm:pb-0 sm:border-b-0">
                     <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] sm:text-[11px] mb-1">
                       BRAND / OPERATING NAME
                     </span>
-                    <span className="font-[family-name:var(--font-body)] text-[14.5px] sm:text-[15px] font-semibold text-[#1A1614]">
+                    <span className="font-[family-name:var(--font-body)] text-[14.5px] sm:text-[15px] font-semibold text-[#1A1614] block">
                       {settings.businessName}
                     </span>
                   </div>
 
-                  <div>
+                  <div className="w-full">
                     <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] sm:text-[11px] mb-1">
                       CUSTOMER INQUIRIES &amp; SUPPORT
                     </span>
                     <a
                       href={`mailto:${settings.supportEmail}`}
-                      className="font-[family-name:var(--font-body)] text-[14.5px] sm:text-[15px] font-medium text-[#BF5330] hover:text-[#8F3E20] hover:underline transition-colors"
+                      className="font-[family-name:var(--font-body)] text-[14.5px] sm:text-[15px] font-medium text-[#BF5330] hover:text-[#8F3E20] hover:underline transition-colors break-words block"
                     >
                       {settings.supportEmail}
                     </a>
@@ -359,26 +363,26 @@ export default async function AboutPage() {
 
                 {/* Optional Phone/WhatsApp if configured */}
                 {(settings.phone || settings.whatsapp) && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-5 border-b border-[#E8DFD4]/80">
+                  <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 pb-4 sm:pb-5 border-b border-[#E8DFD4]/80">
                     {settings.phone && (
-                      <div>
+                      <div className="w-full pb-4 border-b border-[#E8DFD4]/80 sm:pb-0 sm:border-b-0">
                         <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] sm:text-[11px] mb-1">
                           CUSTOMER PHONE
                         </span>
                         <a
                           href={`tel:${settings.phone.replace(/\s+/g, "")}`}
-                          className="font-[family-name:var(--font-body)] text-[14px] font-medium text-[#1A1614] hover:text-[#BF5330] transition-colors"
+                          className="font-[family-name:var(--font-body)] text-[14px] font-medium text-[#1A1614] hover:text-[#BF5330] transition-colors break-words block"
                         >
                           {settings.phone}
                         </a>
                       </div>
                     )}
                     {settings.whatsapp && (
-                      <div>
+                      <div className="w-full">
                         <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] sm:text-[11px] mb-1">
                           WHATSAPP SUPPORT
                         </span>
-                        <span className="font-[family-name:var(--font-body)] text-[14px] font-medium text-[#1A1614]">
+                        <span className="font-[family-name:var(--font-body)] text-[14px] font-medium text-[#1A1614] break-words block">
                           {settings.whatsapp}
                         </span>
                       </div>
@@ -387,12 +391,14 @@ export default async function AboutPage() {
                 )}
 
                 {/* Operating Address */}
-                <div>
+                <div className="w-full">
                   <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] sm:text-[11px] mb-1">
                     OPERATING ADDRESS
                   </span>
-                  <p className="font-[family-name:var(--font-body)] text-[13.5px] sm:text-[14px] text-[#4A3B32] leading-relaxed">
-                    {addressFormatted}
+                  <p className="font-[family-name:var(--font-body)] text-[13.5px] sm:text-[14px] text-[#4A3B32] leading-relaxed break-words">
+                    <span>{addressLine1}, </span>
+                    <br className="hidden md:inline" />
+                    <span>{stateAndPin}</span>
                   </p>
                 </div>
               </div>

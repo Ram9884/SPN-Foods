@@ -1,18 +1,7 @@
-import type { Metadata } from "next";
-import { ProfileSection } from "@/components/account/profile-section";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Profile — SPN Health Mix",
-  description: "Your personal details and contact information.",
-};
-
-export default function AccountProfilePage() {
-  return (
-    <div>
-      <ProfileSection />
-    </div>
-  );
+export default function AccountIndexRedirectPage() {
+  redirect("/account/profile");
 }
-

@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
-import { orderItems, orders, payments, productImages, shipments, shipmentTrackingEvents } from "../db/schema";
+import { orderItems, orders, payments, productImages, shipments, shipmentTrackingEvents, products } from "../db/schema";
 import type { AnyDb } from "../orders/common";
 import type { PaymentGateway } from "../payments/razorpay";
 import { verifyCheckoutSignature } from "../payments/signature";
@@ -107,13 +107,87 @@ async function attachDetails(db: AnyDb, order: { id: string }) {
 }
 
 export async function listMyOrders(db: AnyDb, profileId: string, opts: { limit?: number; offset?: number } = {}) {
-  return db
+  const userOrders = await db
     .select(orderColumns)
     .from(orders)
     .where(eq(orders.profileId, profileId))
     .orderBy(desc(orders.createdAt))
     .limit(Math.min(opts.limit ?? 20, 50))
     .offset(opts.offset ?? 0);
+
+  if (userOrders.length === 0) return [];
+
+  const orderIds = userOrders.map((o) => o.id);
+
+  // Attach items count & primary product thumbnail
+  const items = await db
+    .select({
+      orderId: orderItems.orderId,
+      productId: orderItems.productId,
+      productName: orderItems.productName,
+      quantity: orderItems.quantity,
+    })
+    .from(orderItems)
+    .where(inArray(orderItems.orderId, orderIds));
+
+  const productIds = Array.from(
+    new Set(items.map((i) => i.productId).filter((id): id is string => Boolean(id)))
+  );
+
+  const imagesMap = new Map<string, string>();
+  if (productIds.length > 0) {
+    const imgs = await db
+      .select({
+        productId: productImages.productId,
+        r2Key: productImages.r2Key,
+      })
+      .from(productImages)
+      .where(and(inArray(productImages.productId, productIds), eq(productImages.isPrimary, true)));
+    const imageBaseUrl = process.env.R2_PUBLIC_BASE_URL;
+    for (const img of imgs) {
+      if (img.productId && img.r2Key) {
+        const url = imageUrl(imageBaseUrl, img.r2Key);
+        if (url) imagesMap.set(img.productId, url);
+      }
+    }
+
+    const prods = await db
+      .select({ id: products.id, slug: products.slug })
+      .from(products)
+      .where(inArray(products.id, productIds));
+    for (const p of prods) {
+      if (!imagesMap.has(p.id) && p.slug) {
+        imagesMap.set(p.id, `/products/${p.slug}/main.jpg`);
+      }
+    }
+  }
+
+  // Shipments for delivery dates
+  const ships = await db
+    .select({
+      orderId: shipments.orderId,
+      deliveredAt: shipments.deliveredAt,
+      shippedAt: shipments.shippedAt,
+    })
+    .from(shipments)
+    .where(inArray(shipments.orderId, orderIds));
+
+  return userOrders.map((order) => {
+    const orderItemRows = items.filter((i) => i.orderId === order.id);
+    const itemsCount = orderItemRows.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const firstItem = orderItemRows[0];
+    const img = firstItem?.productId ? imagesMap.get(firstItem.productId) ?? null : null;
+    const shipment = ships.find((s) => s.orderId === order.id);
+
+    return {
+      ...order,
+      itemsCount: itemsCount > 0 ? itemsCount : undefined,
+      imageUrl: img,
+      productName: firstItem?.productName ?? null,
+      deliveredAt: shipment?.deliveredAt ? shipment.deliveredAt.toISOString() : null,
+      shippedAt: shipment?.shippedAt ? shipment.shippedAt.toISOString() : null,
+    };
+  });
 }
 
 export async function getMyOrder(db: AnyDb, profileId: string, orderId: string) {

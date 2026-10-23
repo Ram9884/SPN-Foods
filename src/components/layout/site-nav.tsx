@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { Menu, Search, ShoppingBag, User, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
+import { AccountDropdown } from "@/components/layout/account-dropdown";
 import type { CategoryCard } from "@/lib/storefront/types";
 
 const NAV_CATEGORIES = [
@@ -384,15 +385,8 @@ export function SiteNav({ categories }: SiteNavProps) {
               />
             </form>
 
-            {/* Account Icon */}
-            <Link
-              href="/account"
-              prefetch={false}
-              className="flex items-center justify-center h-10 w-10 rounded-full hover:bg-[var(--color-surface-sunken)] active:scale-95 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] text-[var(--color-text-primary)]"
-              aria-label="My Account"
-            >
-              <User className="h-5 w-5" aria-hidden />
-            </Link>
+            {/* Account Dropdown */}
+            <AccountDropdown />
 
             {/* Cart Icon with Terracotta Badge */}
             <Link

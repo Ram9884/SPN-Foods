@@ -27,16 +27,20 @@ export default async function ContactPage() {
     settings.address &&
     (settings.address.line1 || settings.address.city || settings.address.state);
 
-  const addressFormatted = hasAddress
-    ? [
-        settings.address?.line1,
-        settings.address?.line2,
-        [settings.address?.city, settings.address?.state].filter(Boolean).join(", "),
-        settings.address?.pincode ? `PIN: ${settings.address.pincode}` : null,
-      ]
-        .filter(Boolean)
-        .join(", ")
-    : "No. 257, Vaguthupatti Village, Krishnapuram PT, Dharmapuri, Tamil Nadu, PIN: 635202";
+  const addressLine1 = [
+    settings.address?.line1 || "No. 257, Vaguthupatti Village",
+    settings.address?.line2 || "Krishnapuram PT",
+    settings.address?.city || "Dharmapuri",
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const stateAndPin = [
+    settings.address?.state || "Tamil Nadu",
+    settings.address?.pincode ? `PIN: ${settings.address.pincode}` : "PIN: 635202",
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <main className="w-full bg-[#FFFBF7] min-h-screen">
@@ -142,43 +146,36 @@ export default async function ContactPage() {
                       <Mail className="w-5 h-5" aria-hidden="true" />
                     </div>
                     <div className="font-[family-name:var(--font-body)] min-w-0 flex-1">
-                      <h3 className="text-[14.5px] sm:text-[15px] font-semibold text-[#1A1614]">
+                      <h3 className="text-[15px] sm:text-[15.5px] font-normal text-[#1A1614]">
                         Email Support
                       </h3>
                       <p className="text-[13px] text-[#635850] mt-0.5">
                         For customer orders, billing, and product queries:
                       </p>
                       <a
-                        href={`mailto:${settings.supportEmail}`}
-                        className="inline-block mt-1 text-[14px] font-semibold text-[#BF5330] hover:text-[#8F3E20] hover:underline break-all sm:break-normal transition-colors"
+                        href={`mailto:${settings.supportEmail || "spnhealthmix@gmail.com"}`}
+                        className="inline-block mt-1 text-[14px] font-medium text-[#BF5330] hover:text-[#8F3E20] hover:underline break-all sm:break-normal transition-colors"
                       >
-                        {settings.supportEmail}
+                        {settings.supportEmail || "spnhealthmix@gmail.com"}
                       </a>
-                    </div>
-                  </div>
-
-                  {/* Optional Phone (if configured) */}
-                  {settings.phone && (
-                    <div className="flex items-start gap-4 pt-4 border-t border-[#E8DFD4]/60">
-                      <div className="w-11 h-11 rounded-[10px] bg-[#F5EBE1] border border-[#E8DFD4] flex items-center justify-center shrink-0 text-[#BF5330]">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                        </svg>
-                      </div>
-                      <div className="font-[family-name:var(--font-body)]">
-                        <h3 className="text-[14.5px] sm:text-[15px] font-semibold text-[#1A1614]">
-                          Phone Support
-                        </h3>
-                        <p className="text-[13px] text-[#635850] mt-0.5">Telephone assistance:</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13.5px]">
+                        <span className="text-[#635850]">Phone:</span>
                         <a
-                          href={`tel:${settings.phone.replace(/\s+/g, "")}`}
-                          className="inline-block mt-1 text-[14px] font-medium text-[#1A1614] hover:text-[#BF5330] transition-colors"
+                          href="tel:+917094938940"
+                          className="font-medium text-[#1A1614] hover:text-[#BF5330] hover:underline transition-colors"
                         >
-                          {settings.phone}
+                          +91 70949 38940
+                        </a>
+                        <span className="text-[#D6C7BA] select-none">/</span>
+                        <a
+                          href="tel:+916382674529"
+                          className="font-medium text-[#1A1614] hover:text-[#BF5330] hover:underline transition-colors"
+                        >
+                          +91 63826 74529
                         </a>
                       </div>
                     </div>
-                  )}
+                  </div>
 
                   {/* Row 2: Operating Address */}
                   <div className="flex items-start gap-4 pt-4 border-t border-[#E8DFD4]/60">
@@ -186,11 +183,13 @@ export default async function ContactPage() {
                       <MapPin className="w-5 h-5" aria-hidden="true" />
                     </div>
                     <div className="font-[family-name:var(--font-body)]">
-                      <h3 className="text-[14.5px] sm:text-[15px] font-semibold text-[#1A1614]">
+                      <h3 className="text-[15px] sm:text-[15.5px] font-normal text-[#1A1614]">
                         Operating Address
                       </h3>
                       <p className="text-[13px] sm:text-[13.5px] text-[#4A3B32] mt-1 leading-relaxed">
-                        {addressFormatted}
+                        <span>{addressLine1}, </span>
+                        <br className="hidden md:inline" />
+                        <span>{stateAndPin}</span>
                       </p>
                     </div>
                   </div>
@@ -201,7 +200,7 @@ export default async function ContactPage() {
                       <Clock className="w-5 h-5" aria-hidden="true" />
                     </div>
                     <div className="font-[family-name:var(--font-body)]">
-                      <h3 className="text-[14.5px] sm:text-[15px] font-semibold text-[#1A1614]">
+                      <h3 className="text-[15px] sm:text-[15.5px] font-normal text-[#1A1614]">
                         Response Time
                       </h3>
                       <p className="text-[13px] text-[#635850] mt-0.5 leading-relaxed">

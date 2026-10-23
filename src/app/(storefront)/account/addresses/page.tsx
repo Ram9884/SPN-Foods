@@ -5,13 +5,9 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Saved Addresses — SPN Health Mix",
-  description: "Manage your delivery addresses and set your default destination.",
+  description: "Manage your delivery destinations for quick checkout.",
 };
 
 export default function AccountAddressesPage() {
-  return (
-    <div className="space-y-6">
-      <AccountAddresses />
-    </div>
-  );
+  return <AccountAddresses />;
 }

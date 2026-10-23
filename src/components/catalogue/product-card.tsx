@@ -318,11 +318,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
 
           {/* Pack size selector */}
           {variants.length > 0 ? (
-            <div className="mb-3.5 relative" ref={overflowRef}>
-              <p className="font-[family-name:var(--font-body)] text-[11.5px] sm:text-[12px] font-medium text-[#635850] mb-1.5">
-                Select pack size:
-              </p>
-
+            <div className="mt-2 sm:mt-2.5 mb-3.5 relative" ref={overflowRef}>
               {/* Mobile View (< md): Always display all available pack sizes directly, wrapping neatly if needed */}
               <div
                 className="flex md:hidden flex-wrap gap-1.5 w-full"
@@ -625,10 +621,7 @@ export function ProductCardSkeleton() {
             <div className="h-5 w-4/5 bg-[#FAF5EE] rounded" />
           </div>
           {/* Pack size selector skeleton */}
-          <div className="mb-3.5">
-            <div className="h-4 mb-1.5 flex items-center">
-              <div className="h-3 w-24 bg-[#FAF5EE] rounded" />
-            </div>
+          <div className="mt-2 sm:mt-2.5 mb-3.5">
             <div className="h-8 flex gap-1.5">
               <div className="h-8 w-14 bg-[#FAF5EE] rounded-[6px]" />
               <div className="h-8 w-14 bg-[#FAF5EE] rounded-[6px]" />
