@@ -7,8 +7,8 @@ import { CheckoutForm } from "@/components/checkout/checkout-form";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Checkout — SPN Foods",
-  description: "Complete your SPN Foods order securely.",
+  title: "Checkout — SPN Health Mix",
+  description: "Complete your SPN Health Mix order securely.",
 };
 
 export default async function CheckoutPage() {

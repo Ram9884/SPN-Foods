@@ -142,7 +142,7 @@ export function AccountReviews() {
           My Reviews & Ratings
         </h1>
         <p className="text-sm text-[var(--color-text-muted)] mt-1">
-          View, edit, or manage the product reviews you’ve shared with the SPN Foods community.
+          View, edit, or manage the product reviews you’ve shared with the SPN Health Mix community.
         </p>
       </div>
 

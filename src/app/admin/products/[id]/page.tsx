@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ProductEditor } from "@/components/admin/product-editor";
 
 export const metadata: Metadata = {
-  title: "Edit Product — SPN Foods Admin",
+  title: "Edit Product — SPN Health Mix Admin",
   description: "Manage product variants, inventory, and images.",
 };
 

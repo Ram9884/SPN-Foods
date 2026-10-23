@@ -27,7 +27,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Order Confirmed — SPN Foods",
+  title: "Order Confirmed — SPN Health Mix",
   description: "Your order has been placed and confirmed.",
 };
 

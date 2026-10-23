@@ -10,7 +10,7 @@ export function renderPaymentFailedEmail(data: PaymentFailedData): {
   html: string;
   text: string;
 } {
-  const subject = `Payment Could Not Be Completed: Order #${data.orderNumber} — SPN Foods`;
+  const subject = `Payment Could Not Be Completed: Order #${data.orderNumber} — SPN Health Mix`;
 
   const contentHtml = `
     <p>Dear <strong>${escapeHtml(data.customerName)}</strong>,</p>
@@ -41,7 +41,7 @@ export function renderPaymentFailedEmail(data: PaymentFailedData): {
   });
 
   const text = `
-SPN FOODS — PAYMENT INCOMPLETE
+SPN HEALTH MIX — PAYMENT INCOMPLETE
 
 Dear ${data.customerName},
 

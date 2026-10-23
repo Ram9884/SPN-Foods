@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { OrderDetailView } from "@/components/admin/order-detail-view";
 
 export const metadata: Metadata = {
-  title: "Order Details — SPN Foods Admin",
+  title: "Order Details — SPN Health Mix Admin",
   description: "View customer order items, payments, shipment status, and audit history.",
 };
 

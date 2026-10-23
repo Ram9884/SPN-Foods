@@ -11,7 +11,7 @@ export function renderOrderConfirmationEmail(data: OrderConfirmedData): {
   html: string;
   text: string;
 } {
-  const subject = `Order Confirmed: ${data.orderNumber} — SPN Foods`;
+  const subject = `Order Confirmed: ${data.orderNumber} — SPN Health Mix`;
 
   const address = data.shippingAddress;
   const addressLine = [
@@ -26,7 +26,7 @@ export function renderOrderConfirmationEmail(data: OrderConfirmedData): {
 
   const contentHtml = `
     <p>Dear <strong>${escapeHtml(data.customerName)}</strong>,</p>
-    <p>Thank you for choosing SPN Foods! Your order <strong>#${escapeHtml(data.orderNumber)}</strong> has been successfully placed and confirmed.</p>
+    <p>Thank you for choosing SPN Health Mix! Your order <strong>#${escapeHtml(data.orderNumber)}</strong> has been successfully placed and confirmed.</p>
     
     <div style="margin: 20px 0; padding: 16px; background-color: #FAF6F2; border-radius: 8px; border: 1px solid #EDE6DF;">
       <div style="font-size: 12px; color: #87786E; text-transform: uppercase; font-weight: 600;">Delivery Address</div>
@@ -45,7 +45,7 @@ export function renderOrderConfirmationEmail(data: OrderConfirmedData): {
   `;
 
   const html = renderBaseEmailHtml({
-    preheader: `Your order #${data.orderNumber} has been confirmed. Thank you for your purchase from SPN Foods!`,
+    preheader: `Your order #${data.orderNumber} has been confirmed. Thank you for your purchase from SPN Health Mix!`,
     headline: "Order Confirmed",
     badgeText: "Order Placed",
     badgeColor: "green",
@@ -66,11 +66,11 @@ export function renderOrderConfirmationEmail(data: OrderConfirmedData): {
     .join(", ");
 
   const text = `
-SPN FOODS — ORDER CONFIRMED
+SPN HEALTH MIX — ORDER CONFIRMED
 
 Dear ${data.customerName},
 
-Thank you for choosing SPN Foods! Your order #${data.orderNumber} has been successfully placed and confirmed.
+Thank you for choosing SPN Health Mix! Your order #${data.orderNumber} has been successfully placed and confirmed.
 
 Order Reference: ${data.orderNumber}
 Delivery Address:

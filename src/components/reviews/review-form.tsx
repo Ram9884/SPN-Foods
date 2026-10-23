@@ -111,7 +111,7 @@ export function ReviewForm({
             />
           </svg>
           <span>
-            <strong>Verified Purchase:</strong> You purchased this item on SPN Foods. Your review will display a verified badge.
+            <strong>Verified Purchase:</strong> You purchased this item on SPN Health Mix. Your review will display a verified badge.
           </span>
         </div>
       )}

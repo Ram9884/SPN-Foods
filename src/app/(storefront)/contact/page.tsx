@@ -15,7 +15,7 @@ import {
 import { fetchBusinessSettings } from "@/lib/settings/service";
 
 export const metadata: Metadata = {
-  title: "Contact SPN Foods — Customer Support & Order Assistance",
+  title: "Contact SPN Health Mix — Customer Support & Order Assistance",
   description:
     "We are here to assist you with order status, product ingredients, fulfillment, and customer inquiries.",
 };
@@ -40,7 +40,7 @@ export default async function ContactPage() {
 
   return (
     <main className="w-full bg-[#FFFBF7] min-h-screen">
-      {/* ── Section 1: Hero — Contact SPN Foods ───────────────────────────── */}
+      {/* ── Section 1: Hero — Contact SPN Health Mix ───────────────────────── */}
       <section
         aria-labelledby="contact-hero-heading"
         className="w-full bg-[#FFFBF7] pt-10 sm:pt-14 lg:pt-18 pb-10 sm:pb-14 lg:pb-16 overflow-hidden relative"
@@ -88,7 +88,7 @@ export default async function ContactPage() {
                 className="text-3xl sm:text-4xl lg:text-[46px] xl:text-[50px] text-[#1A1614] leading-[1.12] tracking-[-0.02em] mb-4 sm:mb-5 font-normal"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
-                Contact SPN Foods
+                Contact SPN Health Mix
               </h1>
 
               {/* Supporting Copy */}
@@ -230,7 +230,7 @@ export default async function ContactPage() {
                 </div>
 
                 <p className="font-[family-name:var(--font-body)] text-[13.5px] sm:text-[14px] text-[#635850] leading-[1.65] mb-5">
-                  If you have already placed an order with SPN Foods, your dispatch status, tracking number (AWB), courier name, and itemized receipt are accessible directly in your account portal.
+                  If you have already placed an order with SPN Health Mix, your dispatch status, tracking number (AWB), courier name, and itemized receipt are accessible directly in your account portal.
                 </p>
 
                 {/* Softly Tinted Order Guidance Box */}
@@ -358,7 +358,7 @@ export default async function ContactPage() {
                 </h3>
               </div>
               <p className="font-[family-name:var(--font-body)] text-[13.5px] sm:text-[14px] text-[#635850] leading-[1.65]">
-                We’re here for any other questions or suggestions to help you have a better experience with SPN Foods.
+                We’re here for any other questions or suggestions to help you have a better experience with SPN Health Mix.
               </p>
             </div>
           </div>

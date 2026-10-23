@@ -58,7 +58,7 @@ export interface RazorpayCheckoutButtonProps {
 export function RazorpayCheckoutButton({
   amountPaise,
   currency = "INR",
-  orderName = "SPN Foods",
+  orderName = "SPN Health Mix",
   description = "Standard Web Checkout",
   customerName,
   customerEmail,
@@ -133,7 +133,7 @@ export function RazorpayCheckoutButton({
           contact: customerPhone,
         },
         theme: {
-          color: "#B4491F", // SPN Foods Terracotta Brand Accent
+          color: "#B4491F", // SPN Health Mix Terracotta Brand Accent
         },
         handler: async function (response: {
           razorpay_order_id: string;

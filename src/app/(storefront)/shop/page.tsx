@@ -10,7 +10,7 @@ import { Breadcrumb } from "@/components/catalogue/breadcrumb";
 import type { SortOption } from "@/lib/storefront/types";
 
 export const metadata: Metadata = {
-  title: "Shop All Products — SPN Foods",
+  title: "Shop All Products — SPN Health Mix",
   description: "Explore our traditional health mixes, podis, masalas, and snacks made with heritage recipes.",
   alternates: { canonical: "/shop" },
 };

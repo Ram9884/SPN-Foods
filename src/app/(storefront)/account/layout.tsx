@@ -7,7 +7,7 @@ import { AccountNav } from "@/components/account/account-nav";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "My Account — SPN Foods",
+  title: "My Account — SPN Health Mix",
   description: "Manage your personal profile, view past orders, and manage saved delivery addresses.",
 };
 

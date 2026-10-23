@@ -25,7 +25,7 @@ function buildMimeMessage(message: EmailMessage, from: string, replyTo?: string)
   const toHeader = cleanToName
     ? `"${cleanToName}" <${cleanToEmail}>`
     : cleanToEmail;
-  const fromHeader = `"SPN Foods" <${cleanHeader(from)}>`;
+  const fromHeader = `"SPN Health Mix" <${cleanHeader(from)}>`;
 
   const headers = [
     `From: ${fromHeader}`,

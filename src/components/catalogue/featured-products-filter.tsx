@@ -49,7 +49,7 @@ export function FeaturedProductsFilter({
 
         {/* Product Grid: Exactly 8 products in 4 columns on desktop (2 rows of 4) */}
         {productsToDisplay.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {productsToDisplay.map((product, idx) => (
               <FeaturedProductCard
                 key={product.id}

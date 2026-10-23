@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { fetchBusinessSettings } from "@/lib/settings/service";
 
 export const metadata: Metadata = {
-  title: "About SPN Foods — Authentic South Indian Food Heritage",
+  title: "About SPN Health Mix — Authentic South Indian Food Heritage",
   description:
     "Bringing time-tested Indian food traditions, wholesome grains, and authentic health mixes into contemporary family kitchens.",
 };
@@ -30,7 +30,7 @@ export default async function AboutPage() {
 
   return (
     <main className="w-full bg-[#FFFBF7] min-h-screen">
-      {/* ── Section 1: Hero — About SPN Foods ─────────────────────────────── */}
+      {/* ── Section 1: Hero — About SPN Health Mix ─────────────────────────── */}
       <section
         aria-labelledby="about-hero-heading"
         className="w-full bg-[#FFFBF7] pt-10 sm:pt-14 lg:pt-18 pb-10 sm:pb-14 lg:pb-16 overflow-hidden relative"
@@ -78,7 +78,7 @@ export default async function AboutPage() {
                 className="text-3xl sm:text-4xl lg:text-[46px] xl:text-[50px] text-[#1A1614] leading-[1.12] tracking-[-0.02em] mb-4 sm:mb-5 font-normal"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
-                About SPN Foods
+                About SPN Health Mix
               </h1>
 
               {/* Supporting Copy */}
@@ -103,7 +103,7 @@ export default async function AboutPage() {
               <div className="relative rounded-[20px] sm:rounded-[24px] overflow-hidden aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3] xl:aspect-[16/11] shadow-[0_6px_28px_rgba(42,24,16,0.06)] border border-[#E8DFD4] bg-[#FAF4ED]">
                 <Image
                   src="/categories/health-mix.jpg"
-                  alt="SPN Foods traditional porridge and wholesome heirloom ingredients in authentic brass bowl"
+                  alt="SPN Health Mix traditional porridge and wholesome heirloom ingredients in authentic brass bowl"
                   fill
                   sizes="(max-width: 1024px) 100vw, 640px"
                   priority
@@ -175,7 +175,7 @@ export default async function AboutPage() {
               {/* Paragraphs */}
               <div className="space-y-4 font-[family-name:var(--font-body)] text-[14px] sm:text-[14.5px] lg:text-[15px] text-[#635850] leading-[1.68]">
                 <p>
-                  SPN Foods was founded on a simple belief: the recipes and nourishment passed down through traditional Indian households represent one of the most balanced, enduring ways to feed a family. In a world increasingly saturated with ultra-processed shortcuts and artificial fillers, we focus on authentic, recognizable ingredients.
+                  SPN Health Mix was founded on a simple belief: the recipes and nourishment passed down through traditional Indian households represent one of the most balanced, enduring ways to feed a family. In a world increasingly saturated with ultra-processed shortcuts and artificial fillers, we focus on authentic, recognizable ingredients.
                 </p>
                 <p>
                   Our products range from nutrient-dense health mixes (Sathu Maavu) to multi-grain porridges and regional staples. We select quality grains, pulses, and nuts, milling and roasting them in accordance with traditional preparation standards so that everyday cooking remains both nutritious and convenient.
@@ -197,7 +197,7 @@ export default async function AboutPage() {
             id="principles-heading"
             className="font-[family-name:var(--font-body)] text-[11px] sm:text-[11.5px] font-semibold uppercase tracking-[0.16em] text-[#BF5330] mb-6 sm:mb-7 block"
           >
-            WHAT DEFINES SPN FOODS
+            WHAT DEFINES SPN HEALTH MIX
           </span>
 
           {/* Three Feature Cards in one row */}
@@ -329,7 +329,7 @@ export default async function AboutPage() {
 
               {/* Supporting Text */}
               <p className="font-[family-name:var(--font-body)] text-[14px] sm:text-[14.5px] text-[#635850] leading-relaxed">
-                Official business details and communication points for SPN Foods.
+                Official business details and communication points for SPN Health Mix.
               </p>
 
               {/* Clean Information Card */}

@@ -27,8 +27,8 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: {
-    default: "SPN Foods — Traditional Indian Health Foods",
-    template: "%s | SPN Foods",
+    default: "SPN Health Mix — Traditional Indian Health Foods",
+    template: "%s | SPN Health Mix",
   },
   description:
     "Traditional Indian health mixes, spice powders, podis, masalas and snacks. Packaged with care for modern households.",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   ),
   openGraph: {
     type: "website",
-    siteName: "SPN Foods",
+    siteName: "SPN Health Mix",
     locale: "en_IN",
   },
   icons: {

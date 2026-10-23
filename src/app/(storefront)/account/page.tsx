@@ -4,7 +4,7 @@ import { ProfileSection } from "@/components/account/profile-section";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Profile — SPN Foods",
+  title: "Profile — SPN Health Mix",
   description: "Your personal details and contact information.",
 };
 

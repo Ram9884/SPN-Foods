@@ -4,7 +4,7 @@ import { AccountReviews } from "@/components/account/account-reviews";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "My Reviews — SPN Foods",
+  title: "My Reviews — SPN Health Mix",
   description: "View and manage your product reviews, ratings, and verified purchases.",
 };
 

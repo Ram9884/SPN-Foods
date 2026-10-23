@@ -6,7 +6,7 @@ export function renderRefundProcessedEmail(data: RefundProcessedData): {
   html: string;
   text: string;
 } {
-  const subject = `Refund Processed for Order #${data.orderNumber} — SPN Foods`;
+  const subject = `Refund Processed for Order #${data.orderNumber} — SPN Health Mix`;
 
   const contentHtml = `
     <p>Dear <strong>${escapeHtml(data.customerName)}</strong>,</p>
@@ -53,7 +53,7 @@ export function renderRefundProcessedEmail(data: RefundProcessedData): {
   });
 
   const text = `
-SPN FOODS — REFUND PROCESSED
+SPN HEALTH MIX — REFUND PROCESSED
 
 Dear ${data.customerName},
 

@@ -50,7 +50,7 @@ export function SettingsManager() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<BusinessSettings>({
-    businessName: "SPN Foods",
+    businessName: "SPN Health Mix",
     supportEmail: "spnhealthmix@gmail.com",
     phone: null,
     whatsapp: null,

@@ -32,12 +32,12 @@ export async function POST(req: Request) {
         const emailProvider = getEmailProvider();
         await emailProvider.send({
           to: { email: resetData.email, name: resetData.name },
-          subject: "Reset your SPN Foods password",
+          subject: "Reset your SPN Health Mix password",
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1A1614;">
-              <h2 style="color: #BF5330;">SPN Foods Password Reset</h2>
+              <h2 style="color: #BF5330;">SPN Health Mix Password Reset</h2>
               <p>Hello ${resetData.name || "Customer"},</p>
-              <p>We received a request to reset your password for your SPN Foods account.</p>
+              <p>We received a request to reset your password for your SPN Health Mix account.</p>
               <div style="margin: 32px 0;">
                 <a href="${resetLink}" style="background-color: #BF5330; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Reset Password</a>
               </div>
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
               <p style="font-size: 13px; color: #635850;">If you did not request this, please ignore this email. Your account remains secure.</p>
             </div>
           `,
-          text: `Reset your SPN Foods password by visiting: ${resetLink} (Link expires in 1 hour)`,
+          text: `Reset your SPN Health Mix password by visiting: ${resetLink} (Link expires in 1 hour)`,
         });
       }
 

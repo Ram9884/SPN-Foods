@@ -27,7 +27,7 @@ export interface BusinessSettings {
 }
 
 export const DEFAULT_BUSINESS_SETTINGS: BusinessSettings = {
-  businessName: "SPN Foods",
+  businessName: "SPN Health Mix",
   supportEmail: "spnhealthmix@gmail.com",
   phone: "+91 63826 74529",
   whatsapp: "+91 70949 38940",

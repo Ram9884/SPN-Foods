@@ -3,8 +3,8 @@ import Link from "next/link";
 import { fetchBusinessSettings } from "@/lib/settings/service";
 
 export const metadata: Metadata = {
-  title: "Shipping Policy — SPN Foods",
-  description: "Learn about SPN Foods delivery coverage, shipping rates, packaging standards, and shipment tracking.",
+  title: "Shipping Policy — SPN Health Mix",
+  description: "Learn about SPN Health Mix delivery coverage, shipping rates, packaging standards, and shipment tracking.",
 };
 
 export default async function ShippingPolicyPage() {

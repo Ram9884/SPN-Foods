@@ -3,8 +3,8 @@ import { Breadcrumb } from "@/components/catalogue/breadcrumb";
 import { CartView } from "@/components/cart/cart-view";
 
 export const metadata: Metadata = {
-  title: "Shopping Cart — SPN Foods",
-  description: "View and manage items in your SPN Foods shopping cart.",
+  title: "Shopping Cart — SPN Health Mix",
+  description: "View and manage items in your SPN Health Mix shopping cart.",
   alternates: { canonical: "/cart" },
 };
 

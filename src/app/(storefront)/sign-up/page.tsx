@@ -121,21 +121,21 @@ function SignUpContent() {
           >
             <Image
               src="/logo.png"
-              alt="SPN Foods Emblem"
+              alt="SPN Health Mix Emblem"
               width={64}
               height={64}
               priority
               className="w-16 h-16 rounded-full object-contain drop-shadow-md mb-2.5 transition-transform duration-200 group-hover:scale-105"
             />
             <span className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] font-normal tracking-tight text-[var(--color-brand-primary)] leading-none">
-              SPN Foods
+              SPN Health Mix
             </span>
           </Link>
           <h1 className="font-heading text-3xl font-normal text-[var(--color-text-primary)]">
             Create an Account
           </h1>
           <p className="font-[family-name:var(--font-body)] text-sm text-[var(--color-text-muted)] mt-1.5">
-            Join SPN Foods for faster checkout and order tracking
+            Join SPN Health Mix for faster checkout and order tracking
           </p>
         </div>
 

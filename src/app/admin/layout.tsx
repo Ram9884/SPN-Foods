@@ -8,8 +8,8 @@ import { AdminNav } from "@/components/admin/admin-nav";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Admin Panel — SPN Foods",
-  description: "Operational management for SPN Foods products, stock, categories, and customer orders.",
+  title: "Admin Panel — SPN Health Mix",
+  description: "Operational management for SPN Health Mix products, stock, categories, and customer orders.",
   robots: {
     index: false,
     follow: false,

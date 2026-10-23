@@ -3,8 +3,8 @@ import Link from "next/link";
 import { fetchBusinessSettings } from "@/lib/settings/service";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions — SPN Foods",
-  description: "Terms and conditions governing the use of the SPN Foods storefront, account registration, purchases, and fulfillment.",
+  title: "Terms & Conditions — SPN Health Mix",
+  description: "Terms and conditions governing the use of the SPN Health Mix storefront, account registration, purchases, and fulfillment.",
 };
 
 export default async function TermsPage() {

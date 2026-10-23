@@ -157,11 +157,11 @@ export function SiteNav({ categories }: SiteNavProps) {
             href="/"
             prefetch={false}
             className="flex items-center gap-2.5 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] rounded group"
-            aria-label="SPN Foods — Home"
+            aria-label="SPN Health Mix — Home"
           >
             <Image
               src="/logo.png"
-              alt="SPN Foods Emblem"
+              alt="SPN Health Mix Emblem"
               width={36}
               height={36}
               priority
@@ -170,7 +170,7 @@ export function SiteNav({ categories }: SiteNavProps) {
             <span
               className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] text-[var(--color-brand-primary)] tracking-tight font-normal leading-none"
             >
-              SPN Foods
+              SPN Health Mix
             </span>
           </Link>
 
@@ -364,11 +364,11 @@ export function SiteNav({ categories }: SiteNavProps) {
 
           {/* Right controls: Search pill, User, Cart */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Inline search bar (Desktop) */}
+            {/* Inline search bar (Desktop only - lg and above) */}
             <form
               action="/shop"
               method="GET"
-              className="relative hidden sm:flex items-center"
+              className="relative hidden lg:flex items-center"
               role="search"
             >
               <Search
@@ -380,19 +380,9 @@ export function SiteNav({ categories }: SiteNavProps) {
                 name="q"
                 placeholder="Search products..."
                 aria-label="Search products"
-                className="w-40 md:w-48 lg:w-56 h-9 pl-9 pr-3 text-[13px] rounded-full bg-[#FAF5EE] border border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-brand-primary)] focus:bg-white transition-all font-[family-name:var(--font-body)]"
+                className="w-48 lg:w-56 h-9 pl-9 pr-3 text-[13px] rounded-full bg-[#FAF5EE] border border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-brand-primary)] focus:bg-white transition-all font-[family-name:var(--font-body)]"
               />
             </form>
-
-            {/* Mobile search icon button */}
-            <Link
-              href="/search"
-              prefetch={false}
-              className="sm:hidden flex items-center justify-center h-10 w-10 rounded-full hover:bg-[var(--color-surface-sunken)] active:scale-95 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]"
-              aria-label="Search products"
-            >
-              <Search className="h-5 w-5 text-[var(--color-text-primary)]" aria-hidden />
-            </Link>
 
             {/* Account Icon */}
             <Link
@@ -455,7 +445,7 @@ export function SiteNav({ categories }: SiteNavProps) {
           >
             <Image
               src="/logo.png"
-              alt="SPN Foods Emblem"
+              alt="SPN Health Mix Emblem"
               width={36}
               height={36}
               className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain"
@@ -463,7 +453,7 @@ export function SiteNav({ categories }: SiteNavProps) {
             <span
               className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] text-[var(--color-brand-primary)] tracking-tight font-normal leading-none"
             >
-              SPN Foods
+              SPN Health Mix
             </span>
           </Link>
           <button
@@ -473,6 +463,29 @@ export function SiteNav({ categories }: SiteNavProps) {
           >
             <X className="h-5 w-5 text-[var(--color-text-body)]" aria-hidden />
           </button>
+        </div>
+
+        {/* Drawer search bar */}
+        <div className="px-4 py-3 border-b border-[var(--color-border)]/60">
+          <form
+            action="/shop"
+            method="GET"
+            onSubmit={() => setDrawerOpen(false)}
+            className="relative flex items-center"
+            role="search"
+          >
+            <Search
+              className="absolute left-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              name="q"
+              placeholder="Search products..."
+              aria-label="Search products"
+              className="w-full h-9 pl-9 pr-3 text-[13px] rounded-[8px] bg-[var(--color-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-brand-primary)] focus:bg-white transition-all font-[family-name:var(--font-body)]"
+            />
+          </form>
         </div>
 
         {/* Drawer nav links */}

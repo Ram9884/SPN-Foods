@@ -156,7 +156,7 @@ export function CategoryStrip({ categories }: CategoryStripProps) {
                   {!isNeutralTreatment && meta.image ? (
                     <Image
                       src={meta.image}
-                      alt={`SPN Foods ${cat.name} authentic collection`}
+                      alt={`SPN Health Mix ${cat.name} authentic collection`}
                       fill
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px"
                       className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"

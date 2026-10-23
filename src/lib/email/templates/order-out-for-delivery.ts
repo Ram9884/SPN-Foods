@@ -6,7 +6,7 @@ export function renderOrderOutForDeliveryEmail(data: OrderOutForDeliveryData): {
   html: string;
   text: string;
 } {
-  const subject = `Out for Delivery: Your Order #${data.orderNumber} — SPN Foods`;
+  const subject = `Out for Delivery: Your Order #${data.orderNumber} — SPN Health Mix`;
 
   const contentHtml = `
     <p>Dear <strong>${escapeHtml(data.customerName)}</strong>,</p>
@@ -32,7 +32,7 @@ export function renderOrderOutForDeliveryEmail(data: OrderOutForDeliveryData): {
   `;
 
   const html = renderBaseEmailHtml({
-    preheader: `Your SPN Foods order #${data.orderNumber} is out for delivery.`,
+    preheader: `Your SPN Health Mix order #${data.orderNumber} is out for delivery.`,
     headline: "Out for Delivery",
     badgeText: "Out for Delivery",
     badgeColor: "amber",
@@ -42,7 +42,7 @@ export function renderOrderOutForDeliveryEmail(data: OrderOutForDeliveryData): {
   });
 
   const text = `
-SPN FOODS — OUT FOR DELIVERY
+SPN HEALTH MIX — OUT FOR DELIVERY
 
 Dear ${data.customerName},
 

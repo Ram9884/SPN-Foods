@@ -6,7 +6,7 @@ export function renderOrderDeliveredEmail(data: OrderDeliveredData): {
   html: string;
   text: string;
 } {
-  const subject = `Delivered: Your SPN Foods Order #${data.orderNumber}`;
+  const subject = `Delivered: Your SPN Health Mix Order #${data.orderNumber}`;
 
   const contentHtml = `
     <p>Dear <strong>${escapeHtml(data.customerName)}</strong>,</p>
@@ -34,7 +34,7 @@ export function renderOrderDeliveredEmail(data: OrderDeliveredData): {
   });
 
   const text = `
-SPN FOODS — ORDER DELIVERED
+SPN HEALTH MIX — ORDER DELIVERED
 
 Dear ${data.customerName},
 

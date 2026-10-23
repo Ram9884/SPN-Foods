@@ -12,7 +12,7 @@ export function ProductGrid({ products, className, priorityCount = 0 }: ProductG
   return (
     <ul
       className={cn(
-        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6",
+        "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
         className
       )}
       aria-label="Products"
@@ -38,7 +38,7 @@ export function ProductGridSkeleton({ count = 8, className }: ProductGridSkeleto
   return (
     <ul
       className={cn(
-        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6",
+        "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
         className
       )}
       aria-label="Loading products"

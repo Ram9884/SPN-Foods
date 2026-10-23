@@ -39,38 +39,67 @@ export function CategoryChips({ categories, activeSlug, className }: CategoryChi
   const chipInactive =
     "bg-[#FFFBF7] border border-[#E8DFD4] text-[#1A1614] font-normal hover:border-[#BF5330] hover:text-[#BF5330]";
 
-  return (
-    <div
-      className={cn("flex items-center gap-2 sm:gap-2.5 overflow-x-auto scrollbar-hide py-1", className)}
-      role="radiogroup"
-      aria-label="Filter by category"
-    >
-      {/* All chip */}
-      <Link
-        href={buildHref()}
-        className={cn(chipBase, isAll ? chipActive : chipInactive)}
-        role="radio"
-        aria-checked={isAll}
-      >
-        All
-      </Link>
+  const filteredCategories = categories.filter((cat) => cat.slug !== "thokku");
 
-      {categories
-        .filter((cat) => cat.slug !== "thokku")
-        .map((cat) => {
-          const isActive = activeSlug === cat.slug;
-          return (
-            <Link
-              key={cat.slug}
-              href={buildHref(cat.slug)}
-              className={cn(chipBase, isActive ? chipActive : chipInactive)}
-              role="radio"
-              aria-checked={isActive}
-            >
-              {cat.name}
-            </Link>
-          );
-        })}
+  const allItems = [
+    { slug: undefined, name: "All", isActive: isAll },
+    ...filteredCategories.map((cat) => ({
+      slug: cat.slug,
+      name: cat.name,
+      isActive: activeSlug === cat.slug,
+    })),
+  ];
+
+  const firstThree = allItems.slice(0, 3);
+  const remaining = allItems.slice(3);
+
+  const renderChip = (
+    item: { slug?: string; name: string; isActive: boolean },
+    isMobile: boolean
+  ) => (
+    <Link
+      key={item.slug ?? "all"}
+      href={buildHref(item.slug)}
+      className={cn(
+        chipBase,
+        isMobile
+          ? "h-8 px-2.5 sm:px-3 text-[12px] sm:text-[12.5px]"
+          : "h-9 sm:h-10 px-4.5 sm:px-5 text-[13px] sm:text-[13.5px]",
+        item.isActive ? chipActive : chipInactive
+      )}
+      role="radio"
+      aria-checked={item.isActive}
+    >
+      {item.name}
+    </Link>
+  );
+
+  return (
+    <div className={cn("w-full md:w-auto", className)}>
+      {/* Mobile View (< md): Exactly 2 lines — first three on 1st line, other three/remaining on 2nd line */}
+      <div
+        className="flex md:hidden flex-col gap-2 w-full py-0.5"
+        role="radiogroup"
+        aria-label="Filter by category"
+      >
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {firstThree.map((item) => renderChip(item, true))}
+        </div>
+        {remaining.length > 0 ? (
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {remaining.map((item) => renderChip(item, true))}
+          </div>
+        ) : null}
+      </div>
+
+      {/* Desktop View (>= md): Clean single-row selector with standard spacing */}
+      <div
+        className="hidden md:flex items-center gap-2 sm:gap-2.5 overflow-x-auto scrollbar-hide py-1"
+        role="radiogroup"
+        aria-label="Filter by category"
+      >
+        {allItems.map((item) => renderChip(item, false))}
+      </div>
     </div>
   );
 }

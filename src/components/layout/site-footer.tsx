@@ -50,7 +50,10 @@ interface SiteFooterProps {
 
 export function SiteFooter({ categories, settings }: SiteFooterProps) {
   const currentYear = new Date().getFullYear();
-  const brandName = settings?.businessName || "SPN Foods";
+  const brandName =
+    settings?.businessName && settings.businessName !== "SPN Foods"
+      ? settings.businessName
+      : "SPN Health Mix";
   const supportEmail = settings?.supportEmail || "spnhealthmix@gmail.com";
 
   return (
@@ -66,7 +69,7 @@ export function SiteFooter({ categories, settings }: SiteFooterProps) {
             >
               <Image
                 src="/logo.png"
-                alt="SPN Foods Emblem"
+                alt="SPN Health Mix Emblem"
                 width={36}
                 height={36}
                 className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain drop-shadow-2xs transition-transform duration-200 group-hover:scale-105"

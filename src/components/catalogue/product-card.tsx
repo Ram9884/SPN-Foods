@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Heart, Minus, Plus, ShoppingCart } from "lucide-react";
+import { ArrowRight, ChevronDown, Heart, Minus, Plus, ShoppingCart, X } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import type { ProductCard as ProductCardType, ProductVariant } from "@/lib/storefront/types";
@@ -12,6 +12,14 @@ interface ProductCardProps {
   product: ProductCardType;
   className?: string;
   priority?: boolean;
+}
+
+/**
+ * Formats variant labels into compact tokens (e.g. "50 g" -> "50g", "1 kg" -> "1kg").
+ */
+export function formatCompactPackSize(label: string): string {
+  if (!label) return "";
+  return label.replace(/(\d+)\s*(g|kg|ml|l)\b/gi, "$1$2");
 }
 
 /**
@@ -92,6 +100,31 @@ export function ProductCard({ product, className, priority = false }: ProductCar
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(initialVariant);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [isOverflowOpen, setIsOverflowOpen] = useState(false);
+  const overflowRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown menu when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!isOverflowOpen) return;
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
+        setIsOverflowOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOverflowOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOverflowOpen]);
 
   const productHref = `/products/${slug}${selectedVariant ? `?variant=${selectedVariant.id}` : ""}`;
 
@@ -107,6 +140,33 @@ export function ProductCard({ product, className, priority = false }: ProductCar
     selectedVariant.discountPercent > 0
   );
   const originalMrp = hasGenuineDiscount ? formatPrice(activeMrpPaise) : null;
+
+  // Compact horizontal pack size selector logic:
+  // Display up to MAX_VISIBLE (3) compact buttons on one line, plus a '+N' control for remaining sizes.
+  const MAX_VISIBLE = 3;
+  const hasOverflow = variants.length > MAX_VISIBLE;
+  const remainingCount = hasOverflow ? variants.length - MAX_VISIBLE : 0;
+
+  // If the user selected a variant that belongs to the overflow items,
+  // swap it into the visible slots so the user's active choice is always directly visible and highlighted on the card.
+  const visibleVariants = (() => {
+    if (!hasOverflow) return variants;
+    const selectedIdx = variants.findIndex((v) => v.id === selectedVariant?.id);
+    if (selectedIdx >= MAX_VISIBLE && selectedVariant) {
+      return [...variants.slice(0, MAX_VISIBLE - 1), selectedVariant];
+    }
+    return variants.slice(0, MAX_VISIBLE);
+  })();
+
+  const overflowVariants = variants.filter(
+    (v) => !visibleVariants.some((vis) => vis.id === v.id)
+  );
+
+  const isSelectedInOverflow = Boolean(
+    hasOverflow &&
+    selectedVariant &&
+    !visibleVariants.some((v) => v.id === selectedVariant.id)
+  );
 
   // Current quantity of selected variant in cart (0 if not added)
   const cartItem = cart?.items?.find((item) => item.variantId === selectedVariant?.id);
@@ -159,13 +219,13 @@ export function ProductCard({ product, className, priority = false }: ProductCar
   return (
     <article
       className={cn(
-        "group flex flex-col h-full bg-white rounded-[20px] border border-[#E8DFD4] shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-[#BF5330]/40 transition-all duration-200 overflow-hidden",
+        "group flex flex-col h-full bg-white rounded-[20px] border border-[#E8DFD4] shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-[#BF5330]/40 transition-all duration-200 relative",
         className
       )}
       aria-label={name}
     >
-      {/* 1. Large Top Product Image with Wishlist Button */}
-      <div className="relative w-full aspect-[4/3] bg-[#FAF5EE] overflow-hidden">
+      {/* 1. Product image — prominently displayed at the top, spanning the card's available width */}
+      <div className="relative w-full aspect-[4/3] bg-[#FAF5EE] overflow-hidden rounded-t-[19px]">
         <Link
           href={productHref}
           prefetch={false}
@@ -178,7 +238,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
               src={image.url}
               alt={image.alt ?? name}
               fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
               className="object-cover object-center group-hover:scale-[1.03] transition-transform duration-300 ease-out"
               priority={priority}
               loading={priority ? "eager" : "lazy"}
@@ -230,88 +290,208 @@ export function ProductCard({ product, className, priority = false }: ProductCar
         ) : null}
       </div>
 
-      {/* 2. Structured Card Body */}
+      {/* 2. Structured Card Body following strictly aligned vertical sections */}
       <div className="p-5 sm:p-5.5 flex flex-col flex-1 justify-between">
         <div>
-          {/* Small Uppercase Category Label */}
-          {category?.name ? (
-            <p className="font-[family-name:var(--font-body)] text-[11px] sm:text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[#BF5330] mb-1.5 line-clamp-1">
-              {category.name}
-            </p>
-          ) : null}
+          {/* Category — fixed height for perfect cross-card alignment */}
+          <div className="h-4 mb-1.5 flex items-center">
+            {category?.name ? (
+              <p className="font-[family-name:var(--font-body)] text-[11px] sm:text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[#BF5330] truncate">
+                {category.name}
+              </p>
+            ) : null}
+          </div>
 
-          {/* Editorial Product Name in DM Serif Display */}
-          <h3 className="font-[family-name:var(--font-heading)] text-[20px] sm:text-[22px] font-normal leading-[1.24] text-[#1A1614] mb-2 min-h-[3.1rem] line-clamp-2">
-            <Link
-              href={productHref}
-              prefetch={false}
-              className="hover:text-[#BF5330] transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#BF5330] rounded block"
-            >
-              {renderProductCardTitle(slug, name)}
-            </Link>
-          </h3>
+          {/* Product name — natural height without awkward empty gap before pack size */}
+          <div className="mb-1 sm:mb-1.5 flex items-start">
+            <h3 className="font-[family-name:var(--font-heading)] text-[19px] md:text-[17px] font-normal leading-[1.3] text-[#1A1614] w-full">
+              <Link
+                href={productHref}
+                prefetch={false}
+                title={name}
+                className="hover:text-[#BF5330] transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#BF5330] rounded block"
+              >
+                {name}
+              </Link>
+            </h3>
+          </div>
 
-          {/* Helper Text */}
-          <p className="font-[family-name:var(--font-body)] text-[13px] sm:text-[13.5px] text-[#635850] mb-2.5">
-            Select your pack
-          </p>
-
-          {/* Dynamic Pack-Size Selector with real variants only - Single horizontal row without truncation */}
+          {/* Pack size selector */}
           {variants.length > 0 ? (
-            <div
-              className={cn(
-                "flex items-stretch mb-3.5 min-h-[34px] sm:min-h-[36px] w-full",
-                variants.length >= 5
-                  ? "gap-1 sm:gap-1.5"
-                  : variants.length === 4
-                  ? "gap-1.5 sm:gap-2"
-                  : "gap-2"
-              )}
-              role="radiogroup"
-              aria-label={`Available pack sizes for ${name}`}
-            >
-              {variants.map((variant) => {
-                const isSelected = selectedVariant?.id === variant.id;
-                const isDense = variants.length >= 5;
-                const isFour = variants.length === 4;
+            <div className="mb-3.5 relative" ref={overflowRef}>
+              <p className="font-[family-name:var(--font-body)] text-[11.5px] sm:text-[12px] font-medium text-[#635850] mb-1.5">
+                Select pack size:
+              </p>
 
-                return (
+              {/* Mobile View (< md): Always display all available pack sizes directly, wrapping neatly if needed */}
+              <div
+                className="flex md:hidden flex-wrap gap-1.5 w-full"
+                role="radiogroup"
+                aria-label={`Available pack sizes for ${name}`}
+              >
+                {variants.map((variant) => {
+                  const isSelected = selectedVariant?.id === variant.id;
+                  const compactLabel = formatCompactPackSize(variant.label);
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      disabled={!variant.inStock}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSelectedVariant(variant);
+                      }}
+                      className={cn(
+                        "h-8 px-2.5 rounded-[6px] flex items-center justify-center text-center font-[family-name:var(--font-body)] text-[12px] transition-all cursor-pointer border select-none whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#BF5330]",
+                        isSelected
+                          ? "bg-[#FDF3EE] border-[#BF5330] text-[#BF5330] font-semibold shadow-2xs"
+                          : "bg-[#FFFBF7] border-[#E8DFD4] text-[#1A1614] font-normal hover:border-[#BF5330]/50 hover:bg-[#FAF4ED] hover:text-[#BF5330]",
+                        !variant.inStock &&
+                          "opacity-40 cursor-not-allowed line-through hover:border-[#E8DFD4] hover:bg-[#FFFBF7] hover:text-[#1A1614]"
+                      )}
+                    >
+                      <span>{compactLabel}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Desktop View (>= md): Compact 1-line selector with +N expansion when > 3 variants */}
+              <div
+                className="hidden md:flex items-center gap-1.5 w-full h-8"
+                role="radiogroup"
+                aria-label={`Available pack sizes for ${name}`}
+              >
+                {visibleVariants.map((variant) => {
+                  const isSelected = selectedVariant?.id === variant.id;
+                  const compactLabel = formatCompactPackSize(variant.label);
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      disabled={!variant.inStock}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSelectedVariant(variant);
+                        setIsOverflowOpen(false);
+                      }}
+                      className={cn(
+                        "h-8 px-2.5 sm:px-3 rounded-[6px] flex items-center justify-center text-center font-[family-name:var(--font-body)] text-[12px] sm:text-[12.5px] transition-all cursor-pointer border select-none whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#BF5330] shrink-0",
+                        isSelected
+                          ? "bg-[#FDF3EE] border-[#BF5330] text-[#BF5330] font-semibold shadow-2xs"
+                          : "bg-[#FFFBF7] border-[#E8DFD4] text-[#1A1614] font-normal hover:border-[#BF5330]/50 hover:bg-[#FAF4ED] hover:text-[#BF5330]",
+                        !variant.inStock &&
+                          "opacity-40 cursor-not-allowed line-through hover:border-[#E8DFD4] hover:bg-[#FFFBF7] hover:text-[#1A1614]"
+                      )}
+                    >
+                      <span>{compactLabel}</span>
+                    </button>
+                  );
+                })}
+
+                {/* +N trigger button for remaining variants on desktop */}
+                {hasOverflow ? (
                   <button
-                    key={variant.id}
                     type="button"
-                    role="radio"
-                    aria-checked={isSelected}
-                    disabled={!variant.inStock}
-                    onClick={() => setSelectedVariant(variant)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsOverflowOpen((prev) => !prev);
+                    }}
+                    aria-expanded={isOverflowOpen}
+                    aria-haspopup="dialog"
+                    aria-label={`View ${remainingCount} more pack sizes for ${name}`}
                     className={cn(
-                      "flex-1 min-w-0 rounded-[8px] flex items-center justify-center text-center font-[family-name:var(--font-body)] transition-all cursor-pointer border select-none whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#BF5330]",
-                      isDense
-                        ? "px-0.5 sm:px-1 py-1.5 text-[10.5px] xs:text-[11px] sm:text-[11.5px] lg:text-[12px] tracking-tight"
-                        : isFour
-                        ? "px-1 sm:px-1.5 py-1.5 text-[11px] xs:text-[11.5px] sm:text-[12px] lg:text-[12.5px]"
-                        : "px-1.5 sm:px-2 py-1.5 text-[12px] sm:text-[12.5px] lg:text-[13px]",
-                      isSelected
+                      "h-8 px-2 rounded-[6px] border text-xs font-medium font-[family-name:var(--font-body)] transition-all cursor-pointer select-none shrink-0 flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#BF5330]",
+                      isOverflowOpen || isSelectedInOverflow
                         ? "bg-[#FDF3EE] border-[#BF5330] text-[#BF5330] font-semibold shadow-2xs"
-                        : "bg-[#FFFBF7] border-[#E8DFD4] text-[#1A1614] font-normal hover:border-[#BF5330]/50 hover:bg-[#FAF4ED] hover:text-[#BF5330]",
-                      !variant.inStock &&
-                        "opacity-40 cursor-not-allowed line-through hover:border-[#E8DFD4] hover:bg-[#FFFBF7] hover:text-[#1A1614]"
+                        : "bg-[#FAF5EE] border-[#E8DFD4] text-[#635850] hover:border-[#BF5330]/50 hover:bg-[#FAF4ED] hover:text-[#BF5330]"
                     )}
                   >
-                    <span>{variant.label}</span>
+                    <span>+{remainingCount}</span>
+                    <ChevronDown
+                      className={cn(
+                        "w-3 h-3 transition-transform duration-150 md:hidden",
+                        isOverflowOpen && "rotate-180"
+                      )}
+                    />
                   </button>
-                );
-              })}
+                ) : null}
+              </div>
+
+              {/* Accessible Popover for +N: reveals ONLY additional pack-size options without prices */}
+              {isOverflowOpen && hasOverflow ? (
+                <div
+                  role="dialog"
+                  aria-label={`Additional pack sizes for ${name}`}
+                  className="absolute left-0 top-full mt-1.5 z-30 bg-white border border-[#E8DFD4] rounded-[10px] shadow-[0_10px_25px_rgba(0,0,0,0.12)] p-2.5 animate-in fade-in zoom-in-95 duration-100"
+                >
+                  <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-[#E8DFD4] gap-4">
+                    <span className="text-[11px] font-semibold text-[#635850] uppercase tracking-wider font-[family-name:var(--font-body)]">
+                      More Sizes
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsOverflowOpen(false);
+                      }}
+                      className="text-[#635850] hover:text-[#1A1614] p-0.5 rounded hover:bg-[#FAF5EE] cursor-pointer"
+                      aria-label="Close pack size menu"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-w-[220px]">
+                    {overflowVariants.map((variant) => {
+                      const isSelected = selectedVariant?.id === variant.id;
+                      const compactLabel = formatCompactPackSize(variant.label);
+                      return (
+                        <button
+                          key={variant.id}
+                          type="button"
+                          disabled={!variant.inStock}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setSelectedVariant(variant);
+                            setIsOverflowOpen(false);
+                          }}
+                          className={cn(
+                            "h-8 px-2.5 sm:px-3 rounded-[6px] flex items-center justify-center text-center font-[family-name:var(--font-body)] text-[12px] sm:text-[12.5px] transition-all cursor-pointer border select-none whitespace-nowrap",
+                            isSelected
+                              ? "bg-[#FDF3EE] border-[#BF5330] text-[#BF5330] font-semibold shadow-2xs"
+                              : "bg-[#FFFBF7] border-[#E8DFD4] text-[#1A1614] font-normal hover:border-[#BF5330]/50 hover:bg-[#FAF4ED] hover:text-[#BF5330]",
+                            !variant.inStock && "opacity-40 cursor-not-allowed line-through"
+                          )}
+                        >
+                          <span>{compactLabel}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
             </div>
           ) : (
-            <div className="min-h-[34px] sm:min-h-[36px] mb-3.5 flex items-center">
-              <span className="font-[family-name:var(--font-body)] text-xs text-[#635850]/70 italic">
-                View product details
-              </span>
+            <div className="mb-3.5">
+              <div className="h-8 flex items-center">
+                <span className="font-[family-name:var(--font-body)] text-xs text-[#635850]/70 italic">
+                  View product details
+                </span>
+              </div>
             </div>
           )}
 
-          {/* 3. Actual MRP / Real Price: Crisp, sharp Manrope ExtraBold (weight 800) */}
-          <div className="flex items-baseline gap-2 mb-3.5 min-h-[28px]">
+          {/* 6. Mobile Price View (< md) — preserved 100% exactly as is for mobile */}
+          <div className="h-7.5 mb-4 flex items-baseline gap-2 md:hidden">
             {displayPrice ? (
               <>
                 <span className="font-[family-name:var(--font-price)] font-extrabold text-[22px] sm:text-[24px] text-[#1A1614] tracking-tight leading-none">
@@ -322,23 +502,51 @@ export function ProductCard({ product, className, priority = false }: ProductCar
                     {originalMrp}
                   </span>
                 ) : null}
+                {hasGenuineDiscount && selectedVariant?.discountPercent ? (
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                    {selectedVariant.discountPercent}% OFF
+                  </span>
+                ) : null}
               </>
             ) : null}
           </div>
         </div>
 
-        {/* 4. Action Buttons: Stacked Full-Width Add to Cart & View Details */}
-        <div className="flex flex-col gap-2 sm:gap-2.5 w-full mt-auto pt-1">
-          {variants.length > 0 ? (
-            <>
-              {/* Row 1: Add to Cart button (when 0 in cart) or - (No) + Stepper (when > 0 in cart) */}
-              {currentQty === 0 ? (
+        {/* Purchase Action Button & Desktop Price Row */}
+        <div className="w-full mt-auto pt-1 md:pt-3 md:flex md:items-center md:justify-between md:gap-2.5">
+          {/* Desktop Price View (>= md) — placed on the left, vertically centered relative to the button */}
+          <div className="hidden md:flex flex-col justify-center shrink-0 min-w-0">
+            {displayPrice ? (
+              <>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-[family-name:var(--font-price)] font-extrabold text-[20px] lg:text-[22px] text-[#1A1614] tracking-tight leading-none select-none">
+                    {displayPrice}
+                  </span>
+                  {hasGenuineDiscount && originalMrp ? (
+                    <span className="font-[family-name:var(--font-price)] text-[12px] lg:text-[13px] text-[#7A6E65] line-through font-medium">
+                      {originalMrp}
+                    </span>
+                  ) : null}
+                </div>
+                {hasGenuineDiscount && selectedVariant?.discountPercent ? (
+                  <span className="text-[10.5px] font-bold text-emerald-700 leading-tight mt-0.5">
+                    {selectedVariant.discountPercent}% OFF
+                  </span>
+                ) : null}
+              </>
+            ) : null}
+          </div>
+
+          {/* Action Button / Quantity Controls — full width on mobile, right-aligned on desktop */}
+          <div className="w-full md:w-auto md:shrink-0">
+            {variants.length > 0 ? (
+              currentQty === 0 ? (
                 <button
                   type="button"
                   onClick={handleAddToCart}
                   disabled={!selectedVariant?.inStock || isBusy}
                   className={cn(
-                    "w-full bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[42px] sm:h-[44px] rounded-[4px] font-[family-name:var(--font-body)] text-[13.5px] sm:text-[14px] font-medium transition-all duration-150 flex items-center justify-center gap-2 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] cursor-pointer",
+                    "w-full md:w-auto md:min-w-[124px] lg:min-w-[130px] bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[44px] md:h-[40px] lg:h-[42px] px-3.5 sm:px-4 rounded-[6px] font-[family-name:var(--font-body)] text-[14px] md:text-[13px] lg:text-[13.5px] font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] cursor-pointer shrink-0 whitespace-nowrap",
                     (!selectedVariant?.inStock || isBusy) && "opacity-60 cursor-not-allowed"
                   )}
                   aria-label={`Add ${name}${selectedVariant?.label ? ` - ${selectedVariant.label}` : ""} to cart`}
@@ -348,7 +556,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
                 </button>
               ) : (
                 <div
-                  className="w-full h-[42px] sm:h-[44px] rounded-[4px] bg-[#BF5330] text-white flex items-center justify-between px-2 shadow-xs select-none"
+                  className="w-full md:w-auto h-[44px] md:h-[40px] lg:h-[42px] rounded-[6px] bg-[#BF5330] text-white flex items-center justify-between px-3 md:px-2 lg:px-2.5 shadow-xs select-none shrink-0"
                   role="group"
                   aria-label={`Quantity in cart for ${name} (${selectedVariant?.label})`}
                 >
@@ -356,13 +564,13 @@ export function ProductCard({ product, className, priority = false }: ProductCar
                     type="button"
                     onClick={handleDecrement}
                     disabled={isBusy}
-                    className="h-8 w-9 sm:h-8.5 sm:w-10 rounded-[3px] flex items-center justify-center hover:bg-[#8F3E20] active:scale-95 transition-all text-white cursor-pointer disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
+                    className="h-8.5 w-10 md:h-8 md:w-7.5 rounded-[3px] flex items-center justify-center hover:bg-[#8F3E20] active:scale-95 transition-all text-white cursor-pointer disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
                     aria-label={`Decrease quantity of ${name} (${selectedVariant?.label})`}
                   >
-                    <Minus className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
+                    <Minus className="w-4 h-4 md:w-3.5 md:h-3.5 stroke-[2.5]" aria-hidden="true" />
                   </button>
 
-                  <span className="font-[family-name:var(--font-price)] font-extrabold text-[15px] sm:text-[16px] text-white select-none px-2 tracking-tight">
+                  <span className="font-[family-name:var(--font-price)] font-bold text-[17px] md:text-[15px] lg:text-[16px] text-white select-none px-4 md:px-2 tracking-tight min-w-[28px] md:min-w-[22px] text-center">
                     {currentQty}
                   </span>
 
@@ -373,43 +581,32 @@ export function ProductCard({ product, className, priority = false }: ProductCar
                       isBusy ||
                       (selectedVariant?.maxQuantity ? currentQty >= selectedVariant.maxQuantity : currentQty >= 99)
                     }
-                    className="h-8 w-9 sm:h-8.5 sm:w-10 rounded-[3px] flex items-center justify-center hover:bg-[#8F3E20] active:scale-95 transition-all text-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
+                    className="h-8.5 w-10 md:h-8 md:w-7.5 rounded-[3px] flex items-center justify-center hover:bg-[#8F3E20] active:scale-95 transition-all text-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
                     aria-label={`Increase quantity of ${name} (${selectedVariant?.label})`}
                   >
-                    <Plus className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
+                    <Plus className="w-4 h-4 md:w-3.5 md:h-3.5 stroke-[2.5]" aria-hidden="true" />
                   </button>
                 </div>
-              )}
-
-              {/* Row 2: Full-width View Details button */}
+              )
+            ) : (
               <Link
                 href={productHref}
                 prefetch={false}
-                className="w-full bg-[#FFFBF7] hover:bg-[#FAF4ED] text-[#1A1614] hover:text-[#BF5330] border border-[#E8DFD4] hover:border-[#BF5330]/40 h-[42px] sm:h-[44px] rounded-[4px] font-[family-name:var(--font-body)] text-[13.5px] sm:text-[14px] font-medium transition-all duration-150 flex items-center justify-center gap-1.5 shadow-2xs active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] group/btn"
-                aria-label={`View details and options for ${name}`}
+                className="w-full md:w-auto md:min-w-[124px] bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[44px] md:h-[40px] lg:h-[42px] px-3.5 sm:px-4 rounded-[6px] font-[family-name:var(--font-body)] text-[14px] md:text-[13px] font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] shrink-0 whitespace-nowrap"
+                aria-label={`Choose options for ${name}`}
               >
-                <span>View Details</span>
-                <ArrowRight className="w-3.5 h-3.5 shrink-0 transition-transform group-hover/btn:translate-x-0.5" aria-hidden="true" />
+                <span>Choose options</span>
+                <ArrowRight className="w-4 h-4 md:w-3.5 md:h-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </Link>
-            </>
-          ) : (
-            <Link
-              href={productHref}
-              prefetch={false}
-              className="w-full bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[42px] sm:h-[44px] rounded-[4px] font-[family-name:var(--font-body)] text-[14px] font-medium transition-all duration-150 flex items-center justify-center gap-2 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330]"
-              aria-label={`Choose options for ${name}`}
-            >
-              <span>Choose options</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-            </Link>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </article>
   );
 }
 
-/* ── Skeleton variant matching Featured Bestseller card ─────────────────────── */
+/* ── Skeleton variant matching ProductCard alignment to the pixel ─────────── */
 export function ProductCardSkeleton() {
   return (
     <div
@@ -419,20 +616,34 @@ export function ProductCardSkeleton() {
       <div className="bg-[#FAF5EE] aspect-[4/3] w-full" />
       <div className="p-5 sm:p-5.5 flex flex-col flex-1 justify-between">
         <div>
-          <div className="h-3 w-20 bg-[#FAF5EE] rounded mb-2" />
-          <div className="h-5 w-4/5 bg-[#FAF5EE] rounded mb-2" />
-          <div className="h-5 w-2/3 bg-[#FAF5EE] rounded mb-4" />
-          <div className="h-3 w-28 bg-[#FAF5EE] rounded mb-2.5" />
-          <div className="flex gap-1.5 sm:gap-2 mb-3.5 w-full">
-            <div className="h-8 flex-1 min-w-0 bg-[#FAF5EE] rounded-[8px]" />
-            <div className="h-8 flex-1 min-w-0 bg-[#FAF5EE] rounded-[8px]" />
-            <div className="h-8 flex-1 min-w-0 bg-[#FAF5EE] rounded-[8px]" />
+          {/* Category skeleton */}
+          <div className="h-4 mb-1.5 flex items-center">
+            <div className="h-3 w-20 bg-[#FAF5EE] rounded" />
           </div>
-          <div className="h-7 w-20 bg-[#FAF5EE] rounded mb-3.5" />
+          {/* Title skeleton */}
+          <div className="mb-1 sm:mb-1.5">
+            <div className="h-5 w-4/5 bg-[#FAF5EE] rounded" />
+          </div>
+          {/* Pack size selector skeleton */}
+          <div className="mb-3.5">
+            <div className="h-4 mb-1.5 flex items-center">
+              <div className="h-3 w-24 bg-[#FAF5EE] rounded" />
+            </div>
+            <div className="h-8 flex gap-1.5">
+              <div className="h-8 w-14 bg-[#FAF5EE] rounded-[6px]" />
+              <div className="h-8 w-14 bg-[#FAF5EE] rounded-[6px]" />
+              <div className="h-8 w-14 bg-[#FAF5EE] rounded-[6px]" />
+            </div>
+          </div>
+          {/* Price skeleton (mobile only) */}
+          <div className="h-7.5 mb-4 flex items-center md:hidden">
+            <div className="h-6 w-24 bg-[#FAF5EE] rounded" />
+          </div>
         </div>
-        <div className="flex flex-col gap-2 sm:gap-2.5 w-full mt-auto pt-1">
-          <div className="h-[42px] sm:h-[44px] w-full bg-[#FAF5EE] rounded-[4px]" />
-          <div className="h-[42px] sm:h-[44px] w-full bg-[#FAF5EE] rounded-[4px]" />
+        {/* Buttons and desktop price skeleton */}
+        <div className="w-full mt-auto pt-1 md:pt-3 md:flex md:items-center md:justify-between md:gap-2.5">
+          <div className="hidden md:block h-6 w-20 bg-[#FAF5EE] rounded" />
+          <div className="h-[44px] md:h-[40px] lg:h-[42px] w-full md:w-32 bg-[#FAF5EE] rounded-[6px]" />
         </div>
       </div>
     </div>

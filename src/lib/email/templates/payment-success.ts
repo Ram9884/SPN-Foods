@@ -10,7 +10,7 @@ export function renderPaymentSuccessEmail(data: PaymentSuccessData): {
   html: string;
   text: string;
 } {
-  const subject = `Payment Received for Order #${data.orderNumber} — SPN Foods`;
+  const subject = `Payment Received for Order #${data.orderNumber} — SPN Health Mix`;
 
   const contentHtml = `
     <p>Dear <strong>${escapeHtml(data.customerName)}</strong>,</p>
@@ -51,7 +51,7 @@ export function renderPaymentSuccessEmail(data: PaymentSuccessData): {
   });
 
   const text = `
-SPN FOODS — PAYMENT RECEIVED
+SPN HEALTH MIX — PAYMENT RECEIVED
 
 Dear ${data.customerName},
 

@@ -3,7 +3,7 @@ import { verifyAdminSession } from "@/lib/admin/auth";
 import { DashboardView } from "@/components/admin/dashboard-view";
 
 export const metadata: Metadata = {
-  title: "Dashboard — SPN Foods Admin | SPN Foods",
+  title: "Dashboard — SPN Health Mix Admin | SPN Health Mix",
   description: "Operational overview of orders, inventory, and fulfillment.",
 };
 

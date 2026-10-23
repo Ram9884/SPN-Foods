@@ -106,7 +106,7 @@ export default function RazorpayDemoPage() {
               <RazorpayCheckoutButton
                 amountPaise={amountPaise}
                 currency="INR"
-                orderName="SPN Foods"
+                orderName="SPN Health Mix"
                 description={`Order for ${customerName || "Customer"}`}
                 customerName={customerName}
                 customerEmail={customerEmail}

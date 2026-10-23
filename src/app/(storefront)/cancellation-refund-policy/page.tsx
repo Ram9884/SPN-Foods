@@ -3,8 +3,8 @@ import Link from "next/link";
 import { fetchBusinessSettings } from "@/lib/settings/service";
 
 export const metadata: Metadata = {
-  title: "Cancellation & Refund Policy — SPN Foods",
-  description: "Learn about order cancellation guidelines, refund processing, and replacement policies at SPN Foods.",
+  title: "Cancellation & Refund Policy — SPN Health Mix",
+  description: "Learn about order cancellation guidelines, refund processing, and replacement policies at SPN Health Mix.",
 };
 
 export default async function CancellationRefundPolicyPage() {

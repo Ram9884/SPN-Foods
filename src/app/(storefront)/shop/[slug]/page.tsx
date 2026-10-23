@@ -35,10 +35,10 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   }
 
   return {
-    title: `${category.name} — SPN Foods`,
+    title: `${category.name} — SPN Health Mix`,
     description:
       category.description ??
-      `Shop traditional ${category.name} from SPN Foods. ${category.productCount} products available.`,
+      `Shop traditional ${category.name} from SPN Health Mix. ${category.productCount} products available.`,
     alternates: { canonical: `/shop/${slug}` },
   };
 }

@@ -81,13 +81,13 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
           <Link href="/admin" className="flex items-center gap-2">
             <Image
               src="/logo.png"
-              alt="SPN Foods"
+              alt="SPN Health Mix"
               width={36}
               height={36}
               className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain"
             />
             <span className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] text-[#BF5330] leading-none font-normal tracking-tight">
-              SPN Foods
+              SPN Health Mix
             </span>
             <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-[#BF5330] text-[#BF5330]">
               ADMIN
@@ -120,7 +120,7 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
           >
             <Image
               src="/logo.png"
-              alt="SPN Foods Emblem"
+              alt="SPN Health Mix Emblem"
               width={36}
               height={36}
               priority
@@ -128,7 +128,7 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
             />
             <div className="min-w-0">
               <span className="font-[family-name:var(--font-logo)] block text-xl sm:text-[21px] lg:text-[22px] text-[#BF5330] leading-none font-normal tracking-tight">
-                SPN Foods
+                SPN Health Mix
               </span>
               <span className="block text-[9.5px] font-medium text-[#635850] tracking-[0.08em] uppercase mt-1">
                 OPERATIONS PANEL

@@ -4,7 +4,7 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Payment Issue — SPN Foods",
+  title: "Payment Issue — SPN Health Mix",
   description: "Status of your payment attempt.",
 };
 

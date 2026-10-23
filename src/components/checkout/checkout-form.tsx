@@ -271,7 +271,7 @@ export function CheckoutForm() {
         key: razorpayKeyId,
         amount: amountPaise,
         currency: currency || "INR",
-        name: "SPN Foods",
+        name: "SPN Health Mix",
         description: `Order #${orderNumber}`,
         order_id: razorpayOrderId,
         theme: {

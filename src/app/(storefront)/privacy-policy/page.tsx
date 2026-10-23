@@ -3,8 +3,8 @@ import Link from "next/link";
 import { fetchBusinessSettings } from "@/lib/settings/service";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — SPN Foods",
-  description: "Learn how SPN Foods collects, uses, and protects your personal information when using our online store.",
+  title: "Privacy Policy — SPN Health Mix",
+  description: "Learn how SPN Health Mix collects, uses, and protects your personal information when using our online store.",
 };
 
 export default async function PrivacyPolicyPage() {

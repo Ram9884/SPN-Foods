@@ -370,7 +370,7 @@ export function CategoriesManager() {
             Category Management
           </h1>
           <p className="text-xs sm:text-sm text-[#635850] mt-1.5 font-normal">
-            Taxonomy and ordering of products across the SPN Foods catalogue.
+            Taxonomy and ordering of products across the SPN Health Mix catalogue.
           </p>
         </div>
 

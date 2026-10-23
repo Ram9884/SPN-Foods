@@ -16,7 +16,7 @@ const SETTINGS_KEY = "business";
 
 /**
  * Fetches the current business information and settings.
- * Returns default SPN Foods configuration if not explicitly set.
+ * Returns default SPN Health Mix configuration if not explicitly set.
  */
 export async function getBusinessSettings(db: AnyDb): Promise<BusinessSettings> {
   const [row] = await db
@@ -47,9 +47,15 @@ export async function getBusinessSettings(db: AnyDb): Promise<BusinessSettings> 
   }
 
   const v = row.value as Record<string, any>;
+  const rawBusinessName =
+    typeof v.businessName === "string" && v.businessName.trim()
+      ? v.businessName.trim()
+      : DEFAULT_BUSINESS_SETTINGS.businessName;
+  const businessName =
+    rawBusinessName === "SPN Foods" ? "SPN Health Mix" : rawBusinessName;
 
   return {
-    businessName: typeof v.businessName === "string" && v.businessName.trim() ? v.businessName.trim() : DEFAULT_BUSINESS_SETTINGS.businessName,
+    businessName,
     supportEmail: typeof v.supportEmail === "string" && v.supportEmail.trim() ? v.supportEmail.trim() : DEFAULT_BUSINESS_SETTINGS.supportEmail,
     phone: typeof v.phone === "string" && v.phone.trim() ? v.phone.trim() : null,
     whatsapp: typeof v.whatsapp === "string" && v.whatsapp.trim() ? v.whatsapp.trim() : null,

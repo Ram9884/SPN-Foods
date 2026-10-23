@@ -482,7 +482,7 @@ async function main() {
 
       // Upsert product primary image
       const r2Key = `products/${item.slug}/main.jpg`;
-      const alt = `SPN Foods ${item.name} product packaging`;
+      const alt = `SPN Health Mix ${item.name} product packaging`;
       const [existingImg] = await db
         .select()
         .from(productImages)

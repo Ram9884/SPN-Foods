@@ -3,8 +3,8 @@ import { Suspense } from "react";
 import { OrdersList } from "@/components/admin/orders-list";
 
 export const metadata: Metadata = {
-  title: "Orders Management — SPN Foods Admin",
-  description: "View and fulfill customer orders across SPN Foods.",
+  title: "Orders Management — SPN Health Mix Admin",
+  description: "View and fulfill customer orders across SPN Health Mix.",
 };
 
 export default function AdminOrdersPage() {

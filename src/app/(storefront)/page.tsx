@@ -14,9 +14,10 @@ import { fetchBestsellerProducts, fetchCategories, fetchProducts } from "@/lib/s
 import { CategoryBento, CategoryBentoSkeleton } from "@/components/catalogue/category-bento";
 import { FeaturedProductsFilter } from "@/components/catalogue/featured-products-filter";
 import { ProductGridSkeleton } from "@/components/catalogue/product-grid";
+import { HeroSlider } from "@/components/home/hero-slider";
 
 export const metadata: Metadata = {
-  title: "SPN Foods — Traditional Indian Health Foods",
+  title: "SPN Health Mix — Traditional Indian Health Foods",
   description:
     "Traditional Indian health mixes, spice powders, podis, masalas and snacks. Packaged with care for modern households.",
   alternates: { canonical: "/" },
@@ -46,146 +47,57 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col bg-[#FFFBF7]">
-      {/* ── Viewport-filling Hero & Benefits Strip Wrapper ───────────────────── */}
-      <div className="hero-viewport-frame bg-[#FFFBF7] relative">
-        {/* ── Section 1: Editorial Hero ───────────────────────────────────────── */}
-        <section
-          aria-labelledby="hero-heading"
-          className="relative overflow-hidden bg-[#FFFBF7] flex-1 flex flex-col justify-center pt-0 pb-0"
-        >
-          {/* Botanical leaf accent at top-left matching reference */}
-          <div className="absolute -top-3 sm:-top-4 lg:-top-5 left-0 w-28 sm:w-40 lg:w-48 pointer-events-none select-none z-10">
-            <Image
-              src="/hero-leaves.png"
-              alt=""
-              width={200}
-              height={175}
-              className="w-full h-auto object-contain opacity-95"
-              priority
-            />
-          </div>
+      {/* ── Section 1: Full-Width Auto-sliding Hero Carousel ─────────────────── */}
+      <HeroSlider />
 
-          {/* Left Narrative Content Container */}
-          <div className="container-spn relative z-20 w-full py-2 sm:py-3 lg:py-4">
-            <div className="max-w-[560px] lg:max-w-[490px] xl:max-w-[540px] text-center lg:text-left mx-auto lg:mx-0 lg:pl-2 xl:pl-6">
-              {/* Eyebrow */}
-              <span className="font-[family-name:var(--font-body)] text-[11px] sm:text-[11.5px] font-semibold uppercase tracking-[0.12em] text-[#BF5330] mb-2 sm:mb-2.5 block">
-                TRADITIONAL SOUTH INDIAN FOODS
-              </span>
+      {/* ── Section 2: Continuous Running Benefits Ticker ──────────────────── */}
+      <section
+        aria-label="Brand highlights"
+        className="w-full bg-[#F7EFE6] border-y border-[var(--color-border)] py-3 sm:py-3.5 z-20 shrink-0 overflow-hidden relative select-none"
+      >
+          {/* Subtle edge fade gradients */}
+          <div
+            className="pointer-events-none absolute left-0 top-0 bottom-0 w-10 sm:w-20 bg-gradient-to-r from-[#F7EFE6] to-transparent z-10"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 sm:w-20 bg-gradient-to-l from-[#F7EFE6] to-transparent z-10"
+            aria-hidden="true"
+          />
 
-              {/* Editorial Headline: Strictly 2-line natural wrap on desktop */}
-              <h1
-                id="hero-heading"
-                className="font-heading font-normal text-[34px] xs:text-[36px] sm:text-[44px] lg:text-[46px] xl:text-[48px] leading-[1.06] tracking-[-0.03em] text-[#1A1614] mb-3 sm:mb-3.5 whitespace-normal"
-              >
-                The honest taste of a{" "}
-                <span className="text-[#BF5330]">
-                  homestyle
-                </span>{" "}
-                kitchen
-              </h1>
-
-              {/* Tamil Heritage Tagline */}
-              <p
-                lang="ta"
-                className="font-tamil text-[16px] xs:text-[17px] sm:text-[18px] lg:text-[19px] text-[#8F3E20] font-semibold tracking-wide mb-3 sm:mb-3.5 leading-snug"
-              >
-                அன்பும் அக்கறையும் நிறைந்த ஆரோக்கியம்
-              </p>
-
-              {/* Supporting Description: compact 2-line block */}
-              <p className="font-[family-name:var(--font-body)] text-[15px] sm:text-[16px] lg:text-[16.5px] text-[#635850] leading-[1.55] mb-5 sm:mb-6 max-w-[460px] mx-auto lg:mx-0 font-normal">
-                Traditional South Indian health mixes, podis, masalas and snacks for everyday meals.
-              </p>
-
-              {/* CTA Actions */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 sm:gap-5">
-                <Link
-                  href="/shop"
-                  className="group inline-flex justify-center items-center gap-2 font-[family-name:var(--font-body)] font-medium text-[15px] text-white bg-[#BF5330] hover:bg-[#8F3E20] h-[50px] px-7 rounded-[10px] shadow-xs hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] w-full sm:w-auto"
-                >
-                  <span>Shop All Products</span>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-0.5" aria-hidden="true" />
-                </Link>
-                <Link
-                  href="/about"
-                  prefetch={false}
-                  className="group inline-flex justify-center items-center gap-1.5 font-[family-name:var(--font-body)] font-medium text-[15px] text-[#BF5330] hover:text-[#8F3E20] h-[50px] px-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] w-full sm:w-auto"
-                >
-                  <span className="underline decoration-[#BF5330]/35 underline-offset-4 group-hover:decoration-[#8F3E20]">
-                    Explore Our Story
-                  </span>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-0.5" aria-hidden="true" />
-                </Link>
-              </div>
-
-              {/* Mobile Image: In-flow under CTAs on small screens */}
-              <div className="lg:hidden relative w-full max-w-[480px] mx-auto aspect-[1218/764] select-none mt-5">
-                <Image
-                  src="/hero-visual.png"
-                  alt="SPN Foods Black Rice Porridge Mix and Multi Grain Health Mix authentic traditional packaging"
-                  fill
-                  priority
-                  sizes="(max-width: 512px) calc(100vw - 32px), 480px"
-                  className="object-contain object-bottom pointer-events-none"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop Image: Flush to right edge, spanning full height from top to bottom */}
-          <div className="hidden lg:flex absolute right-0 bottom-0 top-0 justify-end pointer-events-none z-10 select-none w-[58vw] xl:w-[60vw] max-w-[1120px]">
-            <div className="relative h-full aspect-[1218/764] max-w-full">
-              <Image
-                src="/hero-visual.png"
-                alt="SPN Foods Black Rice Porridge Mix and Multi Grain Health Mix authentic traditional packaging"
-                fill
-                priority
-                sizes="(min-width: 1867px) 1120px, (min-width: 1280px) 60vw, 58vw"
-                className="object-cover object-right pointer-events-none"
-              />
+          {/* Running Ticker Track */}
+          <div className="flex overflow-hidden w-full">
+            <div className="animate-marquee flex items-center">
+              {[
+                { icon: Leaf, label: "Heirloom Grain Blends" },
+                { icon: Clock, label: "Slow-Roasted in Small Batches" },
+                { icon: ShieldCheck, label: "Zero Artificial Preservatives" },
+                { icon: Sparkles, label: "100% Pure & Natural" },
+                { icon: Truck, label: "Direct Pan-India Delivery" },
+                { icon: Leaf, label: "Heirloom Grain Blends" },
+                { icon: Clock, label: "Slow-Roasted in Small Batches" },
+                { icon: ShieldCheck, label: "Zero Artificial Preservatives" },
+                { icon: Sparkles, label: "100% Pure & Natural" },
+                { icon: Truck, label: "Direct Pan-India Delivery" },
+              ].map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <div key={idx} className="flex items-center shrink-0">
+                    <div className="flex items-center gap-2.5 sm:gap-3 pl-8 pr-6 sm:pl-12 sm:pr-10 py-0.5">
+                      <Icon className="w-4 h-4 text-[var(--color-brand-primary)] shrink-0" aria-hidden="true" />
+                      <span className="font-[family-name:var(--font-body)] text-[12.5px] sm:text-[13px] font-medium text-[var(--color-text-primary)] tracking-tight whitespace-nowrap">
+                        {item.label}
+                      </span>
+                    </div>
+                    <span className="text-[var(--color-brand-primary)]/35 text-[10px] select-none pr-2 sm:pr-4" aria-hidden="true">
+                      ✦
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
-
-        {/* ── Section 2: Benefits Strip (Visible cleanly at the bottom edge of the screen) ──── */}
-        <section
-          aria-label="Brand highlights"
-          className="w-full bg-[#F7EFE6] border-y border-[var(--color-border)] py-3 sm:py-3.5 z-20 shrink-0"
-        >
-          <div className="container-spn">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 items-center">
-              <div className="flex items-center justify-center gap-2 sm:gap-2.5 py-0.5">
-                <Leaf className="w-4 h-4 text-[var(--color-brand-primary)] shrink-0" aria-hidden="true" />
-                <span className="font-[family-name:var(--font-body)] text-[12px] sm:text-[13px] font-medium text-[var(--color-text-primary)] tracking-tight">
-                  Heirloom Grain Blends
-                </span>
-              </div>
-
-              <div className="flex items-center justify-center gap-2 sm:gap-2.5 py-0.5">
-                <Clock className="w-4 h-4 text-[var(--color-brand-primary)] shrink-0" aria-hidden="true" />
-                <span className="font-[family-name:var(--font-body)] text-[12px] sm:text-[13px] font-medium text-[var(--color-text-primary)] tracking-tight">
-                  Slow-Roasted in Small Batches
-                </span>
-              </div>
-
-              <div className="flex items-center justify-center gap-2 sm:gap-2.5 py-0.5">
-                <ShieldCheck className="w-4 h-4 text-[var(--color-brand-primary)] shrink-0" aria-hidden="true" />
-                <span className="font-[family-name:var(--font-body)] text-[12px] sm:text-[13px] font-medium text-[var(--color-text-primary)] tracking-tight">
-                  Zero Artificial Preservatives
-                </span>
-              </div>
-
-              <div className="flex items-center justify-center gap-2 sm:gap-2.5 py-0.5">
-                <Truck className="w-4 h-4 text-[var(--color-brand-primary)] shrink-0" aria-hidden="true" />
-                <span className="font-[family-name:var(--font-body)] text-[12px] sm:text-[13px] font-medium text-[var(--color-text-primary)] tracking-tight">
-                  Direct Pan-India Delivery
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
 
       {/* ── Section 3: Shop by Traditional Category ────────────────────────── */}
       <div id="categories" className="py-12 sm:py-16 lg:py-20 bg-[var(--color-surface)]">
@@ -221,7 +133,7 @@ export default async function HomePage() {
               <div className="w-full lg:w-1/2 relative min-h-[280px] sm:min-h-[340px] lg:min-h-0 self-stretch overflow-hidden">
                 <Image
                   src="/categories/health-mix.jpg"
-                  alt="SPN Foods traditional porridge and wholesome heirloom ingredients in authentic brass bowl"
+                  alt="SPN Health Mix traditional porridge and wholesome heirloom ingredients in authentic brass bowl"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover object-[center_60%] w-full h-full"
@@ -303,7 +215,7 @@ export default async function HomePage() {
 
                   {/* Supporting paragraph */}
                   <p className="font-[family-name:var(--font-body)] text-[14px] sm:text-[14.5px] lg:text-[15px] text-[#635850] leading-[1.65] mb-6 sm:mb-7">
-                    SPN Foods was founded on a simple principle: the recipes and nourishment passed down through traditional South Indian households represent one of the most balanced, enduring ways to feed a family.
+                    SPN Health Mix was founded on a simple principle: the recipes and nourishment passed down through traditional South Indian households represent one of the most balanced, enduring ways to feed a family.
                   </p>
 
                   {/* CTA Action */}
@@ -324,47 +236,57 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Section 6: Quality Commitment Section (Compact Horizontal Layout matching Image 1) ──── */}
+      {/* ── Section 6: Quality Commitment & Promotional Banner (Mobile-First Reference Design) ──── */}
       <section
         aria-labelledby="trust-heading"
-        className="w-full bg-[#FFFBF7] border-t border-[#E8DFD4] py-7 sm:py-8 lg:py-9"
+        className="w-full bg-[#FFFBF7] border-t border-[#E8DFD4] pt-8 sm:pt-10 lg:pt-12 pb-12 sm:pb-16"
       >
         <div className="container-spn">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8">
-            {/* Header info (~43-44% width on desktop) */}
-            <div className="w-full lg:w-[44%] xl:w-[43%] lg:border-r lg:border-[#E8DFD4] lg:pr-8 xl:pr-10 shrink-0">
-              <span className="font-[family-name:var(--font-body)] text-[10.5px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] text-[#BF5330] mb-1.5 block">
+          {/* 1. Quality Commitment Header */}
+          <div className="mb-6 sm:mb-8 max-w-2xl">
+            <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
+              <span className="font-[family-name:var(--font-body)] text-[11px] sm:text-[11.5px] font-semibold uppercase tracking-[0.16em] text-[#BF5330]">
                 STANDARDS &amp; INTEGRITY
               </span>
-              <h2
-                id="trust-heading"
-                className="text-xl sm:text-2xl lg:text-[27px] xl:text-[29px] text-[#1A1614] leading-[1.2] font-normal mb-1.5 whitespace-normal lg:whitespace-nowrap xl:whitespace-nowrap"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                The SPN Foods Quality Commitment
-              </h2>
-              <p className="font-[family-name:var(--font-body)] text-[13px] sm:text-[13.5px] text-[#635850] leading-normal">
-                Clear, verified food preparation principles upheld across every recipe and batch.
-              </p>
+              <span className="w-10 sm:w-12 h-[1.5px] bg-[#BF5330]" aria-hidden="true" />
+            </div>
+            <h2
+              id="trust-heading"
+              className="text-2xl sm:text-3xl lg:text-[34px] xl:text-[38px] text-[#1A1614] leading-[1.18] font-normal mb-2.5 sm:mb-3"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              The SPN Foods Quality Commitment
+            </h2>
+            <p className="font-[family-name:var(--font-body)] text-[14px] sm:text-[15px] lg:text-[15.5px] text-[#635850] leading-relaxed">
+              Clear, verified food preparation principles upheld across every recipe and batch.
+            </p>
+          </div>
+
+          {/* 2. Four Quality Highlights: 2-column grid on mobile (2 rows), 4-column row on desktop */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-5 mb-8 sm:mb-10">
+            {/* Card 1: Food Safety Standards */}
+            <div className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#EBE3DA] p-2.5 min-[360px]:p-3 sm:p-4.5 flex items-center gap-2 sm:gap-3.5 min-h-[76px] sm:min-h-[88px] shadow-[0_2px_8px_rgba(42,24,16,0.02)] transition-all hover:border-[#D6C7BA]">
+              <div className="w-9 h-9 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4.5 h-4.5 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330] stroke-[1.8]" aria-hidden="true" />
+              </div>
+              <span className="font-[family-name:var(--font-heading)] text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
+                Food Safety<br className="sm:hidden" /> Standards
+              </span>
             </div>
 
-            {/* 4 Pillars with Vertical Dividers (~56-57% width on desktop) */}
-            <div className="w-full lg:w-[56%] xl:w-[57%] grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#E8DFD4] items-center">
-              <div className="flex flex-col items-center text-center p-2.5 sm:px-3 sm:py-1">
-                <ShieldCheck className="w-5.5 h-5.5 text-[#BF5330] mb-2" aria-hidden="true" />
-                <span className="font-semibold text-[12px] sm:text-[12.5px] text-[#1A1614] leading-[1.3] font-[family-name:var(--font-body)]">
-                  Food Safety<br />Standards
-                </span>
+            {/* Card 2: 100% Traditional Recipes */}
+            <div className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#EBE3DA] p-2.5 min-[360px]:p-3 sm:p-4.5 flex items-center gap-2 sm:gap-3.5 min-h-[76px] sm:min-h-[88px] shadow-[0_2px_8px_rgba(42,24,16,0.02)] transition-all hover:border-[#D6C7BA]">
+              <div className="w-9 h-9 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
+                <Leaf className="w-4.5 h-4.5 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330] stroke-[1.8]" aria-hidden="true" />
               </div>
+              <span className="font-[family-name:var(--font-heading)] text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
+                100% Traditional<br className="sm:hidden" /> Recipes
+              </span>
+            </div>
 
-              <div className="flex flex-col items-center text-center p-2.5 sm:px-3 sm:py-1">
-                <Leaf className="w-5.5 h-5.5 text-[#BF5330] mb-2" aria-hidden="true" />
-                <span className="font-semibold text-[12px] sm:text-[12.5px] text-[#1A1614] leading-[1.3] font-[family-name:var(--font-body)]">
-                  100% Traditional<br />Recipes
-                </span>
-              </div>
-
-              <div className="flex flex-col items-center text-center p-2.5 sm:px-3 sm:py-1">
+            {/* Card 3: Small-Batch Milling */}
+            <div className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#EBE3DA] p-2.5 min-[360px]:p-3 sm:p-4.5 flex items-center gap-2 sm:gap-3.5 min-h-[76px] sm:min-h-[88px] shadow-[0_2px_8px_rgba(42,24,16,0.02)] transition-all hover:border-[#D6C7BA]">
+              <div className="w-9 h-9 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -372,95 +294,78 @@ export default async function HomePage() {
                   strokeWidth="1.8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-5.5 h-5.5 text-[#BF5330] mb-2"
+                  className="w-4.5 h-4.5 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330]"
                   aria-hidden="true"
                 >
-                  <path d="M4 11h16a7.5 7.5 0 0 1-15 0z" />
-                  <path d="M8.5 18.5h7" />
-                  <path d="M15.5 3.5l-4.5 7.5" />
+                  <path d="M4 11h16a7 7 0 0 1-14 0z" />
+                  <path d="M8.5 18h7" />
+                  <path d="M16 4.5l-5 6.5" />
                 </svg>
-                <span className="font-semibold text-[12px] sm:text-[12.5px] text-[#1A1614] leading-[1.3] font-[family-name:var(--font-body)]">
-                  Small-Batch<br />Milling
-                </span>
               </div>
+              <span className="font-[family-name:var(--font-heading)] text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
+                Small-Batch<br className="sm:hidden" /> Milling
+              </span>
+            </div>
 
-              <div className="flex flex-col items-center text-center p-2.5 sm:px-3 sm:py-1">
-                <Truck className="w-5.5 h-5.5 text-[#BF5330] mb-2" aria-hidden="true" />
-                <span className="font-semibold text-[12px] sm:text-[12.5px] text-[#1A1614] leading-[1.3] font-[family-name:var(--font-body)]">
-                  Pan-India<br />Delivery
-                </span>
+            {/* Card 4: Pan-India Delivery */}
+            <div className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#EBE3DA] p-2.5 min-[360px]:p-3 sm:p-4.5 flex items-center gap-2 sm:gap-3.5 min-h-[76px] sm:min-h-[88px] shadow-[0_2px_8px_rgba(42,24,16,0.02)] transition-all hover:border-[#D6C7BA]">
+              <div className="w-9 h-9 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
+                <Truck className="w-4.5 h-4.5 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330] stroke-[1.8]" aria-hidden="true" />
               </div>
+              <span className="font-[family-name:var(--font-heading)] text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
+                Pan-India<br className="sm:hidden" /> Delivery
+              </span>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* ── Section 7: Final Shopping Action (Compact Terracotta Banner matching Image 1) ─────────────── */}
-      <section
-        aria-labelledby="cta-heading"
-        className="w-full bg-[#FFFBF7] pb-10 sm:pb-12 pt-0 sm:pt-1"
-      >
-        <div className="container-spn">
-          <div className="relative rounded-[16px] sm:rounded-[20px] bg-gradient-to-r from-[#BF5330] via-[#BA4E2C] to-[#993E20] text-white overflow-hidden shadow-xs">
-            {/* Background delicate leaf watermark behind right composition */}
-            <div
-              className="absolute right-[36%] lg:right-[40%] top-1/2 -translate-y-1/2 w-48 h-48 opacity-15 pointer-events-none select-none text-white hidden md:block"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M 80 10 Q 50 50 30 90" />
-                <path d="M 65 30 C 45 25 35 35 30 40 C 40 48 55 45 65 30" />
-                <path d="M 50 50 C 30 45 20 55 15 60 C 25 68 40 65 50 50" />
-                <path d="M 70 25 C 85 15 95 20 98 25 C 92 35 80 32 70 25" />
-                <path d="M 55 45 C 70 35 80 40 85 45 C 78 55 65 52 55 45" />
-              </svg>
+          {/* 3. Promotional Banner */}
+          <div className="relative rounded-[20px] sm:rounded-[24px] overflow-hidden bg-gradient-to-br from-[#B34522] via-[#BA4E2C] to-[#8C3417] text-white shadow-xs">
+            {/* Background image on right half */}
+            <div className="absolute right-0 top-0 bottom-0 w-[56%] sm:w-[50%] lg:w-[48%] overflow-hidden pointer-events-none select-none">
+              <Image
+                src="/categories/health-mix.jpg"
+                alt="Authentic traditional ingredients"
+                fill
+                sizes="(max-width: 640px) 60vw, (max-width: 1024px) 50vw, 560px"
+                className="object-cover object-right sm:object-[center_right]"
+              />
+              {/* Subtle terracotta gradient blend from left edge of image */}
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-[#B34522] from-10% via-[#B34522]/85 sm:via-[#B34522]/70 to-transparent pointer-events-none"
+                aria-hidden="true"
+              />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-12 items-center relative z-10 min-h-[145px] sm:min-h-[155px] lg:min-h-[165px]">
-              {/* Left Narrative Block */}
-              <div className="sm:col-span-7 lg:col-span-7 xl:col-span-7 p-6 sm:p-7 lg:py-7 lg:pl-10 xl:pl-12 flex flex-col justify-center">
-                <span className="font-[family-name:var(--font-body)] text-[10.5px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F7D8CC] mb-1.5 block">
+            {/* Narrative Content */}
+            <div className="relative z-10 p-5 sm:p-8 lg:py-10 lg:pl-10 xl:pl-12 flex flex-col justify-center min-h-[340px] sm:min-h-[290px] lg:min-h-[310px] max-w-[72%] sm:max-w-[62%] lg:max-w-xl">
+              <div className="flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-2.5">
+                <span className="font-[family-name:var(--font-body)] text-[10.5px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F7D8CC]">
                   TASTE THE TRADITION
                 </span>
-                <h2
-                  id="cta-heading"
-                  className="text-[20px] sm:text-[23px] lg:text-[26px] xl:text-[28px] text-white font-normal leading-[1.2] mb-3.5 max-w-xl"
-                  style={{ fontFamily: "var(--font-heading)" }}
-                >
-                  Ready to bring authentic flavours to your table?
-                </h2>
-                <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-                  <Link
-                    href="/shop"
-                    className="group inline-flex justify-center items-center gap-1.5 font-[family-name:var(--font-body)] font-semibold text-[13px] text-[#BF5330] bg-white hover:bg-[#FFFBF7] h-[38px] sm:h-[40px] px-5 sm:px-6 rounded-full shadow-xs hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150"
-                  >
-                    <span>Shop All Products</span>
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-150 group-hover:translate-x-0.5" aria-hidden="true" />
-                  </Link>
-                  <Link
-                    href="/contact"
-                    prefetch={false}
-                    className="inline-flex justify-center items-center font-[family-name:var(--font-body)] font-medium text-[13px] sm:text-[13.5px] text-white/95 hover:text-white underline underline-offset-4 transition-colors"
-                  >
-                    Contact Support
-                  </Link>
-                </div>
+                <span className="w-8 sm:w-10 h-[1.5px] bg-[#F7D8CC]/80" aria-hidden="true" />
               </div>
 
-              {/* Right Food Composition (Bleeds to right, top, bottom edges) */}
-              <div className="hidden sm:block sm:col-span-5 lg:col-span-5 xl:col-span-5 absolute right-0 top-0 bottom-0 w-[42%] lg:w-[45%] xl:w-[48%] overflow-hidden pointer-events-none select-none">
-                <Image
-                  src="/categories/health-mix.jpg"
-                  alt="Authentic traditional ingredients"
-                  fill
-                  sizes="(max-width: 1024px) 45vw, 560px"
-                  className="object-cover object-[center_65%]"
-                />
-                {/* Subtle gradient feathering from terracotta banner */}
-                <div
-                  className="absolute inset-0 bg-gradient-to-r from-[#BF5330] via-[#BF5330]/30 to-transparent pointer-events-none"
-                  aria-hidden="true"
-                />
+              <h3
+                id="cta-heading"
+                className="text-[20px] min-[360px]:text-[22px] sm:text-[26px] lg:text-[32px] xl:text-[36px] text-white font-normal leading-[1.18] mb-2.5 sm:mb-3"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                Ready to bring authentic flavours to your table?
+              </h3>
+
+              <p className="font-[family-name:var(--font-body)] text-[12.5px] min-[360px]:text-[13px] sm:text-[14px] lg:text-[15px] text-[#FDEEE8] leading-relaxed mb-5 sm:mb-6">
+                Explore our complete range of traditional health mix powders and natural foods.
+              </p>
+
+              <div>
+                <Link
+                  href="/shop"
+                  className="group inline-flex justify-center items-center gap-2 font-[family-name:var(--font-body)] font-semibold text-[13px] sm:text-[14px] text-[#BF5330] bg-white hover:bg-[#FFFBF7] active:scale-[0.98] h-[40px] sm:h-[44px] px-5 sm:px-6 rounded-full shadow-xs hover:shadow transition-all duration-150 w-fit whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <span className="sm:hidden">All Products</span>
+                  <span className="hidden sm:inline">Shop All Products</span>
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-150 group-hover:translate-x-0.5 shrink-0" aria-hidden="true" />
+                </Link>
               </div>
             </div>
           </div>

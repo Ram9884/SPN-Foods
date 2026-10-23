@@ -1,7 +1,29 @@
-import { neon, Pool } from "@neondatabase/serverless";
+import { neon, Pool, neonConfig } from "@neondatabase/serverless";
 import { drizzle as drizzleHttp } from "drizzle-orm/neon-http";
 import { drizzle as drizzleWs } from "drizzle-orm/neon-serverless";
 import * as schema from "./schema";
+
+/**
+ * Configure auto-retry on fetch for serverless HTTP queries to gracefully handle
+ * transient socket drops, Neon compute wakeups, and temporary network resets.
+ */
+if (typeof globalThis.fetch === "function" && !neonConfig.fetchFunction) {
+  neonConfig.fetchFunction = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const maxRetries = 3;
+    let attempt = 0;
+    while (true) {
+      try {
+        return await fetch(input, init);
+      } catch (err) {
+        attempt++;
+        if (attempt >= maxRetries) {
+          throw err;
+        }
+        await new Promise((resolve) => setTimeout(resolve, attempt * 300));
+      }
+    }
+  };
+}
 
 /**
  * Cloudflare Workers: read env per request, not at module load.

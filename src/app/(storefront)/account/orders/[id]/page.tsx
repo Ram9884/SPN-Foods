@@ -4,7 +4,7 @@ import { OrderDetailView } from "@/components/account/order-detail-view";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Order Details — SPN Foods",
+  title: "Order Details — SPN Health Mix",
   description: "View itemized summary, payment status, and shipping information for this order.",
 };
 

@@ -407,7 +407,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                 </p>
                 <p className="text-xs text-[#786B62] leading-relaxed">
                   {isDelivered ? (
-                    "Thank you for shopping with SPN Foods!"
+                    "Thank you for shopping with SPN Health Mix!"
                   ) : isShipped ? (
                     primaryShipment?.trackingUrl ? (
                       <a

@@ -6,7 +6,7 @@ export function renderOrderProcessingEmail(data: OrderStatusUpdateData): {
   html: string;
   text: string;
 } {
-  const subject = `Your Order #${data.orderNumber} is Processing — SPN Foods`;
+  const subject = `Your Order #${data.orderNumber} is Processing — SPN Health Mix`;
 
   const contentHtml = `
     <p>Dear <strong>${escapeHtml(data.customerName)}</strong>,</p>
@@ -21,7 +21,7 @@ export function renderOrderProcessingEmail(data: OrderStatusUpdateData): {
   `;
 
   const html = renderBaseEmailHtml({
-    preheader: `Your SPN Foods order #${data.orderNumber} is now processing.`,
+    preheader: `Your SPN Health Mix order #${data.orderNumber} is now processing.`,
     headline: "Order is Processing",
     badgeText: "Processing",
     badgeColor: "amber",
@@ -31,7 +31,7 @@ export function renderOrderProcessingEmail(data: OrderStatusUpdateData): {
   });
 
   const text = `
-SPN FOODS — ORDER PROCESSING
+SPN HEALTH MIX — ORDER PROCESSING
 
 Dear ${data.customerName},
 

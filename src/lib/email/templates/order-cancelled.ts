@@ -6,7 +6,7 @@ export function renderOrderCancelledEmail(data: OrderCancelledData): {
   html: string;
   text: string;
 } {
-  const subject = `Order Cancelled: #${data.orderNumber} — SPN Foods`;
+  const subject = `Order Cancelled: #${data.orderNumber} — SPN Health Mix`;
 
   const contentHtml = `
     <p>Dear <strong>${escapeHtml(data.customerName)}</strong>,</p>
@@ -43,7 +43,7 @@ export function renderOrderCancelledEmail(data: OrderCancelledData): {
   });
 
   const text = `
-SPN FOODS — ORDER CANCELLED
+SPN HEALTH MIX — ORDER CANCELLED
 
 Dear ${data.customerName},
 

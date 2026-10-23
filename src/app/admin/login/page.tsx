@@ -63,14 +63,14 @@ function AdminLoginContent() {
           <Link href="/" className="inline-flex flex-col items-center group mb-4">
             <Image
               src="/logo.png"
-              alt="SPN Foods Emblem"
+              alt="SPN Health Mix Emblem"
               width={64}
               height={64}
               priority
               className="w-16 h-16 rounded-full object-contain drop-shadow-md mb-2 transition-transform duration-200 group-hover:scale-105"
             />
             <span className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] font-normal tracking-tight text-[var(--color-brand-primary)] leading-none">
-              SPN Foods
+              SPN Health Mix
             </span>
           </Link>
 

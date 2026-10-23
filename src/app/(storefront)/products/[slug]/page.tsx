@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchProduct, fetchProductRatingSummary } from "@/lib/storefront/api";
 import { Breadcrumb } from "@/components/catalogue/breadcrumb";
-import { PriceDisplay } from "@/components/catalogue/price-display";
 import { ProductGrid } from "@/components/catalogue/product-grid";
 import { ProductImageGallery } from "@/components/catalogue/product-image-gallery";
 import { ProductPurchasePanel } from "@/components/catalogue/product-purchase-panel";
-import { RatingStars } from "@/components/reviews/rating-stars";
+import { AboutProductCard } from "@/components/catalogue/about-product-card";
 import { ProductReviewsSection } from "@/components/reviews/product-reviews-section";
-import { formatPrice } from "@/lib/utils";
 
 export const revalidate = 60;
 
@@ -62,7 +59,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
     "@type": "Product",
     name: product.name,
     description: product.description ?? product.shortDescription ?? undefined,
-    brand: { "@type": "Brand", name: "SPN Foods" },
+    brand: { "@type": "Brand", name: "SPN Health Mix" },
     image: product.images.map((i) => i.url),
     ...(ratingSummary.totalReviews > 0
       ? {
@@ -134,120 +131,41 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
             className="mb-6"
           />
 
-          {/* Two-column layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-[55%_45%] gap-8 lg:gap-12 items-start">
+          {/* Two-column layout matching reference design */}
+          <div className="grid grid-cols-1 lg:grid-cols-[52%_48%] xl:grid-cols-[54%_46%] gap-8 lg:gap-12 xl:gap-16 items-start">
 
-            {/* Left: Images */}
-            <div className="lg:sticky lg:top-[88px]">
+            {/* Left: Product Image Gallery */}
+            <div className="lg:sticky lg:top-[96px]">
               <ProductImageGallery
                 images={product.images}
                 productName={product.name}
               />
             </div>
 
-            {/* Right: Purchase panel */}
+            {/* Right: Product Details (exact 8 items in requested order) */}
             <div>
-              {/* Category link */}
-              <Link
-                href={`/shop/${product.category.slug}`}
-                className="font-[family-name:var(--font-body)] text-xs text-[var(--color-text-muted)] hover:text-[var(--color-brand-primary)] transition-colors uppercase tracking-wider"
-              >
-                {product.category.name}
-              </Link>
+              <ProductPurchasePanel
+                product={product}
+                initialVariantId={initialVariantId}
+              />
 
-              {/* Product name */}
-              <h1 className="font-[family-name:var(--font-product)] text-2xl lg:text-[28px] font-medium text-[var(--color-text-primary)] mt-2 mb-2 leading-snug">
-                {product.name}
-              </h1>
-
-              {/* Rating summary badge linking to reviews section */}
-              <div className="flex items-center gap-2 mb-4">
-                <a
-                  href="#reviews"
-                  className="inline-flex items-center gap-2 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-brand-primary)] transition-colors group"
-                >
-                  <RatingStars rating={ratingSummary.averageRating} size="sm" />
-                  <span className="font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-brand-primary)]">
-                    {ratingSummary.totalReviews > 0 ? ratingSummary.averageRating.toFixed(1) : "New"}
-                  </span>
-                  <span>
-                    ({ratingSummary.totalReviews} review{ratingSummary.totalReviews === 1 ? "" : "s"})
-                  </span>
-                </a>
-              </div>
-
-              {/* Short description */}
-              {product.shortDescription && (
-                <p className="font-[family-name:var(--font-body)] text-base text-[var(--color-text-body)] leading-relaxed mb-5">
-                  {product.shortDescription}
-                </p>
-              )}
-
-              {/* Dynamic Purchase Panel (Live Pricing, Variant Radio Group, Quantity Stepper, Add to Cart) */}
-              <ProductPurchasePanel product={product} initialVariantId={initialVariantId} />
-
-              {product.variants.length > 0 && !product.inStock ? (
-                <div className="mb-6">
-                  <p className="w-full h-12 flex items-center justify-center font-[family-name:var(--font-body)] font-semibold text-base text-[var(--color-text-muted)] bg-[var(--color-surface-sunken)] rounded-[8px] border border-[var(--color-border)]">
-                    Out of stock
-                  </p>
-                </div>
-              ) : null}
-
-              {/* ── Product information sections (Visibly below overview & purchase panel) ── */}
-              {(Boolean(product.description?.trim()) ||
-                Boolean(product.usage?.trim()) ||
-                Boolean(product.ingredients?.trim())) && (
-                <div className="mt-8 pt-6 border-t border-[var(--color-border)] space-y-5">
-                  <h2 className="font-[family-name:var(--font-heading)] text-lg lg:text-xl text-[var(--color-text-primary)] font-semibold">
-                    Product Information
-                  </h2>
-
-                  {/* Product description */}
-                  {product.description?.trim() && (
-                    <div className="p-5 rounded-[10px] bg-[var(--color-surface-sunken)] border border-[var(--color-border)]">
-                      <h3 className="font-[family-name:var(--font-heading)] font-semibold text-sm lg:text-base text-[var(--color-text-primary)] mb-2">
-                        Product Description
-                      </h3>
-                      <p className="font-[family-name:var(--font-body)] text-sm text-[var(--color-text-body)] leading-relaxed whitespace-pre-line">
-                        {product.description.trim()}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* How to use */}
-                  {product.usage?.trim() && (
-                    <div className="p-5 rounded-[10px] bg-[var(--color-surface-sunken)] border border-[var(--color-border)]">
-                      <h3 className="font-[family-name:var(--font-heading)] font-semibold text-sm lg:text-base text-[var(--color-text-primary)] mb-2">
-                        How to Use
-                      </h3>
-                      <p className="font-[family-name:var(--font-body)] text-sm text-[var(--color-text-body)] leading-relaxed whitespace-pre-line">
-                        {product.usage.trim()}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Ingredients (Only rendered when verified and non-empty) */}
-                  {product.ingredients?.trim() && (
-                    <div className="p-5 rounded-[10px] bg-[var(--color-surface-sunken)] border border-[var(--color-border)]">
-                      <h3 className="font-[family-name:var(--font-heading)] font-semibold text-sm lg:text-base text-[var(--color-text-primary)] mb-2">
-                        Ingredients
-                      </h3>
-                      <p className="font-[family-name:var(--font-body)] text-sm text-[var(--color-text-body)] leading-relaxed whitespace-pre-line">
-                        {product.ingredients.trim()}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
 
-          {/* ── Customer Reviews & Ratings Section ─────────────────────────── */}
-          <ProductReviewsSection
-            productSlug={slug}
-            initialSummary={ratingSummary}
-          />
+          {/* Middle Section: About This Product & Customer Reviews side by side on desktop, stacked on mobile */}
+          <div className="mt-10 lg:mt-14 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+            {/* About This Product Card */}
+            <AboutProductCard
+              name={product.name}
+              description={product.description ?? product.shortDescription}
+            />
+
+            {/* Customer Reviews Card */}
+            <ProductReviewsSection
+              productSlug={slug}
+              initialSummary={ratingSummary}
+            />
+          </div>
 
           {/* ── Related products ──────────────────────────────────────────── */}
           {product.related.length > 0 && (
