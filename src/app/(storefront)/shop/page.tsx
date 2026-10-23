@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { fetchCategories, fetchProducts } from "@/lib/storefront/api";
 import { ProductGrid } from "@/components/catalogue/product-grid";
-import { CategoryChips } from "@/components/catalogue/category-chips";
+import { CategoryFilter } from "@/components/catalogue/category-chips";
 import { SortSelect } from "@/components/catalogue/sort-select";
 import { Pagination } from "@/components/catalogue/pagination";
 import { Breadcrumb } from "@/components/catalogue/breadcrumb";
@@ -68,14 +68,16 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           </p>
         </div>
 
-        {/* Category Filter Pills and Sorting Bar neatly positioned */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-7 sm:mb-8 border-b border-[#E8DFD4] pb-4">
-          <Suspense>
-            <CategoryChips
-              categories={categories}
-              totalCount={totalAllCategories}
-            />
-          </Suspense>
+        {/* Category Filter and Sorting Controls Toolbar */}
+        <div className="flex items-center justify-between gap-3 sm:gap-4 mb-7 sm:mb-8 border-b border-[#E8DFD4] pb-4">
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+            <Suspense>
+              <CategoryFilter
+                categories={categories}
+                totalCount={totalAllCategories}
+              />
+            </Suspense>
+          </div>
           <div className="flex items-center justify-end shrink-0">
             <Suspense>
               <SortSelect currentSort={sort} />

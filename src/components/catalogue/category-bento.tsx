@@ -213,9 +213,8 @@ export function CategoryBento({ categories }: CategoryBentoProps) {
 
                   {/* Navigation Action Row */}
                   <div className="flex items-center justify-between pt-2 mt-auto border-t border-[#F5EFE8]/80">
-                    <span className="font-[family-name:var(--font-body)] text-[14px] font-medium text-[#BF5330] group-hover:text-[#8F3E20] inline-flex items-center gap-1.5 transition-colors">
-                      <span>Explore Products</span>
-                      <span className="transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
+                    <span className="font-[family-name:var(--font-body)] text-[14px] font-medium text-[#BF5330] group-hover:text-[#8F3E20] inline-flex items-center transition-colors">
+                      Explore Products
                     </span>
 
                     <span

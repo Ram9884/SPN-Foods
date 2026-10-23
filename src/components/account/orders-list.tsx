@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, AlertCircle, ShoppingBag, Package } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, cn } from "@/lib/utils";
 import type { AddressSnapshot } from "@/lib/db/schema";
 
 export interface OrderListItem {
@@ -176,26 +176,35 @@ export function OrdersList({ limit }: { limit?: number }) {
   });
 
   return (
-    <div className="bg-white rounded-2xl sm:rounded-[22px] border border-[#E8DFD4] p-3.5 sm:p-6 lg:p-7 shadow-[0_2px_12px_rgba(42,24,16,0.03)] font-[family-name:var(--font-body)]">
-      {/* Order status filter tabs matching reference image */}
-      <div className="flex items-center gap-1.5 sm:gap-2.5 overflow-x-auto scrollbar-hide -mx-3.5 px-3.5 sm:mx-0 sm:px-0 pb-1 mb-4 sm:mb-6">
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`h-8 sm:h-9 px-3 sm:px-4 rounded-lg sm:rounded-[10px] text-xs sm:text-[13.5px] font-medium transition-all shrink-0 cursor-pointer inline-flex items-center justify-center ${
-                isActive
-                  ? "bg-[#BF5330] text-white shadow-xs font-semibold"
-                  : "bg-[#F5EFE8] text-[#4A3B32] hover:bg-[#EFE7DD] hover:text-[#1A1614]"
-              }`}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
+    <div className="w-full font-[family-name:var(--font-body)]">
+      {/* Order status filter tabs with responsive spacing & horizontal scrolling */}
+      <div className="w-full overflow-x-auto scrollbar-none pb-2 pt-0.5 mb-5 sm:mb-6 select-none">
+        <div
+          className="flex items-center gap-2 sm:gap-2.5 min-w-max"
+          role="tablist"
+          aria-label="Filter orders by status"
+        >
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "h-8 sm:h-9 px-3 sm:px-4 rounded-lg sm:rounded-[10px] text-xs sm:text-[13.5px] font-medium transition-all shrink-0 cursor-pointer inline-flex items-center justify-center whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#BF5330]",
+                  isActive
+                    ? "bg-[#BF5330] text-white shadow-2xs font-semibold"
+                    : "bg-[#F5EFE8] text-[#4A3B32] hover:bg-[#EFE7DD] hover:text-[#1A1614] border border-[#E8DFD4]/70"
+                )}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Loading Skeleton */}
@@ -204,19 +213,19 @@ export function OrdersList({ limit }: { limit?: number }) {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="p-3.5 sm:p-5 rounded-xl border border-[#E8DFD4] bg-[#FAF5EE]/40 animate-pulse flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4"
+              className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-[#E8DFD4] bg-white animate-pulse flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 shadow-[0_1px_4px_rgba(42,24,16,0.02)]"
             >
               <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-[#E8DFD4]/60 shrink-0" />
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-[#FAF5EE] shrink-0" />
                 <div className="space-y-2 flex-1">
-                  <div className="h-4 w-32 sm:w-40 bg-[#E8DFD4]/60 rounded" />
-                  <div className="h-3 w-24 sm:w-28 bg-[#E8DFD4]/60 rounded" />
-                  <div className="h-3 w-40 sm:w-52 bg-[#E8DFD4]/60 rounded" />
+                  <div className="h-4 w-32 sm:w-40 bg-[#FAF5EE] rounded" />
+                  <div className="h-3 w-24 sm:w-28 bg-[#FAF5EE] rounded" />
+                  <div className="h-3 w-40 sm:w-52 bg-[#FAF5EE] rounded" />
                 </div>
               </div>
               <div className="flex md:flex-col items-center md:items-end justify-between border-t border-[#E8DFD4]/60 md:border-0 pt-3 md:pt-0 gap-3">
-                <div className="h-4 w-16 bg-[#E8DFD4]/60 rounded" />
-                <div className="h-10 sm:h-8 w-24 bg-[#E8DFD4]/60 rounded" />
+                <div className="h-4 w-16 bg-[#FAF5EE] rounded" />
+                <div className="h-10 sm:h-8 w-24 bg-[#FAF5EE] rounded" />
               </div>
             </div>
           ))}
@@ -225,7 +234,7 @@ export function OrdersList({ limit }: { limit?: number }) {
 
       {/* Error State */}
       {error && !loading && (
-        <div className="p-8 rounded-xl border border-[#E8DFD4] bg-[#FAF5EE]/30 text-center">
+        <div className="p-8 rounded-2xl border border-[#E8DFD4] bg-white text-center max-w-md mx-auto my-4 shadow-xs">
           <AlertCircle className="h-8 w-8 text-[#BF5330] mx-auto mb-3" />
           <p className="text-sm text-[#4A3B32] mb-4">
             {error}
@@ -242,7 +251,7 @@ export function OrdersList({ limit }: { limit?: number }) {
 
       {/* Empty State */}
       {!loading && !error && filteredOrders.length === 0 && (
-        <div className="py-12 px-6 rounded-xl border border-[#E8DFD4]/70 bg-[#FAF5EE]/30 text-center max-w-md mx-auto my-4">
+        <div className="py-12 px-6 rounded-2xl border border-dashed border-[#E8DFD4] bg-white text-center max-w-md mx-auto my-4 shadow-xs">
           <div className="w-12 h-12 rounded-full bg-[#FDF3EE] border border-[#BF5330]/20 flex items-center justify-center mx-auto mb-3.5 text-[#BF5330]">
             <ShoppingBag className="h-6 w-6 stroke-[1.75]" />
           </div>

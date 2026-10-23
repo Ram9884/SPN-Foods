@@ -486,36 +486,16 @@ export function ProductCard({ product, className, priority = false }: ProductCar
             </div>
           )}
 
-          {/* 6. Mobile Price View (< md) — preserved 100% exactly as is for mobile */}
-          <div className="h-7.5 mb-4 flex items-baseline gap-2 md:hidden">
-            {displayPrice ? (
-              <>
-                <span className="font-[family-name:var(--font-price)] font-extrabold text-[22px] sm:text-[24px] text-[#1A1614] tracking-tight leading-none">
-                  {displayPrice}
-                </span>
-                {hasGenuineDiscount && originalMrp ? (
-                  <span className="font-[family-name:var(--font-price)] text-[13px] sm:text-[14px] text-[#635850] line-through font-normal">
-                    {originalMrp}
-                  </span>
-                ) : null}
-                {hasGenuineDiscount && selectedVariant?.discountPercent ? (
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                    {selectedVariant.discountPercent}% OFF
-                  </span>
-                ) : null}
-              </>
-            ) : null}
-          </div>
         </div>
 
-        {/* Purchase Action Button & Desktop Price Row */}
-        <div className="w-full mt-auto pt-1 md:pt-3 md:flex md:items-center md:justify-between md:gap-2.5">
-          {/* Desktop Price View (>= md) — placed on the left, vertically centered relative to the button */}
-          <div className="hidden md:flex flex-col justify-center shrink-0 min-w-0">
+        {/* Purchase Action Button & Price Row */}
+        <div className="w-full mt-auto pt-2.5 sm:pt-3 flex items-center justify-between gap-2.5">
+          {/* Price View — placed on the left, vertically centered relative to the button */}
+          <div className="flex flex-col justify-center shrink-0 min-w-0">
             {displayPrice ? (
               <>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-[family-name:var(--font-price)] font-extrabold text-[20px] lg:text-[22px] text-[#1A1614] tracking-tight leading-none select-none">
+                <div className="flex items-baseline gap-1 sm:gap-1.5">
+                  <span className="font-[family-name:var(--font-price)] font-extrabold text-[19px] sm:text-[20px] lg:text-[22px] text-[#1A1614] tracking-tight leading-none select-none">
                     {displayPrice}
                   </span>
                   {hasGenuineDiscount && originalMrp ? (
@@ -525,7 +505,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
                   ) : null}
                 </div>
                 {hasGenuineDiscount && selectedVariant?.discountPercent ? (
-                  <span className="text-[10.5px] font-bold text-emerald-700 leading-tight mt-0.5">
+                  <span className="text-[10px] md:text-[10.5px] font-bold text-emerald-700 leading-tight mt-0.5">
                     {selectedVariant.discountPercent}% OFF
                   </span>
                 ) : null}
@@ -533,8 +513,8 @@ export function ProductCard({ product, className, priority = false }: ProductCar
             ) : null}
           </div>
 
-          {/* Action Button / Quantity Controls — full width on mobile, right-aligned on desktop */}
-          <div className="w-full md:w-auto md:shrink-0">
+          {/* Action Button / Quantity Controls — right-aligned, vertically centered */}
+          <div className="shrink-0">
             {variants.length > 0 ? (
               currentQty === 0 ? (
                 <button
@@ -542,17 +522,17 @@ export function ProductCard({ product, className, priority = false }: ProductCar
                   onClick={handleAddToCart}
                   disabled={!selectedVariant?.inStock || isBusy}
                   className={cn(
-                    "w-full md:w-auto md:min-w-[124px] lg:min-w-[130px] bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[44px] md:h-[40px] lg:h-[42px] px-3.5 sm:px-4 rounded-[6px] font-[family-name:var(--font-body)] text-[14px] md:text-[13px] lg:text-[13.5px] font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] cursor-pointer shrink-0 whitespace-nowrap",
+                    "w-auto min-w-[108px] sm:min-w-[124px] lg:min-w-[130px] bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[38px] sm:h-[40px] lg:h-[42px] px-3 sm:px-3.5 lg:px-4 rounded-[6px] font-[family-name:var(--font-body)] text-[12.5px] sm:text-[13px] lg:text-[13.5px] font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] cursor-pointer shrink-0 whitespace-nowrap",
                     (!selectedVariant?.inStock || isBusy) && "opacity-60 cursor-not-allowed"
                   )}
                   aria-label={`Add ${name}${selectedVariant?.label ? ` - ${selectedVariant.label}` : ""} to cart`}
                 >
-                  <ShoppingCart className="w-4 h-4 shrink-0 text-white" aria-hidden="true" />
+                  <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-white" aria-hidden="true" />
                   <span>{isBusy ? "Adding..." : "Add to Cart"}</span>
                 </button>
               ) : (
                 <div
-                  className="w-full md:w-auto h-[44px] md:h-[40px] lg:h-[42px] rounded-[6px] bg-[#BF5330] text-white flex items-center justify-between px-3 md:px-2 lg:px-2.5 shadow-xs select-none shrink-0"
+                  className="w-auto h-[38px] sm:h-[40px] lg:h-[42px] rounded-[6px] bg-[#BF5330] text-white flex items-center justify-between px-2 sm:px-2 lg:px-2.5 shadow-xs select-none shrink-0"
                   role="group"
                   aria-label={`Quantity in cart for ${name} (${selectedVariant?.label})`}
                 >
@@ -560,13 +540,13 @@ export function ProductCard({ product, className, priority = false }: ProductCar
                     type="button"
                     onClick={handleDecrement}
                     disabled={isBusy}
-                    className="h-8.5 w-10 md:h-8 md:w-7.5 rounded-[3px] flex items-center justify-center hover:bg-[#8F3E20] active:scale-95 transition-all text-white cursor-pointer disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
+                    className="h-7.5 w-7.5 sm:h-8 sm:w-7.5 rounded-[3px] flex items-center justify-center hover:bg-[#8F3E20] active:scale-95 transition-all text-white cursor-pointer disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
                     aria-label={`Decrease quantity of ${name} (${selectedVariant?.label})`}
                   >
-                    <Minus className="w-4 h-4 md:w-3.5 md:h-3.5 stroke-[2.5]" aria-hidden="true" />
+                    <Minus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" aria-hidden="true" />
                   </button>
 
-                  <span className="font-[family-name:var(--font-price)] font-bold text-[17px] md:text-[15px] lg:text-[16px] text-white select-none px-4 md:px-2 tracking-tight min-w-[28px] md:min-w-[22px] text-center">
+                  <span className="font-[family-name:var(--font-price)] font-bold text-[15px] sm:text-[15px] lg:text-[16px] text-white select-none px-2.5 sm:px-3 tracking-tight min-w-[20px] sm:min-w-[22px] text-center">
                     {currentQty}
                   </span>
 
@@ -577,10 +557,10 @@ export function ProductCard({ product, className, priority = false }: ProductCar
                       isBusy ||
                       (selectedVariant?.maxQuantity ? currentQty >= selectedVariant.maxQuantity : currentQty >= 99)
                     }
-                    className="h-8.5 w-10 md:h-8 md:w-7.5 rounded-[3px] flex items-center justify-center hover:bg-[#8F3E20] active:scale-95 transition-all text-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
+                    className="h-7.5 w-7.5 sm:h-8 sm:w-7.5 rounded-[3px] flex items-center justify-center hover:bg-[#8F3E20] active:scale-95 transition-all text-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
                     aria-label={`Increase quantity of ${name} (${selectedVariant?.label})`}
                   >
-                    <Plus className="w-4 h-4 md:w-3.5 md:h-3.5 stroke-[2.5]" aria-hidden="true" />
+                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" aria-hidden="true" />
                   </button>
                 </div>
               )
@@ -588,11 +568,11 @@ export function ProductCard({ product, className, priority = false }: ProductCar
               <Link
                 href={productHref}
                 prefetch={false}
-                className="w-full md:w-auto md:min-w-[124px] bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[44px] md:h-[40px] lg:h-[42px] px-3.5 sm:px-4 rounded-[6px] font-[family-name:var(--font-body)] text-[14px] md:text-[13px] font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] shrink-0 whitespace-nowrap"
+                className="w-auto min-w-[108px] sm:min-w-[124px] bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[38px] sm:h-[40px] lg:h-[42px] px-3 sm:px-3.5 rounded-[6px] font-[family-name:var(--font-body)] text-[12.5px] sm:text-[13px] font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] shrink-0 whitespace-nowrap"
                 aria-label={`Choose options for ${name}`}
               >
                 <span>Choose options</span>
-                <ArrowRight className="w-4 h-4 md:w-3.5 md:h-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </Link>
             )}
           </div>
@@ -628,15 +608,11 @@ export function ProductCardSkeleton() {
               <div className="h-8 w-14 bg-[#FAF5EE] rounded-[6px]" />
             </div>
           </div>
-          {/* Price skeleton (mobile only) */}
-          <div className="h-7.5 mb-4 flex items-center md:hidden">
-            <div className="h-6 w-24 bg-[#FAF5EE] rounded" />
-          </div>
         </div>
-        {/* Buttons and desktop price skeleton */}
-        <div className="w-full mt-auto pt-1 md:pt-3 md:flex md:items-center md:justify-between md:gap-2.5">
-          <div className="hidden md:block h-6 w-20 bg-[#FAF5EE] rounded" />
-          <div className="h-[44px] md:h-[40px] lg:h-[42px] w-full md:w-32 bg-[#FAF5EE] rounded-[6px]" />
+        {/* Price and Buttons Row */}
+        <div className="w-full mt-auto pt-2.5 sm:pt-3 flex items-center justify-between gap-2.5">
+          <div className="h-6 w-20 bg-[#FAF5EE] rounded shrink-0" />
+          <div className="h-[38px] md:h-[40px] lg:h-[42px] w-28 md:w-32 bg-[#FAF5EE] rounded-[6px] shrink-0" />
         </div>
       </div>
     </div>
