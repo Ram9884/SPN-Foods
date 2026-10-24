@@ -66,8 +66,8 @@ export async function getBusinessSettings(db: AnyDb): Promise<BusinessSettings> 
       state: v.address.state?.trim() || null,
       pincode: v.address.pincode?.trim() || null,
     } : null,
-    fssaiNumber: typeof v.fssaiNumber === "string" && v.fssaiNumber.trim() ? v.fssaiNumber.trim() : null,
-    gstin: typeof v.gstin === "string" && v.gstin.trim() ? v.gstin.trim() : null,
+    fssaiNumber: typeof v.fssaiNumber === "string" && v.fssaiNumber.trim() ? v.fssaiNumber.trim() : DEFAULT_BUSINESS_SETTINGS.fssaiNumber,
+    gstin: typeof v.gstin === "string" && v.gstin.trim() ? v.gstin.trim() : DEFAULT_BUSINESS_SETTINGS.gstin,
     socialLinks: v.socialLinks && typeof v.socialLinks === "object" ? {
       instagram: v.socialLinks.instagram?.trim() || null,
       facebook: v.socialLinks.facebook?.trim() || null,

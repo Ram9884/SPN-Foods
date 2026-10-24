@@ -38,8 +38,8 @@ export const DEFAULT_BUSINESS_SETTINGS: BusinessSettings = {
     state: "Tamil Nadu",
     pincode: "635202",
   },
-  fssaiNumber: null,
-  gstin: null,
+  fssaiNumber: "22425032000829",
+  gstin: "33GACPM7047B1ZZ",
   socialLinks: {
     instagram: "https://instagram.com/spn_healthmix",
   },

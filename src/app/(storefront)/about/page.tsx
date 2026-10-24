@@ -337,65 +337,56 @@ export default async function AboutPage() {
               </p>
 
               {/* Clean Information Card */}
-              <div className="mt-6 rounded-[16px] sm:rounded-[18px] bg-[#FAF4ED] border border-[#E8DFD4] p-5 sm:p-7 shadow-[0_2px_12px_rgba(42,24,16,0.02)] space-y-4 sm:space-y-5">
-                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 pb-4 sm:pb-5 border-b border-[#E8DFD4]/80">
-                  <div className="w-full pb-4 border-b border-[#E8DFD4]/80 sm:pb-0 sm:border-b-0">
-                    <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] sm:text-[11px] mb-1">
-                      BRAND / OPERATING NAME
-                    </span>
-                    <span className="font-[family-name:var(--font-body)] text-[14.5px] sm:text-[15px] font-semibold text-[#1A1614] block">
-                      {settings.businessName}
-                    </span>
-                  </div>
-
-                  <div className="w-full">
-                    <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] sm:text-[11px] mb-1">
-                      CUSTOMER INQUIRIES &amp; SUPPORT
-                    </span>
-                    <a
-                      href={`mailto:${settings.supportEmail}`}
-                      className="font-[family-name:var(--font-body)] text-[14.5px] sm:text-[15px] font-medium text-[#BF5330] hover:text-[#8F3E20] hover:underline transition-colors break-words block"
-                    >
-                      {settings.supportEmail}
-                    </a>
-                  </div>
+              <div className="mt-6 rounded-[16px] md:rounded-[18px] bg-[#FAF4ED] border border-[#E8DFD4] p-5 md:p-7 shadow-[0_2px_12px_rgba(42,24,16,0.02)] grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-y-5 md:gap-x-8">
+                {/* 1. Brand / Operating Name */}
+                <div className="w-full pb-4 md:pb-5 border-b border-[#E8DFD4]/80">
+                  <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] md:text-[11px] mb-1">
+                    BRAND / OPERATING NAME
+                  </span>
+                  <span className="font-[family-name:var(--font-body)] text-[14.5px] md:text-[15px] font-semibold text-[#1A1614] block">
+                    {settings.businessName}
+                  </span>
                 </div>
 
-                {/* Optional Phone/WhatsApp if configured */}
-                {(settings.phone || settings.whatsapp) && (
-                  <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 pb-4 sm:pb-5 border-b border-[#E8DFD4]/80">
-                    {settings.phone && (
-                      <div className="w-full pb-4 border-b border-[#E8DFD4]/80 sm:pb-0 sm:border-b-0">
-                        <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] sm:text-[11px] mb-1">
-                          CUSTOMER PHONE
-                        </span>
-                        <a
-                          href={`tel:${settings.phone.replace(/\s+/g, "")}`}
-                          className="font-[family-name:var(--font-body)] text-[14px] font-medium text-[#1A1614] hover:text-[#BF5330] transition-colors break-words block"
-                        >
-                          {settings.phone}
-                        </a>
-                      </div>
-                    )}
-                    {settings.whatsapp && (
-                      <div className="w-full">
-                        <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] sm:text-[11px] mb-1">
-                          WHATSAPP SUPPORT
-                        </span>
-                        <span className="font-[family-name:var(--font-body)] text-[14px] font-medium text-[#1A1614] break-words block">
-                          {settings.whatsapp}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {/* 2. GSTIN */}
+                <div className="w-full pb-4 md:pb-5 border-b border-[#E8DFD4]/80">
+                  <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] md:text-[11px] mb-1">
+                    GSTIN
+                  </span>
+                  <span className="font-[family-name:var(--font-body)] text-[14px] md:text-[14.5px] font-medium text-[#1A1614] tracking-wide block">
+                    {settings.gstin || "33GACPM7047B1ZZ"}
+                  </span>
+                </div>
 
-                {/* Operating Address */}
-                <div className="w-full">
-                  <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] sm:text-[11px] mb-1">
+                {/* 3. FSSAI Registration Number */}
+                <div className="w-full pb-4 md:pb-5 border-b border-[#E8DFD4]/80">
+                  <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] md:text-[11px] mb-1">
+                    FSSAI REGISTRATION NUMBER
+                  </span>
+                  <span className="font-[family-name:var(--font-body)] text-[14px] md:text-[14.5px] font-medium text-[#1A1614] tracking-wide block">
+                    {settings.fssaiNumber || "22425032000829"}
+                  </span>
+                </div>
+
+                {/* 4. Customer Inquiries & Support (email) */}
+                <div className="w-full min-w-0 pb-4 md:pb-5 border-b border-[#E8DFD4]/80">
+                  <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] md:text-[11px] mb-1">
+                    CUSTOMER INQUIRIES &amp; SUPPORT
+                  </span>
+                  <a
+                    href={`mailto:${settings.supportEmail}`}
+                    className="font-[family-name:var(--font-body)] text-[14.5px] md:text-[15px] font-medium text-[#BF5330] hover:text-[#8F3E20] hover:underline transition-colors block break-normal [overflow-wrap:anywhere]"
+                  >
+                    {settings.supportEmail}
+                  </a>
+                </div>
+
+                {/* 5. Operating Address */}
+                <div className="w-full md:col-span-2">
+                  <span className="font-[family-name:var(--font-body)] font-semibold text-[#8C7E72] uppercase tracking-[0.14em] block text-[10.5px] md:text-[11px] mb-1">
                     OPERATING ADDRESS
                   </span>
-                  <p className="font-[family-name:var(--font-body)] text-[13.5px] sm:text-[14px] text-[#4A3B32] leading-relaxed break-words">
+                  <p className="font-[family-name:var(--font-body)] text-[13.5px] md:text-[14px] text-[#4A3B32] leading-relaxed break-words">
                     <span>{addressLine1}, </span>
                     <br className="hidden md:inline" />
                     <span>{stateAndPin}</span>
