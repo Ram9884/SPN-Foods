@@ -141,11 +141,11 @@ export function SiteNav({ categories }: SiteNavProps) {
             : "bg-[#FFFBF7] border-b border-transparent"
         )}
       >
-        <div className="container-spn h-[62px] lg:h-[68px] flex items-center justify-between gap-1.5 xs:gap-2 sm:gap-4 px-2.5 xs:px-3 sm:px-4 md:px-6">
-          {/* 1. Left: Mobile hamburger menu (extreme left on mobile, hidden on lg+) */}
-          <div className="flex items-center shrink-0 lg:hidden">
+        <div className="container-spn relative h-[62px] lg:h-[68px] flex items-center justify-between gap-1 xs:gap-2 sm:gap-4 px-1 min-[360px]:px-2 sm:px-4 md:px-6">
+          {/* 1. Left: Mobile hamburger menu (fixed at far-left on mobile, hidden on lg+) */}
+          <div className="flex items-center justify-start w-9 xs:w-10 shrink-0 lg:hidden">
             <button
-              className="flex items-center justify-center h-8.5 w-8.5 xs:h-9 xs:w-9 sm:h-10 sm:w-10 -ml-1 rounded-[6px] hover:bg-[var(--color-surface-sunken)] active:scale-95 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] shrink-0 flex-shrink-0"
+              className="flex items-center justify-center h-9 w-9 xs:h-10 xs:w-10 rounded-[6px] hover:bg-[var(--color-surface-sunken)] active:scale-95 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] shrink-0"
               onClick={() => setDrawerOpen(true)}
               aria-label="Open navigation menu"
               aria-expanded={drawerOpen}
@@ -155,33 +155,55 @@ export function SiteNav({ categories }: SiteNavProps) {
             </button>
           </div>
 
-          {/* 2. Middle (Mobile) / Left (Desktop): Brand section between hamburger & profile on mobile, left on desktop */}
-          <div className="flex-1 min-w-0 flex items-center justify-center lg:justify-start lg:flex-initial lg:shrink-0">
+          {/* 2. Middle (Mobile) / Left (Desktop): Centered brand section on mobile, left-aligned on desktop */}
+          <div className="absolute left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-88px)] min-w-0 flex items-center justify-center lg:static lg:translate-x-0 lg:left-auto lg:w-auto lg:max-w-none lg:justify-start lg:flex-initial lg:shrink-0">
             <Link
               href="/"
               prefetch={false}
-              className="flex items-center gap-1.5 xs:gap-2 sm:gap-2.5 min-w-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] rounded group"
+              className="flex flex-col items-center justify-center text-center min-w-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] rounded group"
               aria-label="SPN Health Mix — Home"
             >
-              <Image
-                src="/logo.png"
-                alt="SPN Health Mix Emblem"
-                width={38}
-                height={38}
-                priority
-                className="w-7 h-7 xs:w-8 xs:h-8 sm:w-[34px] sm:h-[34px] lg:w-[38px] lg:h-[38px] rounded-full object-contain drop-shadow-xs transition-transform duration-200 group-hover:scale-105 shrink-0 flex-shrink-0"
-              />
-              <div className="flex flex-col items-center text-center leading-none min-w-0">
-                <span
-                  className="font-[family-name:var(--font-logo)] text-[14px] xs:text-[15.5px] sm:text-[18px] md:text-[19.5px] lg:text-[21px] text-[var(--color-brand-primary)] tracking-tight font-bold leading-tight"
-                >
-                  SPN Health Mix
-                </span>
-                <span
-                  className="font-[family-name:var(--font-tamil)] text-[7.5px] xs:text-[8.5px] sm:text-[9.5px] md:text-[10px] lg:text-[10.5px] text-[#6B5A4E] font-bold tracking-tight sm:tracking-normal mt-0.5 whitespace-nowrap"
-                >
+              {/* Mobile brand block (<lg): Logo and title on row 1, Tamil tagline directly underneath */}
+              <div className="flex flex-col items-center justify-center text-center min-w-0 lg:hidden">
+                {/* Row 1: Logo and Title side-by-side, centered together */}
+                <div className="flex items-center justify-center gap-1.5 min-[360px]:gap-2">
+                  <Image
+                    src="/logo.png"
+                    alt="SPN Health Mix Emblem"
+                    width={38}
+                    height={38}
+                    priority
+                    className="w-5 h-5 min-[360px]:w-6 min-[360px]:h-6 sm:w-7 sm:h-7 rounded-full object-contain drop-shadow-xs transition-transform duration-200 group-hover:scale-105 shrink-0"
+                  />
+                  <span className="font-[family-name:var(--font-logo)] text-[13.5px] min-[360px]:text-[15px] sm:text-[18px] text-[var(--color-brand-primary)] tracking-tight font-bold leading-tight whitespace-nowrap">
+                    SPN Health Mix
+                  </span>
+                </div>
+
+                {/* Row 2: Complete Tamil tagline directly underneath, centered */}
+                <span className="font-[family-name:var(--font-tamil)] text-[7px] min-[360px]:text-[8px] sm:text-[9.5px] text-[#6B5A4E] font-bold tracking-tight mt-0.5 whitespace-nowrap leading-tight">
                   அன்பும் அக்கறையும் நிறைந்த ஆரோக்கியம்
                 </span>
+              </div>
+
+              {/* Desktop brand block (lg+): Preserved exact original desktop layout */}
+              <div className="hidden lg:flex items-center gap-2.5 min-w-0">
+                <Image
+                  src="/logo.png"
+                  alt="SPN Health Mix Emblem"
+                  width={38}
+                  height={38}
+                  priority
+                  className="w-[38px] h-[38px] rounded-full object-contain drop-shadow-xs transition-transform duration-200 group-hover:scale-105 shrink-0"
+                />
+                <div className="flex flex-col leading-none min-w-0">
+                  <span className="font-[family-name:var(--font-logo)] text-[21px] text-[var(--color-brand-primary)] tracking-tight font-bold leading-tight">
+                    SPN Health Mix
+                  </span>
+                  <span className="font-[family-name:var(--font-tamil)] text-[10.5px] text-[#6B5A4E] font-bold mt-0.5 whitespace-nowrap">
+                    அன்பும் அக்கறையும் நிறைந்த ஆரோக்கியம்
+                  </span>
+                </div>
               </div>
             </Link>
           </div>
@@ -374,8 +396,8 @@ export function SiteNav({ categories }: SiteNavProps) {
             </div>
           </nav>
 
-          {/* Right controls: Search pill, User, Cart */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0 flex-shrink-0">
+          {/* 3. Right: Profile icon (fixed at far-right on mobile) and Desktop Search/Cart */}
+          <div className="relative z-10 ml-auto flex items-center justify-end w-9 xs:w-10 md:w-auto gap-2 sm:gap-3 shrink-0 flex-shrink-0">
             {/* Inline search bar (Desktop only - lg and above) */}
             <form
               action="/shop"

@@ -3,8 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { fetchCategories, fetchProducts } from "@/lib/storefront/api";
 import { ProductGrid } from "@/components/catalogue/product-grid";
-import { CategoryFilter } from "@/components/catalogue/category-chips";
-import { SortSelect } from "@/components/catalogue/sort-select";
+import { CatalogueToolbar } from "@/components/catalogue/catalogue-toolbar";
 import { Pagination } from "@/components/catalogue/pagination";
 import type { SortOption } from "@/lib/storefront/types";
 
@@ -59,21 +58,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         </div>
 
         {/* Category Filter and Sorting Controls Toolbar */}
-        <div className="flex items-center justify-between gap-3 sm:gap-4 mb-7 sm:mb-8 border-b border-[#E8DFD4] pb-4">
-          <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-            <Suspense>
-              <CategoryFilter
-                categories={categories}
-                totalCount={totalAllCategories}
-              />
-            </Suspense>
-          </div>
-          <div className="flex items-center justify-end shrink-0">
-            <Suspense>
-              <SortSelect currentSort={sort} />
-            </Suspense>
-          </div>
-        </div>
+        <Suspense>
+          <CatalogueToolbar
+            categories={categories}
+            totalCount={totalAllCategories}
+            currentSort={sort}
+          />
+        </Suspense>
 
         {/* Product Grid in Homepage Bestseller Card Design */}
         {products.length > 0 ? (
