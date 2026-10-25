@@ -147,7 +147,7 @@ export function CategoryBento({ categories }: CategoryBentoProps) {
               className="text-[32px] sm:text-[38px] lg:text-[44px] text-[#1A1614] leading-[1.1] font-normal tracking-[-0.025em]"
               style={{ fontFamily: "var(--font-heading)" }}
             >
-              Shop by Traditional Category
+              Shop by <br className="md:hidden" />Traditional Category
             </h2>
             <p className="font-[family-name:var(--font-body)] text-[14.5px] sm:text-[15.5px] text-[#635850] mt-2 sm:mt-2.5 leading-relaxed font-normal">
               Explore authentic staple categories &mdash; from morning porridge mixes to freshly ground spice podis.

@@ -1,5 +1,20 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+
+/**
+ * Route whitelist: Breadcrumbs are strictly restricted to the four My Account pages
+ * (/account/profile, /account/orders, /account/addresses, /account/reviews).
+ */
+const ALLOWED_BREADCRUMB_ROUTES = new Set([
+  "/account",
+  "/account/profile",
+  "/account/orders",
+  "/account/addresses",
+  "/account/reviews",
+]);
 
 interface BreadcrumbItem {
   label: string;
@@ -12,6 +27,13 @@ interface BreadcrumbProps {
 }
 
 export function Breadcrumb({ items, className }: BreadcrumbProps) {
+  const pathname = usePathname();
+
+  // Return null if not on one of the four allowed account pages
+  if (!pathname || !ALLOWED_BREADCRUMB_ROUTES.has(pathname)) {
+    return null;
+  }
+
   return (
     <nav aria-label="Breadcrumb" className={cn("", className)}>
       <ol

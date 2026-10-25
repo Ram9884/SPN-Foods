@@ -653,7 +653,7 @@ export function OrdersList() {
                       <td className="px-5 py-4 whitespace-nowrap">
                         <Link
                           href={`/admin/orders/${o.id}`}
-                          className="font-mono font-bold text-[13px] text-[#1A1614] hover:text-[#BF5330] transition-colors"
+                          className="font-order-id font-bold text-[13px] text-[#1A1614] hover:text-[#BF5330] transition-colors"
                         >
                           {o.orderNumber}
                         </Link>

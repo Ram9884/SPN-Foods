@@ -8,6 +8,7 @@ import { Menu, Search, ShoppingBag, User, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { AccountDropdown } from "@/components/layout/account-dropdown";
+import { FloatingCartButton } from "@/components/layout/floating-cart-button";
 import type { CategoryCard } from "@/lib/storefront/types";
 
 const NAV_CATEGORIES = [
@@ -140,40 +141,50 @@ export function SiteNav({ categories }: SiteNavProps) {
             : "bg-[#FFFBF7] border-b border-transparent"
         )}
       >
-        <div className="container-spn h-[60px] lg:h-[64px] flex items-center justify-between gap-4">
-
-          {/* Mobile: hamburger */}
-          <button
-            className="lg:hidden flex items-center justify-center h-10 w-10 -ml-1 rounded-[6px] hover:bg-[var(--color-surface-sunken)] active:scale-95 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]"
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Open navigation menu"
-            aria-expanded={drawerOpen}
-            aria-controls="mobile-drawer"
-          >
-            <Menu className="h-5 w-5 text-[var(--color-text-primary)]" aria-hidden />
-          </button>
-
-          {/* Logo */}
-          <Link
-            href="/"
-            prefetch={false}
-            className="flex items-center gap-2.5 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] rounded group"
-            aria-label="SPN Health Mix — Home"
-          >
-            <Image
-              src="/logo.png"
-              alt="SPN Health Mix Emblem"
-              width={36}
-              height={36}
-              priority
-              className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain drop-shadow-xs transition-transform duration-200 group-hover:scale-105"
-            />
-            <span
-              className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] text-[var(--color-brand-primary)] tracking-tight font-normal leading-none"
+        <div className="container-spn h-[62px] lg:h-[68px] flex items-center justify-between gap-1.5 xs:gap-2 sm:gap-4 px-2.5 xs:px-3 sm:px-4 md:px-6">
+          {/* 1. Left: Mobile hamburger menu (extreme left on mobile, hidden on lg+) */}
+          <div className="flex items-center shrink-0 lg:hidden">
+            <button
+              className="flex items-center justify-center h-8.5 w-8.5 xs:h-9 xs:w-9 sm:h-10 sm:w-10 -ml-1 rounded-[6px] hover:bg-[var(--color-surface-sunken)] active:scale-95 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] shrink-0 flex-shrink-0"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Open navigation menu"
+              aria-expanded={drawerOpen}
+              aria-controls="mobile-drawer"
             >
-              SPN Health Mix
-            </span>
-          </Link>
+              <Menu className="h-5 w-5 text-[var(--color-text-primary)]" aria-hidden />
+            </button>
+          </div>
+
+          {/* 2. Middle (Mobile) / Left (Desktop): Brand section between hamburger & profile on mobile, left on desktop */}
+          <div className="flex-1 min-w-0 flex items-center justify-center lg:justify-start lg:flex-initial lg:shrink-0">
+            <Link
+              href="/"
+              prefetch={false}
+              className="flex items-center gap-1.5 xs:gap-2 sm:gap-2.5 min-w-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] rounded group"
+              aria-label="SPN Health Mix — Home"
+            >
+              <Image
+                src="/logo.png"
+                alt="SPN Health Mix Emblem"
+                width={38}
+                height={38}
+                priority
+                className="w-7 h-7 xs:w-8 xs:h-8 sm:w-[34px] sm:h-[34px] lg:w-[38px] lg:h-[38px] rounded-full object-contain drop-shadow-xs transition-transform duration-200 group-hover:scale-105 shrink-0 flex-shrink-0"
+              />
+              <div className="flex flex-col items-center text-center leading-none min-w-0">
+                <span
+                  className="font-[family-name:var(--font-logo)] text-[14px] xs:text-[15.5px] sm:text-[18px] md:text-[19.5px] lg:text-[21px] text-[var(--color-brand-primary)] tracking-tight font-bold leading-tight"
+                >
+                  SPN Health Mix
+                </span>
+                <span
+                  className="font-[family-name:var(--font-tamil)] text-[7.5px] xs:text-[8.5px] sm:text-[9.5px] md:text-[10px] lg:text-[10.5px] text-[#6B5A4E] font-bold tracking-tight sm:tracking-normal mt-0.5 whitespace-nowrap"
+                >
+                  அன்பும் அக்கறையும் நிறைந்த ஆரோக்கியம்
+                </span>
+              </div>
+            </Link>
+          </div>
 
           {/* Desktop center nav */}
           <nav
@@ -364,7 +375,7 @@ export function SiteNav({ categories }: SiteNavProps) {
           </nav>
 
           {/* Right controls: Search pill, User, Cart */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 flex-shrink-0">
             {/* Inline search bar (Desktop only - lg and above) */}
             <form
               action="/shop"
@@ -388,11 +399,11 @@ export function SiteNav({ categories }: SiteNavProps) {
             {/* Account Dropdown */}
             <AccountDropdown />
 
-            {/* Cart Icon with Terracotta Badge */}
+            {/* Cart Icon with Terracotta Badge (Desktop/Tablet only: hidden on mobile, visible from md up) */}
             <Link
               href="/cart"
               prefetch={false}
-              className="flex items-center justify-center h-10 w-10 rounded-full hover:bg-[var(--color-surface-sunken)] active:scale-95 transition-all relative focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] text-[var(--color-text-primary)]"
+              className="hidden md:flex items-center justify-center h-10 w-10 rounded-full hover:bg-[var(--color-surface-sunken)] active:scale-95 transition-all relative focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] text-[var(--color-text-primary)]"
               aria-label={itemCount > 0 ? `Shopping cart, ${itemCount} items` : "Shopping cart"}
             >
               <ShoppingBag className="h-5 w-5" aria-hidden />
@@ -430,22 +441,22 @@ export function SiteNav({ categories }: SiteNavProps) {
         )}
       >
         {/* Drawer header */}
-        <div className="flex items-center justify-between px-4 h-14 border-b border-[var(--color-border)] shrink-0">
+        <div className="flex items-center justify-between px-4 h-16 border-b border-[var(--color-border)] shrink-0">
           <Link
             href="/"
             prefetch={false}
             onClick={() => setDrawerOpen(false)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2.5"
           >
             <Image
               src="/logo.png"
               alt="SPN Health Mix Emblem"
               width={36}
               height={36}
-              className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain"
+              className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain shrink-0"
             />
             <span
-              className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] text-[var(--color-brand-primary)] tracking-tight font-normal leading-none"
+              className="font-[family-name:var(--font-logo)] text-[18px] sm:text-[19px] text-[var(--color-brand-primary)] tracking-tight font-bold leading-none"
             >
               SPN Health Mix
             </span>
@@ -634,6 +645,9 @@ export function SiteNav({ categories }: SiteNavProps) {
 
         </nav>
       </div>
+
+      {/* ── Floating Mobile Cart Button ───────────────────────────────────────── */}
+      <FloatingCartButton drawerOpen={drawerOpen} />
     </>
   );
 }

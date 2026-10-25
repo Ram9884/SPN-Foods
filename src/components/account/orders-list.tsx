@@ -308,7 +308,7 @@ export function OrdersList({ limit }: { limit?: number }) {
                   <div className="flex-1 min-w-0 space-y-1">
                     {/* Order Reference ID + Status Badge */}
                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
-                      <span className="font-semibold text-sm sm:text-[15px] text-[#1A1614] tracking-tight">
+                      <span className="font-semibold text-sm sm:text-[15px] text-[#1A1614] tracking-tight font-order-id">
                         #{order.orderNumber}
                       </span>
                       <OrderStatusBadge status={order.status} />

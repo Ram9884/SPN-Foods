@@ -1,9 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&family=BJCree:wght@400;500;600;700&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+Tamil:wght@400;600;700&display=swap");
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SPN Foods Design System — Tailwind v4 theme
-   Typography: Lora (Logo), DM Serif Display (Headings), Manrope (UI/Body), Noto Serif Tamil (Tamil)
+   Typography: Lora (Logo), DM Serif Display (Headings), Manrope (UI/Body), Archivo (Price), Nunito Sans (Order ID), Noto Serif Tamil (Tamil)
    Palette: Warm Ivory #FFFBF7, Terracotta #BF5330, Deep Terracotta #8F3E20,
             Warm Sand #D9C6AA, Muted Olive #56634A, Main Text #1A1614,
             Secondary Text #635850, Warm Border #E8DFD4, White #FFFFFF
@@ -11,12 +12,13 @@
 
 @theme {
   /* Fonts — Multi-Font System */
-  --font-logo:    var(--font-lora), "Lora", Georgia, serif;
-  --font-heading: var(--font-dm-serif), "DM Serif Display", Georgia, serif;
-  --font-product: var(--font-manrope), "Manrope", system-ui, sans-serif;
-  --font-body:    var(--font-manrope), "Manrope", system-ui, sans-serif;
-  --font-price:   var(--font-manrope), "Manrope", system-ui, sans-serif;
-  --font-tamil:   "Noto Serif Tamil", "Latha", serif;
+  --font-logo:     var(--font-lora), "Lora", Georgia, serif;
+  --font-heading:  var(--font-dm-serif), "DM Serif Display", Georgia, serif;
+  --font-product:  var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --font-body:     var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --font-price:    var(--font-archivo), "Archivo", sans-serif;
+  --font-order-id: var(--font-nunito-sans), "Nunito Sans", sans-serif;
+  --font-tamil:    "Noto Serif Tamil", "Latha", serif;
 
   /* ── Brand Colors (Approved Heritage Palette) ───────────────────────────── */
   --color-brand-primary:       #BF5330;
@@ -102,6 +104,11 @@
 
 @utility font-price {
   font-family: var(--font-price);
+  font-variant-numeric: tabular-nums;
+}
+
+@utility font-order-id {
+  font-family: var(--font-order-id);
   font-variant-numeric: tabular-nums;
 }
 

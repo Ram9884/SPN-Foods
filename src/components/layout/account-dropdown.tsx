@@ -125,7 +125,7 @@ export function AccountDropdown() {
   return (
     <div
       ref={containerRef}
-      className="relative inline-block"
+      className="relative inline-block shrink-0 flex-shrink-0"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -138,13 +138,13 @@ export function AccountDropdown() {
         aria-expanded={isOpen}
         aria-controls="account-dropdown-menu"
         className={cn(
-          "flex items-center justify-center h-10 w-10 rounded-full transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] cursor-pointer",
+          "flex items-center justify-center h-9 w-9 xs:h-10 xs:w-10 rounded-full shrink-0 flex-shrink-0 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] cursor-pointer",
           isOpen || isAnyAccountActive
             ? "bg-[#FDF3EE] text-[#BF5330]"
             : "text-[#1A1614] hover:bg-[var(--color-surface-sunken)] active:scale-95"
         )}
       >
-        <User className="h-5 w-5" aria-hidden="true" />
+        <User className="h-4.5 w-4.5 xs:h-5 xs:w-5" aria-hidden="true" />
       </button>
 
       {/* Dropdown Menu Panel */}

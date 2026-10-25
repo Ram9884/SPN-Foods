@@ -6,7 +6,6 @@ import { ProductGrid } from "@/components/catalogue/product-grid";
 import { CategoryFilter } from "@/components/catalogue/category-chips";
 import { SortSelect } from "@/components/catalogue/sort-select";
 import { Pagination } from "@/components/catalogue/pagination";
-import { Breadcrumb } from "@/components/catalogue/breadcrumb";
 import type { SortOption } from "@/lib/storefront/types";
 
 export const metadata: Metadata = {
@@ -42,15 +41,6 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   return (
     <div className="py-8 lg:py-12 bg-[#FFFBF7] min-h-screen">
       <div className="container-spn">
-
-        {/* Breadcrumb Navigation */}
-        <Breadcrumb
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Shop" },
-          ]}
-          className="mb-5"
-        />
 
         {/* Editorial Page Header */}
         <div className="mb-8">

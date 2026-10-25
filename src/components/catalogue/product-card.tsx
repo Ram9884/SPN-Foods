@@ -291,7 +291,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
       </div>
 
       {/* 2. Structured Card Body following strictly aligned vertical sections */}
-      <div className="p-5 sm:p-5.5 flex flex-col flex-1 justify-between">
+      <div className="px-[5%] sm:px-5.5 py-4 sm:py-5 flex flex-col flex-1 justify-between">
         <div>
           {/* Category — fixed height for perfect cross-card alignment */}
           <div className="h-4 mb-1.5 flex items-center">
@@ -488,10 +488,10 @@ export function ProductCard({ product, className, priority = false }: ProductCar
 
         </div>
 
-        {/* Purchase Action Button & Price Row */}
+        {/* Purchase Action Button & Price Row — Mobile: Price ~5% from left edge & Add to Cart ~5% from right edge */}
         <div className="w-full mt-auto pt-2.5 sm:pt-3 flex items-center justify-between gap-2.5">
-          {/* Price View — placed on the left, vertically centered relative to the button */}
-          <div className="flex flex-col justify-center shrink-0 min-w-0">
+          {/* Price View — positioned ~5% from left edge of card, vertically centered in row */}
+          <div className="flex flex-col justify-center items-start shrink-0 min-w-0">
             {displayPrice ? (
               <>
                 <div className="flex items-baseline gap-1 sm:gap-1.5">
@@ -513,8 +513,8 @@ export function ProductCard({ product, className, priority = false }: ProductCar
             ) : null}
           </div>
 
-          {/* Action Button / Quantity Controls — right-aligned, vertically centered */}
-          <div className="shrink-0">
+          {/* Action Button / Quantity Controls — positioned ~5% from right edge of card, vertically centered in row */}
+          <div className="flex justify-end shrink-0">
             {variants.length > 0 ? (
               currentQty === 0 ? (
                 <button
@@ -522,7 +522,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
                   onClick={handleAddToCart}
                   disabled={!selectedVariant?.inStock || isBusy}
                   className={cn(
-                    "w-auto min-w-[108px] sm:min-w-[124px] lg:min-w-[130px] bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[38px] sm:h-[40px] lg:h-[42px] px-3 sm:px-3.5 lg:px-4 rounded-[6px] font-[family-name:var(--font-body)] text-[12.5px] sm:text-[13px] lg:text-[13.5px] font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] cursor-pointer shrink-0 whitespace-nowrap",
+                    "w-auto min-w-[102px] min-[360px]:min-w-[108px] sm:min-w-[124px] lg:min-w-[130px] bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[38px] sm:h-[40px] lg:h-[42px] px-2.5 min-[360px]:px-3 sm:px-3.5 lg:px-4 rounded-[6px] font-[family-name:var(--font-body)] text-[12px] min-[360px]:text-[12.5px] sm:text-[13px] lg:text-[13.5px] font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] cursor-pointer shrink-0 whitespace-nowrap",
                     (!selectedVariant?.inStock || isBusy) && "opacity-60 cursor-not-allowed"
                   )}
                   aria-label={`Add ${name}${selectedVariant?.label ? ` - ${selectedVariant.label}` : ""} to cart`}
@@ -568,7 +568,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
               <Link
                 href={productHref}
                 prefetch={false}
-                className="w-auto min-w-[108px] sm:min-w-[124px] bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[38px] sm:h-[40px] lg:h-[42px] px-3 sm:px-3.5 rounded-[6px] font-[family-name:var(--font-body)] text-[12.5px] sm:text-[13px] font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] shrink-0 whitespace-nowrap"
+                className="w-auto min-w-[102px] min-[360px]:min-w-[108px] sm:min-w-[124px] bg-[#BF5330] hover:bg-[#8F3E20] text-white h-[38px] sm:h-[40px] lg:h-[42px] px-2.5 min-[360px]:px-3 sm:px-3.5 rounded-[6px] font-[family-name:var(--font-body)] text-[12px] min-[360px]:text-[12.5px] sm:text-[13px] font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#BF5330] shrink-0 whitespace-nowrap"
                 aria-label={`Choose options for ${name}`}
               >
                 <span>Choose options</span>
@@ -590,7 +590,7 @@ export function ProductCardSkeleton() {
       aria-hidden="true"
     >
       <div className="bg-[#FAF5EE] aspect-[4/3] w-full" />
-      <div className="p-5 sm:p-5.5 flex flex-col flex-1 justify-between">
+      <div className="px-[5%] sm:px-5.5 py-4 sm:py-5 flex flex-col flex-1 justify-between">
         <div>
           {/* Category skeleton */}
           <div className="h-4 mb-1.5 flex items-center">

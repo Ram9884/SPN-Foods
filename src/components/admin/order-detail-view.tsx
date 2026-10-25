@@ -520,14 +520,14 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
           Orders
         </Link>
         <ChevronRight className="w-3.5 h-3.5 text-[#8A7E74]" />
-        <span className="text-[#1A1614] font-medium font-mono">{order.orderNumber}</span>
+        <span className="text-[#1A1614] font-medium font-order-id">{order.orderNumber}</span>
       </div>
 
       {/* ── Order Header ────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-2">
         <div>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-[#1A1614]">
+            <h1 className="font-order-id text-2xl sm:text-3xl font-bold tracking-tight text-[#1A1614]">
               {order.orderNumber}
             </h1>
             <span

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchProduct, fetchProductRatingSummary } from "@/lib/storefront/api";
-import { Breadcrumb } from "@/components/catalogue/breadcrumb";
 import { ProductGrid } from "@/components/catalogue/product-grid";
 import { ProductImageGallery } from "@/components/catalogue/product-image-gallery";
 import { ProductPurchasePanel } from "@/components/catalogue/product-purchase-panel";
@@ -119,17 +118,6 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
 
       <div className="py-6 lg:py-10">
         <div className="container-spn">
-
-          {/* Breadcrumb */}
-          <Breadcrumb
-            items={[
-              { label: "Home", href: "/" },
-              { label: "Shop", href: "/shop" },
-              { label: product.category.name, href: `/shop/${product.category.slug}` },
-              { label: product.name },
-            ]}
-            className="mb-6"
-          />
 
           {/* Two-column layout matching reference design */}
           <div className="grid grid-cols-1 lg:grid-cols-[52%_48%] xl:grid-cols-[54%_46%] gap-8 lg:gap-12 xl:gap-16 items-start">

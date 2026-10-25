@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Breadcrumb } from "@/components/catalogue/breadcrumb";
 
 interface AccountHeaderProps {
   displayName: string;
@@ -18,44 +18,40 @@ export function AccountHeader({ displayName }: AccountHeaderProps) {
   const isReviews = pathname === "/account/reviews";
   const isProfile = pathname === "/account/profile" || pathname === "/account";
 
-  // Breadcrumbs (only for nested sub-pages such as Order Details)
-  const renderBreadcrumbs = () => {
-    if (isOrderDetail) {
-      return (
-        <ol className="flex items-center gap-1.5 text-xs text-[#8C7E74]">
-          <li>
-            <Link href="/" className="hover:text-[#BF5330] transition-colors">
-              Home
-            </Link>
-          </li>
-          <li aria-hidden="true" className="text-[#C5B4A2]">
-            &gt;
-          </li>
-          <li>
-            <Link href="/account/profile" className="hover:text-[#BF5330] transition-colors">
-              My Account
-            </Link>
-          </li>
-          <li aria-hidden="true" className="text-[#C5B4A2]">
-            &gt;
-          </li>
-          <li>
-            <Link href="/account/orders" className="hover:text-[#BF5330] transition-colors">
-              My Orders
-            </Link>
-          </li>
-          <li aria-hidden="true" className="text-[#C5B4A2]">
-            &gt;
-          </li>
-          <li aria-current="page" className="font-medium text-[#1A1614]">
-            Order Details
-          </li>
-        </ol>
-      );
+  // Breadcrumbs: visible only on the four main My Account pages
+  const getBreadcrumbItems = () => {
+    if (isOrdersList) {
+      return [
+        { label: "Home", href: "/" },
+        { label: "My Account", href: "/account/profile" },
+        { label: "My Orders" },
+      ];
     }
-
+    if (isAddresses) {
+      return [
+        { label: "Home", href: "/" },
+        { label: "My Account", href: "/account/profile" },
+        { label: "Saved Addresses" },
+      ];
+    }
+    if (isReviews) {
+      return [
+        { label: "Home", href: "/" },
+        { label: "My Account", href: "/account/profile" },
+        { label: "My Reviews" },
+      ];
+    }
+    if (isProfile) {
+      return [
+        { label: "Home", href: "/" },
+        { label: "My Account", href: "/account/profile" },
+        { label: "Profile" },
+      ];
+    }
     return null;
   };
+
+  const breadcrumbItems = getBreadcrumbItems();
 
   // Heading & Subtitle
   const headingTitle = isOrdersList
@@ -80,11 +76,9 @@ export function AccountHeader({ displayName }: AccountHeaderProps) {
 
   return (
     <>
-      {/* Breadcrumb Navigation - only rendered on nested sub-pages like Order Details */}
-      {isOrderDetail && (
-        <nav aria-label="Breadcrumb" className="mb-2 sm:mb-4">
-          {renderBreadcrumbs()}
-        </nav>
+      {/* Breadcrumb Navigation - strictly visible on the four My Account pages */}
+      {breadcrumbItems && (
+        <Breadcrumb items={breadcrumbItems} className="mb-2 sm:mb-4" />
       )}
 
       {/* Account Header Banner */}

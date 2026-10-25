@@ -323,7 +323,7 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-[#FAF7F2]/80 border border-[var(--color-border,#E8DFD6)]/80 text-xs font-[family-name:var(--font-body)]">
                 <div>
                   <span className="text-[var(--color-text-muted,#786B62)] block">Order Number</span>
-                  <span className="font-semibold text-sm text-[var(--color-text-primary,#2D241E)] mt-0.5 block">
+                  <span className="font-semibold text-sm text-[var(--color-text-primary,#2D241E)] font-order-id mt-0.5 block">
                     #{displayOrderNumber || "—"}
                   </span>
                 </div>
@@ -344,7 +344,7 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
 
                 <div>
                   <span className="text-[var(--color-text-muted,#786B62)] block">Total Paid</span>
-                  <span className="font-bold text-sm text-[var(--color-text-primary,#2D241E)] mt-0.5 block">
+                  <span className="font-bold text-sm text-[var(--color-text-primary,#2D241E)] font-price mt-0.5 block">
                     {orderData ? formatPrice(orderData.totalPaise) : "₹—"}
                   </span>
                 </div>
@@ -420,21 +420,21 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
                     <div className="mt-3 pt-3 border-t border-[var(--color-border,#E8DFD6)] space-y-1.5 text-xs text-[var(--color-text-muted,#786B62)]">
                       <div className="flex justify-between">
                         <span>Subtotal</span>
-                        <span>{formatPrice(orderData.subtotalPaise)}</span>
+                        <span className="font-price font-medium">{formatPrice(orderData.subtotalPaise)}</span>
                       </div>
                       {orderData.discountPaise > 0 && (
-                        <div className="flex justify-between text-[#2E7D32] font-medium">
+                        <div className="flex justify-between text-[#2E7D32] font-medium font-price">
                           <span>Discount Savings</span>
                           <span>−{formatPrice(orderData.discountPaise)}</span>
                         </div>
                       )}
                       <div className="flex justify-between">
                         <span>Shipping</span>
-                        <span>{orderData.shippingPaise === 0 ? "Free" : formatPrice(orderData.shippingPaise)}</span>
+                        <span className="font-price font-medium">{orderData.shippingPaise === 0 ? "Free" : formatPrice(orderData.shippingPaise)}</span>
                       </div>
                       <div className="flex justify-between pt-1.5 border-t border-[var(--color-border,#E8DFD6)]/80 text-sm font-bold text-[var(--color-text-primary,#2D241E)]">
                         <span>Total Paid</span>
-                        <span>{formatPrice(orderData.totalPaise)}</span>
+                        <span className="font-price">{formatPrice(orderData.totalPaise)}</span>
                       </div>
                     </div>
                   )}

@@ -11,7 +11,6 @@ import { ProductGrid } from "@/components/catalogue/product-grid";
 import { CategoryFilter } from "@/components/catalogue/category-chips";
 import { SortSelect } from "@/components/catalogue/sort-select";
 import { Pagination } from "@/components/catalogue/pagination";
-import { Breadcrumb } from "@/components/catalogue/breadcrumb";
 import type { SortOption } from "@/lib/storefront/types";
 
 export const revalidate = 60;
@@ -64,16 +63,6 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   return (
     <div className="py-8 lg:py-12 bg-[#FFFBF7] min-h-screen">
       <div className="container-spn">
-
-        {/* Breadcrumb */}
-        <Breadcrumb
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Shop", href: "/shop" },
-            { label: category.name },
-          ]}
-          className="mb-5"
-        />
 
         {/* Editorial Category Page Header */}
         <div className="mb-8">

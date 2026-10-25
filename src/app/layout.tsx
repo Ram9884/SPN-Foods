@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Lora, Manrope } from "next/font/google";
+import { Archivo, DM_Serif_Display, Lora, Manrope, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 
 const lora = Lora({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
   variable: "--font-lora",
@@ -23,6 +23,20 @@ const manrope = Manrope({
   weight: ["400", "500", "600", "700", "800"],
   display: "swap",
   variable: "--font-manrope",
+});
+
+const archivo = Archivo({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  variable: "--font-archivo",
+});
+
+const nunitoSans = Nunito_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-nunito-sans",
 });
 
 export const metadata: Metadata = {
@@ -57,16 +71,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-IN" data-scroll-behavior="smooth">
-      <head />
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&family=BJCree:wght@400;500;600;700&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
-        className={`${lora.variable} ${dmSerifDisplay.variable} ${manrope.variable}`}
+        className={`${lora.variable} ${dmSerifDisplay.variable} ${manrope.variable} ${archivo.variable} ${nunitoSans.variable}`}
         style={
           {
             "--font-logo": `var(--font-lora), "Lora", Georgia, serif`,
             "--font-heading": `var(--font-dm-serif), "DM Serif Display", Georgia, serif`,
             "--font-product": `var(--font-manrope), "Manrope", system-ui, sans-serif`,
             "--font-body": `var(--font-manrope), "Manrope", system-ui, sans-serif`,
-            "--font-price": `var(--font-manrope), "Manrope", system-ui, sans-serif`,
+            "--font-price": `var(--font-archivo), "Archivo", sans-serif`,
+            "--font-order-id": `var(--font-nunito-sans), "Nunito Sans", sans-serif`,
             "--font-tamil": `"Noto Serif Tamil", "Latha", serif`,
           } as React.CSSProperties
         }

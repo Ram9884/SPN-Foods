@@ -266,27 +266,27 @@ export default async function HomePage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-5 mb-8 sm:mb-10">
             {/* Card 1: Food Safety Standards */}
             <div className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#EBE3DA] p-2.5 min-[360px]:p-3 sm:p-4.5 flex items-center gap-2 sm:gap-3.5 min-h-[76px] sm:min-h-[88px] shadow-[0_2px_8px_rgba(42,24,16,0.02)] transition-all hover:border-[#D6C7BA]">
-              <div className="w-9 h-9 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-4.5 h-4.5 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330] stroke-[1.8]" aria-hidden="true" />
+              <div className="w-8 h-8 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330] stroke-[1.8]" aria-hidden="true" />
               </div>
-              <span className="font-[family-name:var(--font-heading)] text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
+              <span className="font-[family-name:var(--font-heading)] text-[11.5px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
                 Food Safety<br className="sm:hidden" /> Standards
               </span>
             </div>
 
             {/* Card 2: 100% Traditional Recipes */}
             <div className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#EBE3DA] p-2.5 min-[360px]:p-3 sm:p-4.5 flex items-center gap-2 sm:gap-3.5 min-h-[76px] sm:min-h-[88px] shadow-[0_2px_8px_rgba(42,24,16,0.02)] transition-all hover:border-[#D6C7BA]">
-              <div className="w-9 h-9 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
-                <Leaf className="w-4.5 h-4.5 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330] stroke-[1.8]" aria-hidden="true" />
+              <div className="w-8 h-8 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
+                <Leaf className="w-4 h-4 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330] stroke-[1.8]" aria-hidden="true" />
               </div>
-              <span className="font-[family-name:var(--font-heading)] text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
+              <span className="font-[family-name:var(--font-heading)] text-[11.5px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
                 100% Traditional<br className="sm:hidden" /> Recipes
               </span>
             </div>
 
             {/* Card 3: Small-Batch Milling */}
             <div className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#EBE3DA] p-2.5 min-[360px]:p-3 sm:p-4.5 flex items-center gap-2 sm:gap-3.5 min-h-[76px] sm:min-h-[88px] shadow-[0_2px_8px_rgba(42,24,16,0.02)] transition-all hover:border-[#D6C7BA]">
-              <div className="w-9 h-9 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -294,7 +294,7 @@ export default async function HomePage() {
                   strokeWidth="1.8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-4.5 h-4.5 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330]"
+                  className="w-4 h-4 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330]"
                   aria-hidden="true"
                 >
                   <path d="M4 11h16a7 7 0 0 1-14 0z" />
@@ -302,32 +302,32 @@ export default async function HomePage() {
                   <path d="M16 4.5l-5 6.5" />
                 </svg>
               </div>
-              <span className="font-[family-name:var(--font-heading)] text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
+              <span className="font-[family-name:var(--font-heading)] text-[11.5px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
                 Small-Batch<br className="sm:hidden" /> Milling
               </span>
             </div>
 
             {/* Card 4: Pan-India Delivery */}
             <div className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#EBE3DA] p-2.5 min-[360px]:p-3 sm:p-4.5 flex items-center gap-2 sm:gap-3.5 min-h-[76px] sm:min-h-[88px] shadow-[0_2px_8px_rgba(42,24,16,0.02)] transition-all hover:border-[#D6C7BA]">
-              <div className="w-9 h-9 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
-                <Truck className="w-4.5 h-4.5 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330] stroke-[1.8]" aria-hidden="true" />
+              <div className="w-8 h-8 min-[360px]:w-10 min-[360px]:h-10 sm:w-12 sm:h-12 rounded-full bg-[#FAF0E6] flex items-center justify-center shrink-0">
+                <Truck className="w-4 h-4 min-[360px]:w-5 min-[360px]:h-5 sm:w-6 sm:h-6 text-[#BF5330] stroke-[1.8]" aria-hidden="true" />
               </div>
-              <span className="font-[family-name:var(--font-heading)] text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
+              <span className="font-[family-name:var(--font-heading)] text-[11.5px] min-[360px]:text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#1A1614] font-normal leading-[1.25]">
                 Pan-India<br className="sm:hidden" /> Delivery
               </span>
             </div>
           </div>
 
           {/* 3. Promotional Banner */}
-          <div className="relative rounded-[20px] sm:rounded-[24px] overflow-hidden bg-gradient-to-br from-[#B34522] via-[#BA4E2C] to-[#8C3417] text-white shadow-xs">
-            {/* Background image on right half */}
-            <div className="absolute right-0 top-0 bottom-0 w-[56%] sm:w-[50%] lg:w-[48%] overflow-hidden pointer-events-none select-none">
+          <div className="relative rounded-[20px] sm:rounded-[24px] overflow-hidden bg-gradient-to-br from-[#B34522] via-[#BA4E2C] to-[#8C3417] text-white shadow-xs w-full">
+            {/* Background image on right side with responsive opacity */}
+            <div className="absolute right-0 top-0 bottom-0 w-[55%] sm:w-[50%] lg:w-[48%] overflow-hidden pointer-events-none select-none">
               <Image
                 src="/categories/health-mix.jpg"
                 alt="Authentic traditional ingredients"
                 fill
-                sizes="(max-width: 640px) 60vw, (max-width: 1024px) 50vw, 560px"
-                className="object-cover object-right sm:object-[center_right]"
+                sizes="(max-width: 640px) 55vw, (max-width: 1024px) 50vw, 560px"
+                className="object-cover object-right sm:object-[center_right] opacity-35 sm:opacity-50 lg:opacity-100"
               />
               {/* Subtle terracotta gradient blend from left edge of image */}
               <div
@@ -336,10 +336,10 @@ export default async function HomePage() {
               />
             </div>
 
-            {/* Narrative Content */}
-            <div className="relative z-10 p-5 sm:p-8 lg:py-10 lg:pl-10 xl:pl-12 flex flex-col justify-center min-h-[340px] sm:min-h-[290px] lg:min-h-[310px] max-w-[72%] sm:max-w-[62%] lg:max-w-xl">
+            {/* Narrative Content: Spans from left side to rightmost side across mobile screens */}
+            <div className="relative z-10 p-5 min-[360px]:p-6 sm:p-8 lg:py-10 lg:pl-10 xl:pl-12 flex flex-col justify-center min-h-[220px] min-[360px]:min-h-[240px] sm:min-h-[280px] lg:min-h-[310px] w-full max-w-full lg:max-w-xl">
               <div className="flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-2.5">
-                <span className="font-[family-name:var(--font-body)] text-[10.5px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F7D8CC]">
+                <span className="font-[family-name:var(--font-body)] text-[10px] min-[360px]:text-[10.5px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F7D8CC]">
                   TASTE THE TRADITION
                 </span>
                 <span className="w-8 sm:w-10 h-[1.5px] bg-[#F7D8CC]/80" aria-hidden="true" />
@@ -347,23 +347,22 @@ export default async function HomePage() {
 
               <h3
                 id="cta-heading"
-                className="text-[20px] min-[360px]:text-[22px] sm:text-[26px] lg:text-[32px] xl:text-[36px] text-white font-normal leading-[1.18] mb-2.5 sm:mb-3"
+                className="text-[18px] min-[360px]:text-[20px] min-[390px]:text-[22px] sm:text-[26px] lg:text-[32px] xl:text-[36px] text-white font-normal leading-[1.2] mb-2 sm:mb-3 max-w-2xl"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
                 Ready to bring authentic flavours to your table?
               </h3>
 
-              <p className="font-[family-name:var(--font-body)] text-[12.5px] min-[360px]:text-[13px] sm:text-[14px] lg:text-[15px] text-[#FDEEE8] leading-relaxed mb-5 sm:mb-6">
+              <p className="font-[family-name:var(--font-body)] text-[12px] min-[360px]:text-[13px] sm:text-[14px] lg:text-[15px] text-[#FDEEE8] leading-relaxed mb-4 sm:mb-6 max-w-xl">
                 Explore our complete range of traditional health mix powders and natural foods.
               </p>
 
               <div>
                 <Link
                   href="/shop"
-                  className="group inline-flex justify-center items-center gap-2 font-[family-name:var(--font-body)] font-semibold text-[13px] sm:text-[14px] text-[#BF5330] bg-white hover:bg-[#FFFBF7] active:scale-[0.98] h-[40px] sm:h-[44px] px-5 sm:px-6 rounded-full shadow-xs hover:shadow transition-all duration-150 w-fit whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="group inline-flex justify-center items-center gap-2 font-[family-name:var(--font-body)] font-semibold text-[12.5px] min-[360px]:text-[13px] sm:text-[14px] text-[#BF5330] bg-white hover:bg-[#FFFBF7] active:scale-[0.98] h-[38px] sm:h-[44px] px-4.5 sm:px-6 rounded-full shadow-xs hover:shadow transition-all duration-150 w-fit whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
-                  <span className="sm:hidden">All Products</span>
-                  <span className="hidden sm:inline">Shop All Products</span>
+                  <span>Shop All Products</span>
                   <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-150 group-hover:translate-x-0.5 shrink-0" aria-hidden="true" />
                 </Link>
               </div>

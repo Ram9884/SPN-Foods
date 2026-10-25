@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/server";
 import { CheckoutForm } from "@/components/checkout/checkout-form";
@@ -19,24 +18,6 @@ export default async function CheckoutPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* Breadcrumb Navigation */}
-      <nav aria-label="Breadcrumb" className="mb-6">
-        <ol className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
-          <li>
-            <Link href="/" className="hover:text-[var(--color-brand-primary)]">
-              Home
-            </Link>
-          </li>
-          <li>/</li>
-          <li>
-            <Link href="/cart" className="hover:text-[var(--color-brand-primary)]">
-              Cart
-            </Link>
-          </li>
-          <li>/</li>
-          <li className="text-[var(--color-text-primary)] font-medium">Checkout</li>
-        </ol>
-      </nav>
 
       <div className="mb-8">
         <h1 className="font-heading text-3xl font-normal text-[var(--color-text-primary)]">
