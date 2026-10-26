@@ -37,10 +37,10 @@ export function FloatingCartButton({ drawerOpen = false }: FloatingCartButtonPro
         prefetch={false}
         className={cn(
           "relative flex items-center justify-center w-[54px] h-[54px] rounded-full",
-          "bg-[var(--color-brand-primary)] text-white",
-          "shadow-[0_6px_20px_rgba(191,83,48,0.42)] border-2 border-white/90",
-          "active:scale-90 hover:scale-105 hover:bg-[var(--color-brand-primary-dark)]",
-          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
+          "bg-[#66994D] text-white",
+          "shadow-[0_6px_20px_rgba(22,101,52,0.42)] border-2 border-white/90",
+          "active:scale-90 hover:scale-105 hover:bg-[#14532D]",
+          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#166534]",
           "transition-all duration-200 ease-out"
         )}
         aria-label={itemCount > 0 ? `Shopping cart, ${itemCount} items` : "Shopping cart"}

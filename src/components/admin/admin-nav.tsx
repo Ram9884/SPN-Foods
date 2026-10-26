@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -39,11 +40,21 @@ const NAV_ITEMS = [
 export function AdminNav({ profile }: { profile: AdminProfile }) {
   const pathname = usePathname();
   const router = useRouter();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
+  const initials = (profile.name || "Sai Saran")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+
   const handleSignOut = async () => {
     setSigningOut(true);
+
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       router.push("/admin/login");
@@ -60,13 +71,17 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
     if (item.exact) {
       return pathname === item.href;
     }
-    return pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+    return (
+      pathname === item.href ||
+      pathname.startsWith(`${item.href}/`)
+    );
   };
 
   return (
     <>
       {/* Mobile Top Header */}
-      <div className="lg:hidden flex items-center justify-between border-b border-[#E8DFD4] bg-[#FFFBF7] px-4 py-3 sticky top-0 z-40">
+      <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between border-b border-[#E8DFD4] bg-[#FFFBF7] px-4 py-3">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -75,7 +90,11 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
             aria-label="Toggle navigation"
             aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
 
           <Link href="/admin" className="flex items-center gap-2">
@@ -86,11 +105,9 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
               height={36}
               className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain"
             />
-            <span className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] lg:text-[22px] text-[#BF5330] leading-none font-normal tracking-tight">
+
+            <span className="font-[family-name:var(--font-logo)] text-xl sm:text-[21px] text-[#BF5330] leading-none font-normal tracking-tight">
               SPN Health Mix
-            </span>
-            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-[#BF5330] text-[#BF5330]">
-              ADMIN
             </span>
           </Link>
         </div>
@@ -126,34 +143,42 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
               priority
               className="w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full object-contain drop-shadow-2xs shrink-0 transition-transform duration-200 group-hover:scale-105"
             />
+
             <div className="min-w-0">
-              <span className="font-[family-name:var(--font-logo)] block text-xl sm:text-[21px] lg:text-[22px] text-[#BF5330] leading-none font-normal tracking-tight">
+              <span className="font-[family-name:var(--font-logo)] block text-xl sm:text-[21px] lg:text-[18px] text-[#BF5330] leading-tight font-normal tracking-tight whitespace-nowrap">
                 SPN Health Mix
               </span>
-              <span className="block text-[9.5px] font-medium text-[#635850] tracking-[0.08em] uppercase mt-1">
-                OPERATIONS PANEL
-              </span>
+
+              {/* Operations Panel + Admin Badge */}
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[9.5px] font-medium text-[#635850] tracking-[0.08em] uppercase whitespace-nowrap">
+                  OPERATIONS PANEL
+                </span>
+
+                <span className="inline-flex items-center text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-[#BF5330] text-[#BF5330] shrink-0">
+                  ADMIN
+                </span>
+              </div>
             </div>
           </Link>
-          <span className="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-[#BF5330] text-[#BF5330] shrink-0">
-            ADMIN
-          </span>
         </div>
 
         {/* Navigation Links */}
         <nav
-          className="flex-1 px-3.5 py-4 space-y-1.5 overflow-y-auto"
+          className="flex-1 px-3.5 py-3 space-y-1 overflow-y-auto"
           aria-label="Admin Navigation"
         >
           {NAV_ITEMS.map((item) => {
             const active = isActive(item);
             const Icon = item.icon;
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[14.5px] transition-colors ${
+                aria-current={active ? "page" : undefined}
+                className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-[14px] transition-colors ${
                   active
                     ? "bg-[#BF5330] text-white shadow-xs font-semibold"
                     : "text-[#1A1614] hover:bg-[#FAF5EF] font-medium"
@@ -164,6 +189,7 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
                     active ? "text-white" : "text-[#635850]"
                   }`}
                 />
+
                 <span>{item.label}</span>
               </Link>
             );
@@ -173,26 +199,28 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
         {/* Footer Identity & Sign Out */}
         <div className="p-4 border-t border-[#E8DFD4] bg-[#FFFBF7] space-y-3">
           {/* Admin Identity Card */}
-          <div className="p-3.5 rounded-2xl border border-[#E8DFD4] bg-[#FBF6F0] flex items-center gap-3">
-            {/* Initials Avatar */}
-            <div className="w-11 h-11 rounded-full bg-[#EFE7DD] border border-[#E8DFD4] flex items-center justify-center font-bold text-sm text-[#1A1614] shrink-0">
-              SS
+          <div className="p-3.5 rounded-none border border-[#E8DFD4] bg-[#FBF6F0] flex items-center gap-3">
+            {/* Rounded Square Initials Avatar */}
+            <div className="w-11 h-11 rounded-xl bg-[#EFE7DD] border border-[#E8DFD4] flex items-center justify-center font-bold text-sm text-[#1A1614] shrink-0">
+              {initials}
             </div>
 
+            {/* Admin Profile Details */}
             <div className="flex-1 min-w-0">
+              {/* Name + Verification Badge */}
               <div className="flex items-center justify-between gap-1">
                 <span className="text-[13.5px] font-semibold text-[#1A1614] truncate">
-                  Sai Saran
+                  {profile.name || "Sai Saran"}
                 </span>
+
                 <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] shrink-0">
                   Verified
                 </span>
               </div>
-              <p className="text-[11.5px] text-[#635850] font-normal leading-tight mt-0.5">
-                Founder &amp; Admin
-              </p>
+
+              {/* Email Address */}
               <p
-                className="text-[11.5px] text-[#635850] truncate leading-tight mt-0.5"
+                className="text-[11.5px] text-[#635850] truncate leading-tight mt-1"
                 title={profile.email}
               >
                 {profile.email}
@@ -200,8 +228,8 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
             </div>
           </div>
 
-          {/* Sign Out Action Button */}
-          <div className="px-1 pt-1">
+          {/* Sign Out Action */}
+          <div className="px-1 pt-0.5">
             <button
               type="button"
               onClick={handleSignOut}
@@ -209,7 +237,10 @@ export function AdminNav({ profile }: { profile: AdminProfile }) {
               className="inline-flex items-center gap-2.5 text-[13.5px] font-semibold text-[#BF5330] hover:text-[#8F3E20] transition-colors cursor-pointer disabled:opacity-50"
             >
               <LogOut className="w-4 h-4 shrink-0 text-[#BF5330]" />
-              <span>{signingOut ? "Signing out..." : "Sign Out"}</span>
+
+              <span>
+                {signingOut ? "Signing out..." : "Sign Out"}
+              </span>
             </button>
           </div>
         </div>

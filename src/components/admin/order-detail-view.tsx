@@ -11,7 +11,6 @@ import {
   Truck,
   User,
   MapPin,
-  FileText,
   Pencil,
   AlertCircle,
   ExternalLink,
@@ -203,11 +202,6 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
   const [transitioning, setTransitioning] = useState(false);
   const [transitionError, setTransitionError] = useState<string | null>(null);
 
-  // Internal Note Editor
-  const [editingNote, setEditingNote] = useState(false);
-  const [noteContent, setNoteContent] = useState("");
-  const [savingNote, setSavingNote] = useState(false);
-
   // Shipment Tracking Form
   const [editingShipment, setEditingShipment] = useState(false);
   const [shipCourier, setShipCourier] = useState("");
@@ -229,8 +223,6 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
       }
       const data: OrderDetail = await res.json();
       setOrder(data);
-      const note = data.adminNote ?? data.notes ?? "";
-      setNoteContent(note);
       if (data.shipments && data.shipments.length > 0) {
         setShipCourier(data.shipments[0].courierName || "");
         setShipAwb(data.shipments[0].awb || "");
@@ -321,33 +313,6 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
       setTransitionError(err.message || "Status update failed");
     } finally {
       setTransitioning(false);
-    }
-  };
-
-  // Save Internal Admin Note
-  const handleSaveNote = async () => {
-    setSavingNote(true);
-    try {
-      const res = await fetch(`/api/admin/orders/${orderId}/notes`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Origin: window.location.origin,
-        },
-        body: JSON.stringify({ note: noteContent.trim() || null }),
-      });
-
-      const resData = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(resData?.error?.message || "Failed to save note.");
-
-      setActionSuccess("Internal note updated.");
-      setTimeout(() => setActionSuccess(null), 4000);
-      setEditingNote(false);
-      await fetchOrder();
-    } catch (err: any) {
-      alert(err.message || "Failed to save note");
-    } finally {
-      setSavingNote(false);
     }
   };
 
@@ -516,8 +481,6 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
   // Address postal code fallback
   const pincode =
     order.shippingAddress?.pincode || (order.shippingAddress as any)?.postalCode || "";
-
-  const orderNote = order.adminNote ?? order.notes ?? "";
 
   return (
     <div className="space-y-6 max-w-6xl font-[family-name:var(--font-body)] text-[#1A1614]">
@@ -1150,69 +1113,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
             </div>
           </div>
 
-          {/* 4. Internal Staff Note Card */}
-          <div className="bg-white border border-[#E8DFD4] rounded-[10px] p-5 sm:p-6 shadow-xs text-xs">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#FAF5EF] flex items-center justify-center text-[#BF5330]">
-                  <FileText className="w-4 h-4" />
-                </div>
-                <h2 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#1A1614]">
-                  Internal Staff Note
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditingNote(!editingNote)}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-[#BF5330] hover:underline"
-              >
-                <span>{editingNote ? "Cancel" : "Edit"}</span>
-                <Pencil className="w-3 h-3" />
-              </button>
-            </div>
-
-            {editingNote ? (
-              <div className="space-y-2.5">
-                <textarea
-                  rows={3}
-                  value={noteContent}
-                  onChange={(e) => setNoteContent(e.target.value)}
-                  placeholder="Private notes (not visible to customer)..."
-                  className="w-full px-3 py-2 rounded-[8px] border border-[#E8DFD4] bg-[#FAF5EF]/60 focus:outline-none focus:border-[#BF5330] text-xs text-[#1A1614]"
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setEditingNote(false)}
-                    className="px-3 py-1.5 text-xs rounded-[6px] border border-[#E8DFD4] text-[#635850] hover:bg-[#FAF5EF]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveNote}
-                    disabled={savingNote}
-                    className="px-3.5 py-1.5 text-xs rounded-[6px] bg-[#BF5330] text-white font-semibold hover:bg-[#8F3E20] disabled:opacity-50"
-                  >
-                    {savingNote ? "Saving..." : "Save Note"}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="p-3.5 rounded-[8px] bg-[#FAF5EF]/60 border border-[#E8DFD4]/70">
-                <p
-                  className={cn(
-                    "text-xs leading-relaxed",
-                    orderNote ? "text-[#1A1614]" : "text-[#8A7E74] italic"
-                  )}
-                >
-                  {orderNote || "No internal notes for this order."}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* 5. Order Audit Activity Card */}
+          {/* 4. Order Audit Activity Card */}
           <div className="bg-white border border-[#E8DFD4] rounded-[10px] p-5 sm:p-6 shadow-xs text-xs">
             <div className="flex items-center gap-2.5 mb-3.5">
               <div className="w-8 h-8 rounded-lg bg-[#FAF5EF] flex items-center justify-center text-[#BF5330]">
