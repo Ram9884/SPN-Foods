@@ -9,12 +9,20 @@ import {
   db,
   fillCart,
   pool,
+  rawCheckout,
   useHarness,
+  KEY_SECRET,
+  productId,
   variantId,
   variant2Id,
 } from "./harness";
 import * as s from "../src/lib/db/schema";
-import { extractVariantWeightGrams, calculateCartWeightGrams, calculateAuthoritativeShipping } from "../src/lib/shipping/calculator";
+import {
+  extractVariantWeightGrams,
+  calculateCartWeightGrams,
+  calculateAuthoritativeShipping,
+  isTamilNadu,
+} from "../src/lib/shipping/calculator";
 import { getShippingProvider, registerShippingProvider } from "../src/lib/shipping/provider";
 import { MockShippingProvider } from "../src/lib/shipping/mock";
 import { ShiprocketShippingProvider } from "../src/lib/shipping/shiprocket";
@@ -448,3 +456,260 @@ describe("Shipping Webhook Handling", () => {
     expect(events[0].status).toBe("delivered");
   });
 });
+
+describe("Tamil Nadu Shipping Pricing Rules & Order Integrity (₹499, ₹500, above ₹500)", () => {
+  it("validates Tamil Nadu detection by state string and postal PIN code prefixes", () => {
+    // Explicit Tamil Nadu state variations
+    expect(isTamilNadu({ state: "Tamil Nadu", pincode: "600001" })).toBe(true);
+    expect(isTamilNadu({ state: "tamil nadu", pincode: "625001" })).toBe(true);
+    expect(isTamilNadu({ state: "TN", pincode: "641001" })).toBe(true);
+    expect(isTamilNadu({ state: "TamilNadu", pincode: "635202" })).toBe(true);
+
+    // Detected by postal PIN prefix (60-64) when state omitted
+    expect(isTamilNadu({ state: null, pincode: "600028" })).toBe(true);
+    expect(isTamilNadu({ state: "", pincode: "641602" })).toBe(true);
+
+    // Other Indian states must NOT be treated as Tamil Nadu
+    expect(isTamilNadu({ state: "Karnataka", pincode: "560001" })).toBe(false);
+    expect(isTamilNadu({ state: "Maharashtra", pincode: "400001" })).toBe(false);
+    expect(isTamilNadu({ state: "Delhi", pincode: "110001" })).toBe(false);
+    expect(isTamilNadu({ state: "Kerala", pincode: "682001" })).toBe(false);
+    expect(isTamilNadu(null)).toBe(false);
+  });
+
+  it("calculates shipping for ₹499, ₹500, and above ₹500 according to Tamil Nadu rules", async () => {
+    await db
+      .insert(s.siteSettings)
+      .values({
+        key: "shipping",
+        value: {
+          flatRatePaise: 5000,
+          freeShippingAbovePaise: 50000,
+          tamilNaduFlatRatePaise: 5000,
+          tamilNaduFreeShippingAbovePaise: 50000,
+        },
+      })
+      .onConflictDoUpdate({
+        target: s.siteSettings.key,
+        set: {
+          value: {
+            flatRatePaise: 5000,
+            freeShippingAbovePaise: 50000,
+            tamilNaduFlatRatePaise: 5000,
+            tamilNaduFreeShippingAbovePaise: 50000,
+          },
+        },
+      });
+
+    // 1. Subtotal = ₹499 (49900 paise): incurs ₹50 shipping (5000 paise)
+    const quote499 = await calculateAuthoritativeShipping(db, "600001", 500, 49900, "mock", "Tamil Nadu");
+    expect(quote499.serviceable).toBe(true);
+    expect(quote499.ratePaise).toBe(5000);
+    expect(quote499.freeShipping).toBe(false);
+
+    // 2. Subtotal = ₹500 (50000 paise): free shipping (0 paise)
+    const quote500 = await calculateAuthoritativeShipping(db, "600001", 500, 50000, "mock", "Tamil Nadu");
+    expect(quote500.serviceable).toBe(true);
+    expect(quote500.ratePaise).toBe(0);
+    expect(quote500.freeShipping).toBe(true);
+
+    // 3. Subtotal = ₹501 (50100 paise, above ₹500): free shipping (0 paise)
+    const quote501 = await calculateAuthoritativeShipping(db, "600001", 500, 50100, "mock", "Tamil Nadu");
+    expect(quote501.serviceable).toBe(true);
+    expect(quote501.ratePaise).toBe(0);
+    expect(quote501.freeShipping).toBe(true);
+
+    // 4. Subtotal = ₹1000 (100000 paise, well above ₹500): free shipping (0 paise)
+    const quote1000 = await calculateAuthoritativeShipping(db, "641001", 500, 100000, "mock", "Tamil Nadu");
+    expect(quote1000.serviceable).toBe(true);
+    expect(quote1000.ratePaise).toBe(0);
+    expect(quote1000.freeShipping).toBe(true);
+
+    // 5. Non-Tamil Nadu address at ₹500: does not silently apply Tamil Nadu free shipping
+    const quoteNonTN = await calculateAuthoritativeShipping(db, "560001", 500, 50000, "mock", "Karnataka");
+    expect(quoteNonTN.serviceable).toBe(true);
+    // Mock provider charges base rate of 5000 paise for <=1kg outside TN when subtotal < 100000
+    expect(quoteNonTN.ratePaise).toBe(5000);
+    expect(quoteNonTN.freeShipping).toBe(false);
+  });
+
+  it("persists ₹50 shipping in order when checkout subtotal is ₹499 and payment verification succeeds", async () => {
+    await db
+      .insert(s.siteSettings)
+      .values({
+        key: "shipping",
+        value: {
+          flatRatePaise: 5000,
+          freeShippingAbovePaise: 50000,
+          tamilNaduFlatRatePaise: 5000,
+          tamilNaduFreeShippingAbovePaise: 50000,
+        },
+      })
+      .onConflictDoUpdate({
+        target: s.siteSettings.key,
+        set: {
+          value: {
+            flatRatePaise: 5000,
+            freeShippingAbovePaise: 50000,
+            tamilNaduFlatRatePaise: 5000,
+            tamilNaduFreeShippingAbovePaise: 50000,
+          },
+        },
+      });
+
+    // Create a variant specifically priced at ₹499 (49900 paise)
+    const [v499] = await db
+      .insert(s.productVariants)
+      .values({
+        productId,
+        sku: "SPN-TEST-499",
+        label: "Trial Pack 499g",
+        mrpPaise: 55000,
+        pricePaise: 49900,
+        stock: 20,
+      })
+      .returning();
+
+    const addr = await addAddress(CUST_A, {
+      state: "Tamil Nadu",
+      city: "Chennai",
+      pincode: "600017",
+    });
+
+    await fillCart(CUST_A, [{ variantId: v499.id, quantity: 1 }]);
+
+    // Quote must return ₹50
+    const quoteRes = await call("POST", "/api/shipping/quote", {
+      user: CUST_A,
+      body: { addressId: addr.id },
+    });
+    expect(quoteRes.status).toBe(200);
+    expect(quoteRes.body.ratePaise).toBe(5000);
+    expect(quoteRes.body.freeShipping).toBe(false);
+
+    // Checkout: subtotal 49900 + shipping 5000 = total 54900 paise
+    const checkoutRes = await rawCheckout(CUST_A, addr.id);
+    expect(checkoutRes.status).toBe(201);
+    expect(checkoutRes.body.amountPaise).toBe(54900);
+
+    // Persisted order verification
+    const [orderRow] = await db.select().from(s.orders).where(eq(s.orders.id, checkoutRes.body.orderId));
+    expect(orderRow.subtotalPaise).toBe(49900);
+    expect(orderRow.shippingPaise).toBe(5000);
+    expect(orderRow.discountPaise).toBe(0);
+    expect(orderRow.totalPaise).toBe(54900);
+    expect(orderRow.totalPaise).toBe(orderRow.subtotalPaise - orderRow.discountPaise + orderRow.shippingPaise);
+
+    // Verify payment callback matches order total and transitions to confirmed
+    const fakePaymentId = `pay_tn499_${Date.now()}`;
+    const sig = createHmac("sha256", KEY_SECRET)
+      .update(`${checkoutRes.body.razorpayOrderId}|${fakePaymentId}`)
+      .digest("hex");
+
+    const verifyRes = await call("POST", "/api/checkout/verify", {
+      user: CUST_A,
+      body: {
+        razorpay_order_id: checkoutRes.body.razorpayOrderId,
+        razorpay_payment_id: fakePaymentId,
+        razorpay_signature: sig,
+      },
+    });
+    expect(verifyRes.status).toBe(200);
+    expect(verifyRes.body.verified).toBe(true);
+    expect(verifyRes.body.status).toBe("confirmed");
+
+    const [orderConfirmed] = await db.select().from(s.orders).where(eq(s.orders.id, checkoutRes.body.orderId));
+    expect(orderConfirmed.status).toBe("confirmed");
+    expect(orderConfirmed.shippingPaise).toBe(5000);
+    expect(orderConfirmed.totalPaise).toBe(54900);
+  });
+
+  it("persists ₹0 free shipping when checkout subtotal is exactly ₹500 and above ₹500", async () => {
+    await db
+      .insert(s.siteSettings)
+      .values({
+        key: "shipping",
+        value: {
+          flatRatePaise: 5000,
+          freeShippingAbovePaise: 50000,
+          tamilNaduFlatRatePaise: 5000,
+          tamilNaduFreeShippingAbovePaise: 50000,
+        },
+      })
+      .onConflictDoUpdate({
+        target: s.siteSettings.key,
+        set: {
+          value: {
+            flatRatePaise: 5000,
+            freeShippingAbovePaise: 50000,
+            tamilNaduFlatRatePaise: 5000,
+            tamilNaduFreeShippingAbovePaise: 50000,
+          },
+        },
+      });
+
+    // 1. Exact ₹500 subtotal test
+    const [v500] = await db
+      .insert(s.productVariants)
+      .values({
+        productId,
+        sku: "SPN-TEST-500",
+        label: "Economy Pack 500g",
+        mrpPaise: 60000,
+        pricePaise: 50000,
+        stock: 20,
+      })
+      .returning();
+
+    const addr = await addAddress(CUST_A, {
+      state: "Tamil Nadu",
+      city: "Coimbatore",
+      pincode: "641001",
+    });
+
+    await fillCart(CUST_A, [{ variantId: v500.id, quantity: 1 }]);
+
+    const quoteRes500 = await call("POST", "/api/shipping/quote", {
+      user: CUST_A,
+      body: { addressId: addr.id },
+    });
+    expect(quoteRes500.status).toBe(200);
+    expect(quoteRes500.body.ratePaise).toBe(0);
+    expect(quoteRes500.body.freeShipping).toBe(true);
+
+    const co500 = await rawCheckout(CUST_A, addr.id);
+    expect(co500.status).toBe(201);
+    expect(co500.body.amountPaise).toBe(50000);
+
+    const [row500] = await db.select().from(s.orders).where(eq(s.orders.id, co500.body.orderId));
+    expect(row500.subtotalPaise).toBe(50000);
+    expect(row500.shippingPaise).toBe(0);
+    expect(row500.totalPaise).toBe(50000);
+
+    // 2. Above ₹500 subtotal test (₹600 via 2 * variant2Id @ 30000 paise = 60000 paise)
+    await fillCart(CUST_B, [{ variantId: variant2Id, quantity: 2 }]);
+    const addrB = await addAddress(CUST_B, {
+      state: "Tamil Nadu",
+      city: "Madurai",
+      pincode: "625001",
+    });
+
+    const quoteRes600 = await call("POST", "/api/shipping/quote", {
+      user: CUST_B,
+      body: { addressId: addrB.id },
+    });
+    expect(quoteRes600.status).toBe(200);
+    expect(quoteRes600.body.ratePaise).toBe(0);
+    expect(quoteRes600.body.freeShipping).toBe(true);
+
+    const co600 = await rawCheckout(CUST_B, addrB.id);
+    expect(co600.status).toBe(201);
+    expect(co600.body.amountPaise).toBe(60000);
+
+    const [row600] = await db.select().from(s.orders).where(eq(s.orders.id, co600.body.orderId));
+    expect(row600.subtotalPaise).toBe(60000);
+    expect(row600.shippingPaise).toBe(0);
+    expect(row600.totalPaise).toBe(60000);
+  });
+});
+

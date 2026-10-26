@@ -151,7 +151,7 @@ export async function loadCartLines(db: AnyDb, profileId: string) {
 /* Writing                                                                    */
 /* ------------------------------------------------------------------------- */
 
-function assertQuantity(q: unknown): asserts q is number {
+export function assertQuantity(q: unknown): asserts q is number {
   if (typeof q !== "number" || !Number.isInteger(q) || q < 1) {
     throw new CartError("INVALID_QUANTITY", "Quantity must be a whole number of at least 1.");
   }
@@ -174,7 +174,7 @@ async function lockCart(tx: AnyDb, profileId: string): Promise<string> {
 }
 
 /** Is this variant something a customer can buy right now? Also returns current stock. */
-async function lookupBuyable(tx: AnyDb, variantId: string) {
+export async function lookupBuyable(tx: AnyDb, variantId: string) {
   const [v] = await tx
     .select({ stock: productVariants.stock, variantActive: productVariants.isActive, productActive: products.isActive })
     .from(productVariants)

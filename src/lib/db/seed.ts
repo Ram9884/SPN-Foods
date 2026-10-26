@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { getDb } from "./index";
 import { categories, productImages, productVariants, products, siteSettings } from "./schema";
 
@@ -540,10 +540,23 @@ async function main() {
   await db
     .insert(siteSettings)
     .values([
-      { key: "shipping", value: { freeShippingAbovePaise: null, flatRatePaise: null } },
+      {
+        key: "shipping",
+        value: {
+          flatRatePaise: 5000,
+          freeShippingAbovePaise: 50000,
+          tamilNaduFlatRatePaise: 5000,
+          tamilNaduFreeShippingAbovePaise: 50000,
+        },
+      },
       { key: "contact", value: { email: null, phone: null, whatsapp: null } },
     ])
-    .onConflictDoNothing({ target: siteSettings.key });
+    .onConflictDoUpdate({
+      target: siteSettings.key,
+      set: {
+        value: sql`EXCLUDED.value`,
+      },
+    });
 
   console.log(`Seeded ${CATALOGUE.length} categories, ${productCount} products, and ${variantCount} variants with approved pack sizes, prices, and images.`);
 }

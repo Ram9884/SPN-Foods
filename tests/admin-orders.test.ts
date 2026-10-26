@@ -104,7 +104,7 @@ describe("dashboard", () => {
     expect(r.body.ordersByStatus).toEqual({ confirmed: 1, processing: 1, pending_payment: 1 });
     expect(r.body.toFulfil).toBe(2);
     expect(r.body.openRefunds).toBe(1);
-    expect(r.body.last30Days).toEqual({ paidOrders: 2, revenuePaise: 60000 });
+    expect(r.body.last30Days).toEqual({ paidOrders: 2, revenuePaise: a.amountPaise + b.amountPaise });
     expect(r.body.lowStockVariants).toBe(1);
   });
 });
@@ -126,7 +126,7 @@ describe("order list: filters, search, pagination", () => {
     expect(r.status).toBe(200);
     expect(r.body.total).toBe(3);
     expect(r.body.orders.map((o: any) => o.id)).toEqual([o3.orderId, o2.orderId, o1.orderId]);
-    expect(r.body.orders[2]).toMatchObject({ orderNumber: o1.orderNumber, status: "confirmed", totalPaise: 30000, itemCount: 2, needsAttention: false, customer: { email: "alice@example.com" } });
+    expect(r.body.orders[2]).toMatchObject({ orderNumber: o1.orderNumber, status: "confirmed", totalPaise: o1.amountPaise, itemCount: 2, needsAttention: false, customer: { email: "alice@example.com" } });
   });
 
   it("filters by status", async () => {
@@ -198,12 +198,12 @@ describe("order detail", () => {
     const r = await acall("GET", `/api/admin/orders/${o.orderId}`, { user: "boss" });
     expect(r.status).toBe(200);
     expect(r.body).toMatchObject({
-      id: o.orderId, status: "confirmed", adminNote: "call before delivery", totalPaise: 30000,
+      id: o.orderId, status: "confirmed", adminNote: "call before delivery", totalPaise: o.amountPaise,
       customer: { email: "alice@example.com" },
       shippingAddress: { city: "Chennai", pincode: "600017" },
     });
     expect(r.body.items).toHaveLength(1);
-    expect(r.body.payments[0]).toMatchObject({ status: "captured", razorpayPaymentId: o.paymentId, amountPaise: 30000 });
+    expect(r.body.payments[0]).toMatchObject({ status: "captured", razorpayPaymentId: o.paymentId, amountPaise: o.amountPaise });
     expect(r.body.shipments).toEqual([]);
     expect(r.body.activity).toEqual([]);
   });
@@ -290,8 +290,22 @@ describe("status transitions", () => {
     await makeAdmin("boss");
     const o = await paidOrder("alice");
     for (const body of [{ to: "refunded" }, { to: "pending_payment" }, { to: "confirmed" }, { to: "bogus" }, {}, { to: "processing", status: "x" }]) {
-      expect((await setStatus(o.orderId, body)).status).toBe(422);
+      const res = await setStatus(o.orderId, body);
+      expect(res.status).toBe(422);
+      expect(res.body.error).toBeDefined();
+      expect(res.body.error.fields).toBeDefined();
     }
+    // Also explicitly test invalid legacy payload { status: "delivered" } and extra field cancelReason
+    const legacyStatusRes = await setStatus(o.orderId, { status: "delivered" } as any);
+    expect(legacyStatusRes.status).toBe(422);
+    expect(legacyStatusRes.body.error.fields).toHaveProperty("to");
+
+    const legacyCancelRes = await setStatus(o.orderId, { to: "cancelled", cancelReason: "out of stock" } as any);
+    expect(legacyCancelRes.status).toBe(422);
+    expect(legacyCancelRes.body.error.fields).toBeDefined();
+    // In Zod .strict(), unrecognized keys at root level produce issue.path = [] -> fields["_"]
+    expect(legacyCancelRes.body.error.fields["_"]).toContain("cancelReason");
+
     expect((await orderRow(o.orderId)).status).toBe("confirmed");
     expect((await setStatus(SOME, { to: "processing" })).status).toBe(404);
   });

@@ -156,7 +156,7 @@ export function SiteNav({ categories }: SiteNavProps) {
           </div>
 
           {/* 2. Middle (Mobile) / Left (Desktop): Centered brand section on mobile, left-aligned on desktop */}
-          <div className="absolute left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-88px)] min-w-0 flex items-center justify-center lg:static lg:translate-x-0 lg:left-auto lg:w-auto lg:max-w-none lg:justify-start lg:flex-initial lg:shrink-0">
+          <div className="absolute left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-88px)] min-w-0 flex items-center justify-center lg:static lg:translate-x-0 lg:left-auto lg:w-auto lg:max-w-none lg:justify-start lg:flex-none lg:shrink-0">
             <Link
               href="/"
               prefetch={false}
@@ -197,7 +197,7 @@ export function SiteNav({ categories }: SiteNavProps) {
                   className="w-[38px] h-[38px] rounded-full object-contain drop-shadow-xs transition-transform duration-200 group-hover:scale-105 shrink-0"
                 />
                 <div className="flex flex-col leading-none min-w-0">
-                  <span className="font-[family-name:var(--font-logo)] text-[21px] text-[var(--color-brand-primary)] tracking-tight font-bold leading-tight">
+                  <span className="font-[family-name:var(--font-logo)] text-[21px] text-[var(--color-brand-primary)] tracking-tight font-bold leading-tight whitespace-nowrap">
                     SPN Health Mix
                   </span>
                   <span className="font-[family-name:var(--font-tamil)] text-[10.5px] text-[#6B5A4E] font-bold mt-0.5 whitespace-nowrap">
@@ -208,16 +208,16 @@ export function SiteNav({ categories }: SiteNavProps) {
             </Link>
           </div>
 
-          {/* Desktop center nav */}
+          {/* Desktop center nav: Horizontally centered in available space between brand and actions */}
           <nav
-            className="hidden lg:flex items-center gap-5 xl:gap-7"
+            className="hidden lg:flex lg:flex-1 items-center justify-center lg:mx-2 xl:mx-6 min-w-0 gap-3.5 lg:gap-4 xl:gap-6 2xl:gap-7"
             aria-label="Primary navigation"
           >
             <Link
               href="/"
               prefetch={false}
               className={cn(
-                "font-[family-name:var(--font-body)] text-[14.5px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] rounded-[4px] px-1 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
+                "whitespace-nowrap font-[family-name:var(--font-body)] text-[14px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] rounded-[4px] px-1 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
                 isHomeActive
                   ? "text-[var(--color-brand-primary)] font-semibold"
                   : "text-[var(--color-text-primary)]"
@@ -229,7 +229,7 @@ export function SiteNav({ categories }: SiteNavProps) {
             <Link
               href="/shop"
               className={cn(
-                "font-[family-name:var(--font-body)] text-[14.5px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] rounded-[4px] px-1 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
+                "whitespace-nowrap font-[family-name:var(--font-body)] text-[14px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] rounded-[4px] px-1 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
                 isShopActive
                   ? "text-[var(--color-brand-primary)] font-semibold"
                   : "text-[var(--color-text-primary)]"
@@ -239,11 +239,11 @@ export function SiteNav({ categories }: SiteNavProps) {
             </Link>
 
             {/* Categories dropdown */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 ref={catButtonRef}
                 className={cn(
-                  "inline-flex items-center gap-1 font-[family-name:var(--font-body)] text-[14.5px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] py-2 px-1 rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
+                  "whitespace-nowrap inline-flex items-center gap-1 font-[family-name:var(--font-body)] text-[14px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] py-2 px-1 rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
                   isCategoriesActive || catOpen
                     ? "text-[var(--color-brand-primary)] font-semibold"
                     : "text-[var(--color-text-primary)]"
@@ -314,7 +314,7 @@ export function SiteNav({ categories }: SiteNavProps) {
             <Link
               href="/about"
               className={cn(
-                "font-[family-name:var(--font-body)] text-[14.5px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] rounded-[4px] px-1 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
+                "whitespace-nowrap font-[family-name:var(--font-body)] text-[14px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] rounded-[4px] px-1 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
                 isAboutActive
                   ? "text-[var(--color-brand-primary)] font-semibold"
                   : "text-[var(--color-text-primary)]"
@@ -324,11 +324,11 @@ export function SiteNav({ categories }: SiteNavProps) {
             </Link>
 
             {/* More dropdown */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 ref={moreButtonRef}
                 className={cn(
-                  "inline-flex items-center gap-1 font-[family-name:var(--font-body)] text-[14.5px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] py-2 px-1 rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
+                  "whitespace-nowrap inline-flex items-center gap-1 font-[family-name:var(--font-body)] text-[14px] xl:text-[15px] font-medium transition-colors hover:text-[var(--color-brand-primary)] py-2 px-1 rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]",
                   isMoreActive || moreOpen
                     ? "text-[var(--color-brand-primary)] font-semibold"
                     : "text-[var(--color-text-primary)]"
@@ -396,8 +396,8 @@ export function SiteNav({ categories }: SiteNavProps) {
             </div>
           </nav>
 
-          {/* 3. Right: Profile icon (fixed at far-right on mobile) and Desktop Search/Cart */}
-          <div className="relative z-10 ml-auto flex items-center justify-end w-9 xs:w-10 md:w-auto gap-2 sm:gap-3 shrink-0 flex-shrink-0">
+          {/* 3. Right: Profile icon (fixed at far-right on mobile) and Desktop Search/Profile/Cart */}
+          <div className="relative z-10 ml-auto lg:ml-0 flex items-center justify-end w-9 xs:w-10 md:w-auto gap-2 sm:gap-3 shrink-0 lg:flex-none lg:shrink-0">
             {/* Inline search bar (Desktop only - lg and above) */}
             <form
               action="/shop"
@@ -414,7 +414,7 @@ export function SiteNav({ categories }: SiteNavProps) {
                 name="q"
                 placeholder="Search products..."
                 aria-label="Search products"
-                className="w-48 lg:w-56 h-9 pl-9 pr-3 text-[13px] rounded-full bg-[#FAF5EE] border border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-brand-primary)] focus:bg-white transition-all font-[family-name:var(--font-body)]"
+                className="w-40 xl:w-52 2xl:w-56 h-9 pl-9 pr-3 text-[13px] rounded-full bg-[#FAF5EE] border border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-brand-primary)] focus:bg-white transition-all font-[family-name:var(--font-body)]"
               />
             </form>
 

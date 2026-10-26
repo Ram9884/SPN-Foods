@@ -3,7 +3,18 @@ import { orders, payments, products, siteSettings } from "../db/schema";
 import {
   createAddress, deleteAddress, getOwnedAddress, listAddresses, setDefaultAddress, toSnapshot, updateAddress,
 } from "../customers/addresses";
-import { addCartItem, clearCart, getCart, loadCartLines, removeCartItem, setCartItemQuantity } from "../cart/cart";
+import { addCartItem, clearCart, getCart, loadCartLines, removeCartItem, setCartItemQuantity, type CartView } from "../cart/cart";
+import {
+  type GuestCartItem,
+  extractGuestCartFromRequest,
+  serializeGuestCartCookie,
+  serializeClearGuestCartCookie,
+  getGuestCart,
+  addGuestCartItem,
+  setGuestCartItemQuantity,
+  removeGuestCartItem,
+  mergeGuestCartIntoUser,
+} from "../cart/guest-cart";
 import { CartError } from "../cart/errors";
 import { getMyOrder, listMyOrders, verifyCheckoutCallback } from "../customers/orders";
 import type { AuthedUser } from "../customers/profile";
@@ -17,7 +28,11 @@ import { cartCouponSchema } from "../discounts/validation";
 import { CustomerError } from "../customers/errors";
 import { OrderError, type AnyDb } from "../orders/common";
 import { startCheckout } from "../orders/checkout";
-import { calculateAuthoritativeShipping, calculateCartWeightGrams } from "../shipping/calculator";
+import {
+  calculateAuthoritativeShipping,
+  calculateCartWeightGrams,
+  getAuthoritativeShippingRule,
+} from "../shipping/calculator";
 import { getShippingProvider } from "../shipping/provider";
 import type { PaymentGateway } from "../payments/razorpay";
 import type { ObjectStorage } from "../storage/storage";
@@ -139,47 +154,127 @@ export const getOrder = (req: Request, deps: ApiDeps, id: string) =>
     json(200, await getMyOrder(db, user.profileId, notFound(id, "ORDER_NOT_FOUND"))));
 
 /* --------------------------------- Cart ----------------------------------- */
-// No cart id appears in any URL, body or response: the cart is always "the signed-in
-// customer's cart", resolved from the session. There is nothing to swap for someone else's.
 
 const variantFromPath = (id: string | undefined) => {
   if (!id || !uuidSchema.safeParse(id).success) throw new CartError("VARIANT_UNAVAILABLE", "This item is no longer available.");
   return id;
 };
 
+/**
+ * Cart endpoints wrapper supporting both authenticated customer sessions and guest carts.
+ * When an authenticated user has guest cart items in their cookie, they are safely merged
+ * into the customer's database cart and the guest cookie is cleared.
+ */
+export function cartAction(
+  deps: ApiDeps,
+  req: Request,
+  opts: { mutating: boolean },
+  fn: (c: {
+    db: AnyDb;
+    user: AuthedUser | null;
+    req: Request;
+    guestItems: GuestCartItem[];
+  }) => Promise<{ cart: CartView; newGuestItems?: GuestCartItem[] | null }>
+) {
+  const log = deps.log ?? ((m, e) => console.error(m, e));
+  return (async () => {
+    try {
+      if (opts.mutating && deps.allowedOrigins) {
+        const origin = req.headers.get("origin");
+        if (origin && !deps.allowedOrigins.includes(origin)) {
+          throw new ApiError(403, "FORBIDDEN_ORIGIN", "Request origin not allowed.");
+        }
+      }
+      return await deps.withDb(async (db) => {
+        const user = await deps.authenticate(req, db);
+        const guestItems = extractGuestCartFromRequest(req);
+
+        // If user is authenticated and there are guest items in cookie, merge them!
+        if (user && guestItems.length > 0) {
+          await mergeGuestCartIntoUser(db, user.profileId, guestItems);
+          const mergedCart = await getCart(db, user.profileId);
+          const res = json(200, mergedCart);
+          res.headers.append("Set-Cookie", serializeClearGuestCartCookie());
+          return res;
+        }
+
+        const result = await fn({ db, user, req, guestItems });
+        const res = json(200, result.cart);
+        if (result.newGuestItems !== undefined) {
+          if (result.newGuestItems === null) {
+            res.headers.append("Set-Cookie", serializeClearGuestCartCookie());
+          } else {
+            res.headers.append("Set-Cookie", serializeGuestCartCookie(result.newGuestItems));
+          }
+        }
+        return res;
+      });
+    } catch (err) {
+      return toResponse(err, log);
+    }
+  })();
+}
+
 export const getCartH = (req: Request, deps: ApiDeps) =>
-  secured(deps, req, { mutating: false }, async ({ db, user }) => json(200, await getCart(db, user.profileId)));
+  cartAction(deps, req, { mutating: false }, async ({ db, user, guestItems }) => {
+    if (user) {
+      return { cart: await getCart(db, user.profileId) };
+    }
+    return { cart: await getGuestCart(db, guestItems) };
+  });
 
 export const postCartItem = (req: Request, deps: ApiDeps) =>
-  secured(deps, req, { mutating: true }, async ({ db, user }) => {
+  cartAction(deps, req, { mutating: true }, async ({ db, user, guestItems, req }) => {
     const b = validate(cartAddSchema, await readJson(req));
-    return json(200, await addCartItem(db, user.profileId, b.variantId, b.quantity));
+    if (user) {
+      return { cart: await addCartItem(db, user.profileId, b.variantId, b.quantity) };
+    }
+    const { items: newGuestItems, cart } = await addGuestCartItem(db, guestItems, b.variantId, b.quantity);
+    return { cart, newGuestItems };
   });
 
 export const putCartItem = (req: Request, deps: ApiDeps, variantId: string) =>
-  secured(deps, req, { mutating: true }, async ({ db, user }) => {
+  cartAction(deps, req, { mutating: true }, async ({ db, user, guestItems, req }) => {
     const b = validate(cartSetSchema, await readJson(req));
-    return json(200, await setCartItemQuantity(db, user.profileId, variantFromPath(variantId), b.quantity));
+    const validVariantId = variantFromPath(variantId);
+    if (user) {
+      return { cart: await setCartItemQuantity(db, user.profileId, validVariantId, b.quantity) };
+    }
+    const { items: newGuestItems, cart } = await setGuestCartItemQuantity(db, guestItems, validVariantId, b.quantity);
+    return { cart, newGuestItems };
   });
 
 export const deleteCartItem = (req: Request, deps: ApiDeps, variantId: string) =>
-  secured(deps, req, { mutating: true }, async ({ db, user }) => {
-    // Idempotent: removing something that isn't there is fine. A malformed id can't be in a cart.
-    if (!uuidSchema.safeParse(variantId).success) return json(200, await getCart(db, user.profileId));
-    return json(200, await removeCartItem(db, user.profileId, variantId));
+  cartAction(deps, req, { mutating: true }, async ({ db, user, guestItems }) => {
+    if (!uuidSchema.safeParse(variantId).success) {
+      if (user) return { cart: await getCart(db, user.profileId) };
+      return { cart: await getGuestCart(db, guestItems) };
+    }
+    if (user) {
+      return { cart: await removeCartItem(db, user.profileId, variantId) };
+    }
+    const { items: newGuestItems, cart } = await removeGuestCartItem(db, guestItems, variantId);
+    return { cart, newGuestItems };
   });
 
 export const deleteCart = (req: Request, deps: ApiDeps) =>
-  secured(deps, req, { mutating: true }, async ({ db, user }) => json(200, await clearCart(db, user.profileId)));
+  cartAction(deps, req, { mutating: true }, async ({ db, user }) => {
+    if (user) {
+      return { cart: await clearCart(db, user.profileId) };
+    }
+    return {
+      cart: { items: [], summary: { lineCount: 0, totalQuantity: 0, subtotalPaise: 0, savingsPaise: 0, hasIssues: false, canCheckout: false } },
+      newGuestItems: null,
+    };
+  });
 
 /* ------------------------------- Checkout --------------------------------- */
 
-async function shippingRule(db: AnyDb): Promise<(subtotalPaise: number) => number> {
-  const [row] = await db.select().from(siteSettings).where(eq(siteSettings.key, "shipping"));
-  const v = (row?.value ?? {}) as { flatRatePaise?: number | null; freeShippingAbovePaise?: number | null };
-  const flat = Number.isInteger(v.flatRatePaise) && v.flatRatePaise! >= 0 ? v.flatRatePaise! : 0;
-  const freeAbove = Number.isInteger(v.freeShippingAbovePaise) ? v.freeShippingAbovePaise! : null;
-  return (subtotal) => (freeAbove !== null && subtotal >= freeAbove ? 0 : flat);
+async function shippingRule(
+  db: AnyDb,
+  address?: { state?: string | null; pincode?: string | null },
+): Promise<(subtotalPaise: number) => number> {
+  return getAuthoritativeShippingRule(db, address ?? {});
 }
 
 async function existingCheckout(db: AnyDb, profileId: string, key: string) {
@@ -268,7 +363,7 @@ export const postCheckout = (req: Request, deps: ApiDeps) =>
     if (!serviceability.serviceable) {
       throw new ApiError(422, "UNSERVICEABLE_PINCODE", serviceability.message || "Delivery is currently unavailable for this pincode.");
     }
-    const shipping = await shippingRule(db);
+    const shipping = await shippingRule(db, address);
 
     try {
       const out = await startCheckout(db, deps.gateway, {
@@ -317,39 +412,49 @@ export const postCheckoutVerify = (req: Request, deps: ApiDeps) =>
  *
  * Validates and previews coupon discount against the active customer's server-side cart.
  */
-export const postCartCoupon = (req: Request, deps: ApiDeps) =>
-  secured(deps, req, { mutating: false }, async ({ db, user }) => {
-    const body = validate(cartCouponSchema, await readJson(req));
-    const cart = await getCart(db, user.profileId);
+export const postCartCoupon = (req: Request, deps: ApiDeps) => {
+  const log = deps.log ?? ((m, e) => console.error(m, e));
+  return (async () => {
+    try {
+      return await deps.withDb(async (db) => {
+        const user = await deps.authenticate(req, db);
+        const guestItems = extractGuestCartFromRequest(req);
+        const body = validate(cartCouponSchema, await readJson(req));
+        const cart = user ? await getCart(db, user.profileId) : await getGuestCart(db, guestItems);
 
-    const discountItems: DiscountItem[] = cart.items
-      .filter((i) => i.issue === null)
-      .map((i) => ({
-        variantId: i.variantId,
-        productId: i.productId,
-        quantity: i.quantity,
-        unitPricePaise: i.unitPricePaise,
-        lineTotalPaise: i.lineTotalPaise,
-      }));
+        const discountItems: DiscountItem[] = cart.items
+          .filter((i) => i.issue === null)
+          .map((i) => ({
+            variantId: i.variantId,
+            productId: i.productId,
+            quantity: i.quantity,
+            unitPricePaise: i.unitPricePaise,
+            lineTotalPaise: i.lineTotalPaise,
+          }));
 
-    const result = await calculateDiscounts(db, {
-      items: discountItems,
-      couponCode: body.couponCode,
-      now: (deps.now ?? (() => new Date()))(),
-    });
+        const result = await calculateDiscounts(db, {
+          items: discountItems,
+          couponCode: body.couponCode,
+          now: (deps.now ?? (() => new Date()))(),
+        });
 
-    return json(200, {
-      valid: !result.couponError,
-      error: result.couponError ?? null,
-      subtotalPaise: result.subtotalPaise,
-      offerDiscountPaise: result.offerDiscountPaise,
-      couponDiscountPaise: result.couponDiscountPaise,
-      totalDiscountPaise: result.totalDiscountPaise,
-      finalPayablePaise: result.finalPayablePaise,
-      appliedCoupon: result.appliedCoupon,
-      appliedOffers: result.appliedOffers,
-    });
-  });
+        return json(200, {
+          valid: !result.couponError,
+          error: result.couponError ?? null,
+          subtotalPaise: result.subtotalPaise,
+          offerDiscountPaise: result.offerDiscountPaise,
+          couponDiscountPaise: result.couponDiscountPaise,
+          totalDiscountPaise: result.totalDiscountPaise,
+          finalPayablePaise: result.finalPayablePaise,
+          appliedCoupon: result.appliedCoupon,
+          appliedOffers: result.appliedOffers,
+        });
+      });
+    } catch (err) {
+      return toResponse(err, log);
+    }
+  })();
+};
 
 /**
  * POST /api/shipping/quote
@@ -375,6 +480,8 @@ export const postShippingQuote = (req: Request, deps: ApiDeps) =>
       address.pincode,
       weightGrams,
       cart.summary.subtotalPaise,
+      undefined,
+      address.state,
     );
     return json(200, quote);
   });

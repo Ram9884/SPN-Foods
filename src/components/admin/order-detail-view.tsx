@@ -265,7 +265,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
     setTransitionError(null);
 
     const payload: any = {
-      status: targetStatus,
+      to: targetStatus,
     };
 
     if (targetStatus === "cancelled") {
@@ -274,7 +274,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
         setTransitioning(false);
         return;
       }
-      payload.cancelReason = cancelReason.trim();
+      payload.note = cancelReason.trim();
     }
 
     if (targetStatus === "shipped") {
@@ -303,7 +303,14 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
       const resData = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(resData?.error?.message || "Failed to update order status.");
+        const fields = resData?.error?.fields;
+        const fieldError =
+          fields && typeof fields === "object"
+            ? Object.entries(fields)
+                .map(([field, msg]) => `${field}: ${msg}`)
+                .join(", ")
+            : null;
+        throw new Error(fieldError || resData?.error?.message || "Failed to update order status.");
       }
 
       setActionSuccess(`Order updated to ${targetStatus}.`);

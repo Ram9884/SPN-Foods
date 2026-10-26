@@ -121,15 +121,6 @@ function parseCartResponse(data: unknown): CartView | null {
           body: JSON.stringify({ variantId, quantity }),
         });
 
-        if (res.status === 401) {
-          showToast("Please sign in to add items to your cart", "info");
-          // Redirect to sign in with return and add instructions
-          const currentUrl = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
-          router.push(
-            `/sign-in?redirect_url=${encodeURIComponent(currentUrl)}&add=${encodeURIComponent(variantId)}&qty=${encodeURIComponent(String(quantity))}`
-          );
-          return false;
-        }
 
         if (res.ok) {
           const data = await res.json();

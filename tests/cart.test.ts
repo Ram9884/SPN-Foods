@@ -19,21 +19,23 @@ const view = (user: string) => call("GET", "/api/cart", { user });
 const rowsOf = async () => db.select().from(s.cartItems);
 const setVariant = (id: string, v: Partial<typeof s.productVariants.$inferInsert>) => db.update(s.productVariants).set(v).where(eq(s.productVariants.id, id));
 
-describe("unauthenticated access", () => {
-  const someId = "11111111-1111-4111-8111-111111111111";
-  const endpoints: [string, string, unknown?][] = [
-    ["GET", "/api/cart"],
-    ["DELETE", "/api/cart"],
-    ["POST", "/api/cart/items", { variantId: someId, quantity: 1 }],
-    ["PUT", `/api/cart/items/${someId}`, { quantity: 1 }],
-    ["DELETE", `/api/cart/items/${someId}`],
-  ];
-  it.each(endpoints)("%s %s -> 401 and creates nothing", async (method, path, body) => {
-    const r = await call(method, path, { body });
-    expect(r.status).toBe(401);
-    expect(r.body.error.code).toBe("UNAUTHENTICATED");
+describe("unauthenticated access (guest cart)", () => {
+  it("GET /api/cart -> 200 and returns empty cart without requiring sign-in", async () => {
+    const r = await call("GET", "/api/cart");
+    expect(r.status).toBe(200);
+    expect(r.body.items).toEqual([]);
+    expect(r.body.summary).toMatchObject({ totalQuantity: 0, subtotalPaise: 0 });
     expect(await db.select().from(s.carts)).toHaveLength(0);
     expect(await rowsOf()).toHaveLength(0);
+  });
+
+  it("POST /api/cart/items -> 200, sets guest cookie, and creates nothing in carts table", async () => {
+    const r = await call("POST", "/api/cart/items", { body: { variantId, quantity: 1 } });
+    expect(r.status).toBe(200);
+    expect(r.body.items).toHaveLength(1);
+    expect(r.body.items[0].variantId).toBe(variantId);
+    expect(r.headers.get("set-cookie")).toContain("spn_guest_cart=");
+    expect(await db.select().from(s.carts)).toHaveLength(0);
   });
 });
 

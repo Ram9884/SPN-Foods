@@ -3,6 +3,11 @@ import { profiles } from "@/lib/db/schema";
 import { normalizeEmail, profileEmailMatches } from "@/lib/auth/email";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSession, serializeSessionCookie } from "@/lib/auth/session";
+import {
+  extractGuestCartFromRequest,
+  mergeGuestCartIntoUser,
+  serializeClearGuestCartCookie,
+} from "@/lib/cart/guest-cart";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +68,18 @@ export async function POST(req: Request) {
       const { sessionToken, expiresAt } = await createSession(db, user.id);
       const cookieHeader = serializeSessionCookie(sessionToken, expiresAt);
 
+      // Merge guest cart items into customer cart if present
+      const guestItems = extractGuestCartFromRequest(req);
+      if (guestItems.length > 0) {
+        await mergeGuestCartIntoUser(db, user.id, guestItems);
+      }
+
+      const responseHeaders = new Headers();
+      responseHeaders.append("Set-Cookie", cookieHeader);
+      if (guestItems.length > 0) {
+        responseHeaders.append("Set-Cookie", serializeClearGuestCartCookie());
+      }
+
       return Response.json(
         {
           success: true,
@@ -75,9 +92,7 @@ export async function POST(req: Request) {
         },
         {
           status: 200,
-          headers: {
-            "Set-Cookie": cookieHeader,
-          },
+          headers: responseHeaders,
         }
       );
     } finally {

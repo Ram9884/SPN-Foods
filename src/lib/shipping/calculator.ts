@@ -63,12 +63,103 @@ export async function calculateCartWeightGrams(db: AnyDb, items: CartItemWeight[
   return Math.max(100, totalWeight); // Minimum 100g
 }
 
+export type ShippingSiteSettings = {
+  flatRatePaise?: number | null;
+  freeShippingAbovePaise?: number | null;
+  tamilNaduFlatRatePaise?: number | null;
+  tamilNaduFreeShippingAbovePaise?: number | null;
+};
+
+/**
+ * Checks whether an address or PIN code is within Tamil Nadu.
+ * Checks canonical and common variations of state names, as well as postal PIN code ranges (60xxxx - 64xxxx).
+ */
+export function isTamilNadu(
+  destination?: { state?: string | null; pincode?: string | null } | string | null,
+  pincode?: string | null,
+): boolean {
+  if (!destination) return false;
+  let stateStr: string | null = null;
+  let pinStr: string | null = null;
+
+  if (typeof destination === "string") {
+    stateStr = destination;
+    pinStr = pincode ?? null;
+  } else {
+    stateStr = destination.state ?? null;
+    pinStr = destination.pincode ?? pincode ?? null;
+  }
+
+  if (stateStr) {
+    const cleanState = stateStr.trim().toLowerCase();
+    if (cleanState === "tamil nadu" || cleanState === "tamilnadu" || cleanState === "tn") {
+      return true;
+    }
+    // If an explicit non-Tamil Nadu state is declared (e.g. Karnataka, Kerala, Delhi), it is not Tamil Nadu
+    if (cleanState.length > 0 && cleanState !== "tamil nadu" && cleanState !== "tamilnadu" && cleanState !== "tn") {
+      return false;
+    }
+  }
+
+  // Fallback to 6-digit Indian PIN code check: Tamil Nadu postal circle ranges from 600001 to 643253 (prefix 60-64)
+  if (pinStr) {
+    const cleanPin = pinStr.trim().replace(/\s/g, "");
+    if (/^6[0-4]\d{4}$/.test(cleanPin)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Resolves the authoritative shipping rule function for order calculation.
+ * Ensures the exact same rule applies during checkout order insertion as during quote calculation.
+ */
+export async function getAuthoritativeShippingRule(
+  db: AnyDb,
+  destination: { state?: string | null; pincode?: string | null },
+): Promise<(subtotalPaise: number) => number> {
+  const [row] = await db.select().from(siteSettings).where(eq(siteSettings.key, "shipping"));
+  const v = (row?.value ?? {}) as ShippingSiteSettings;
+
+  if (isTamilNadu(destination)) {
+    const tnFlatRate =
+      Number.isInteger(v.tamilNaduFlatRatePaise) && v.tamilNaduFlatRatePaise! >= 0
+        ? v.tamilNaduFlatRatePaise!
+        : (Number.isInteger(v.flatRatePaise) && v.flatRatePaise! >= 0 ? v.flatRatePaise! : 5000);
+
+    const tnFreeAbove =
+      Number.isInteger(v.tamilNaduFreeShippingAbovePaise) && v.tamilNaduFreeShippingAbovePaise! >= 0
+        ? v.tamilNaduFreeShippingAbovePaise!
+        : (Number.isInteger(v.freeShippingAbovePaise) ? v.freeShippingAbovePaise! : 50000);
+
+    return (subtotalPaise: number) => {
+      return subtotalPaise >= tnFreeAbove ? 0 : tnFlatRate;
+    };
+  }
+
+  // Non-Tamil Nadu addresses: preserve configured general flat rate and threshold
+  const generalFlatRate = Number.isInteger(v.flatRatePaise) && v.flatRatePaise! >= 0 ? v.flatRatePaise! : 0;
+  const generalFreeAbove = Number.isInteger(v.freeShippingAbovePaise) ? v.freeShippingAbovePaise! : null;
+
+  return (subtotalPaise: number) => {
+    return generalFreeAbove !== null && subtotalPaise >= generalFreeAbove ? 0 : generalFlatRate;
+  };
+}
+
 /**
  * Authoritatively calculates shipping charge and serviceability.
- * Priority:
- * 1. Site settings free-shipping threshold (e.g. Free shipping above ₹1000).
- * 2. Provider serviceability check and live rates (if configured).
- * 3. Fallback to site settings flat rate (e.g. ₹50 flat rate).
+ *
+ * Rules:
+ * - Tamil Nadu orders:
+ *   - Flat shipping charge of ₹50 (5000 paise).
+ *   - Free shipping on qualifying subtotals >= ₹500 (50000 paise).
+ *   - Subtotals < ₹500 (e.g. ₹499 = 49900 paise) incur ₹50 (5000 paise) shipping.
+ * - Non-Tamil Nadu orders:
+ *   - Serviceability check through shipping provider.
+ *   - Live rates from provider if configured, or general flat rate configuration.
+ *   - Tamil Nadu rates are not silently applied to other states.
  */
 export async function calculateAuthoritativeShipping(
   db: AnyDb,
@@ -76,12 +167,11 @@ export async function calculateAuthoritativeShipping(
   weightGrams: number,
   subtotalPaise: number,
   providerId?: string,
+  destinationState?: string | null,
 ): Promise<ShippingRateQuote> {
   // 1. Fetch site shipping settings
   const [row] = await db.select().from(siteSettings).where(eq(siteSettings.key, "shipping"));
-  const v = (row?.value ?? {}) as { flatRatePaise?: number | null; freeShippingAbovePaise?: number | null };
-  const flatRatePaise = Number.isInteger(v.flatRatePaise) && v.flatRatePaise! >= 0 ? v.flatRatePaise! : 0;
-  const freeAbovePaise = Number.isInteger(v.freeShippingAbovePaise) ? v.freeShippingAbovePaise! : null;
+  const v = (row?.value ?? {}) as ShippingSiteSettings;
 
   // 2. Check provider serviceability
   const provider = getShippingProvider(providerId);
@@ -95,35 +185,56 @@ export async function calculateAuthoritativeShipping(
     };
   }
 
-  // 3. Free shipping threshold qualification
-  if (freeAbovePaise !== null && subtotalPaise >= freeAbovePaise) {
+  // 3. Determine if destination is within Tamil Nadu
+  const resolvedState = destinationState ?? serviceability.state ?? null;
+  const inTamilNadu = isTamilNadu({ state: resolvedState, pincode: destinationPincode });
+
+  if (inTamilNadu) {
+    const tnFlatRate =
+      Number.isInteger(v.tamilNaduFlatRatePaise) && v.tamilNaduFlatRatePaise! >= 0
+        ? v.tamilNaduFlatRatePaise!
+        : (Number.isInteger(v.flatRatePaise) && v.flatRatePaise! >= 0 ? v.flatRatePaise! : 5000);
+
+    const tnFreeAbove =
+      Number.isInteger(v.tamilNaduFreeShippingAbovePaise) && v.tamilNaduFreeShippingAbovePaise! >= 0
+        ? v.tamilNaduFreeShippingAbovePaise!
+        : (Number.isInteger(v.freeShippingAbovePaise) ? v.freeShippingAbovePaise! : 50000);
+
+    const isFree = subtotalPaise >= tnFreeAbove;
+    const ratePaise = isFree ? 0 : tnFlatRate;
+
     return {
       serviceable: true,
-      ratePaise: 0,
+      ratePaise,
       courierName: serviceability.courierName,
       estimatedDays: serviceability.estimatedDays,
-      freeShipping: true,
+      freeShipping: isFree || ratePaise === 0,
     };
   }
 
-  // 4. Live provider rate calculation if configured
+  // 4. Non-Tamil Nadu: Live provider rate calculation if configured
   if (provider.isConfigured() && provider.id !== "manual") {
     try {
       const quote = await provider.calculateRate(destinationPincode, weightGrams, subtotalPaise);
-      if (quote.serviceable && quote.ratePaise > 0) {
+      if (quote.serviceable && quote.ratePaise >= 0) {
         return quote;
       }
     } catch {
-      // Fall through to configured flat rate
+      // Fall through to configured general flat rate
     }
   }
 
-  // 5. Authoritative business flat rate fallback
+  // 5. General non-Tamil Nadu business flat rate fallback
+  const generalFlatRate = Number.isInteger(v.flatRatePaise) && v.flatRatePaise! >= 0 ? v.flatRatePaise! : 0;
+  const generalFreeAbove = Number.isInteger(v.freeShippingAbovePaise) ? v.freeShippingAbovePaise! : null;
+  const isFreeGeneral = generalFreeAbove !== null && subtotalPaise >= generalFreeAbove;
+  const generalRate = isFreeGeneral ? 0 : generalFlatRate;
+
   return {
     serviceable: true,
-    ratePaise: flatRatePaise,
+    ratePaise: generalRate,
     courierName: serviceability.courierName,
     estimatedDays: serviceability.estimatedDays,
-    freeShipping: flatRatePaise === 0,
+    freeShipping: isFreeGeneral || generalRate === 0,
   };
 }

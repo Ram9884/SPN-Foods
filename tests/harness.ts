@@ -19,7 +19,7 @@ import type { PaymentGateway } from "../src/lib/payments/razorpay";
 import type { ObjectStorage } from "../src/lib/storage/storage";
 
 const rawUrl = process.env.TEST_DATABASE_URL ?? "postgres://postgres:pw@localhost:5432/spn_test";
-const url = rawUrl.replace("-pooler.", ".");
+const url = rawUrl;
 export const pool = new Pool({ connectionString: url, max: 20 });
 export const db = drizzle(pool, { schema: s });
 
